@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Academic papers I have read for this.
+papers/
+
 # Distribution / packaging
 .Python
 build/
@@ -172,3 +175,28 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# LaTeX
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.lol
+*.nav
+*.snm
+*.synctex.gz
+*.synctex(busy)
+*.vrb
+*.pdf
+
+# just track the two deliverable pdfs.
+!deliverables/gh124-project-plan.pdf
+!deliverables/gh124-final-report.pdf
