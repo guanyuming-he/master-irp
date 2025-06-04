@@ -28,6 +28,7 @@ TBD.
 \textbf{Keywords:} content discovery, information retrieval, LLM, search engines, \casemethod, Business school,
 
 \section{Introduction}
+\subsection{Problem background}
 Since the emergence of the first Business schools in the late 19th century
 \cite{first.bis.school.1, first.bis.school.2}, several distinct pedagogical
 teaching strategies have been applied.  First institutionalized at Harvard
@@ -55,40 +56,85 @@ remain relevant in the business world \cite{case.method.limit.4}; McFarlane
 emphasises the importance of updated cases, as otherwise students could be
 disengaged or discouraged \cite{case.method.limit.5}.
 
+\subsection{Past advancements in information retrieval}
 During the past two centuries, a number of key developments have profoundly
 expanded an individual's capacity to retrieve information about the world. In
-the early 19th century, the transmission of information was constrained by the
-physical limitations of transportation and postal delivery; messages had to be
-carried on paper or remembered by a person, which would often need days or
-weeks to reach their recipients. This fundamentally limited both the speed and
-geographic reach of information retrieval. The invention of telegraph in the
-1840s by Morse, Cornell, and Henry \cite{history.telegraph.1,
-history.telegraph.2}, notably with Samuel Morse's first telegraph message,
+the early 19th century, the transmission of information was still traditional
+--- carried by person on paper or simply remembered. This fundamentally limited
+both the speed and geographic reach of information retrieval. The invention of
+telegraph in the 1840s by Morse, Cornell, and Henry \cite{history.telegraph.1,
+history.telegraph.2}, notably with Morse's first telegraph message,
 ``\emph{What hath God wrought?}'' in 1844 \cite{first.telegraph.msg}, marked a
-paradigm shift by enabling nearly instantaneous transmission of textual
-information over relatively short distances (w.r.t.\ the earth) via wired
-networks.  This technological innovation was considerably improved by the
-invention of the telephone by Alexander Graham Bell in 1876
-\cite{history.telephone.1, history.telephone.2}, enabling communication
-directly by human voice, instead of encoded Morse code. 
+paradigm shift by enabling very fast transmission of encoded information over
+relatively short distances (w.r.t.\ the earth) via wired networks.  This
+technological innovation was considerably improved by the invention of the
+telephone by Bell in 1876 \cite{history.telephone.1, history.telephone.2},
+enabling communication directly by human voice, instead of encoded Morse code.
 
-Although wired communication was a giant leap in speed
-of information spread, it was still critically constrianed by geographical
-features on where the wires were laid. Around the late 19th century, Guglielmo
+Wired communication is critically constrianed by geographical
+features on where the wires were laid. Around the late 19th century, 
 Marconi's experiments with wireless telegraphy \cite{history.wireless.1} and
 the first successful transatlantic signal in 1901
 \cite{history.first.atlantic.broadcast} introduced electromagnetic wave-based
 wireless communication, eventually accumulating into the world's first voice
 broadcast by radio in 1906 \cite{first.voice.broadcast}. These milestones
 collectively redefined the temporal and spatial boundaries of information
-access, transforming information retrieval from a manual and delayed process
-into a near-instantaneous activity acrossing even continents.
+access.
 
-The next many decades have seen people improving on the then limitations of
-these methods. In particular, the carrying capacity of the wireless waves.
+The next many decades have seen people improving on the serious limitations of
+wireless communication: signal strength, interferences and attenuation,
+carrying capacity, and even deliberate sabotage during war times
+\cite{wireless.weakness.1, wireless.weakness.2, wireless.weakness.3}.
+Theoretically, Hartley observed a logritham pattern of information capacity
+\cite{hartley.log.information} and then Shannon expanded on it to first define
+\emph{bits} and \emph{entropy}, giving a formal mathematical theory of
+information \cite{shannon.theory.communication} in 1948. Meanwhile,
+engineers were experimenting with alternative modulation techniques, notably
+frequency modulation (FM), and the concepts were formalized in the 1930s
+\cite{history.modulation}. 
 
-\section{Methods}
-Abc
+As the theoretical understanding of information progressed, people began to
+have the idea of \emph{searching} for information based on content
+and by relevance, instead of by unique identifier
+\cite{history.information.retrieval}. Actually, the term \emph{information
+retrieval} was not invented until Mooers coined it in 1950
+\cite{mooers.info.ret.term}. Since then, information retrieval systems have
+quickly evolved, and went through four phases before 2000: ``(1) manual and mechanical
+devices; (2) offline computing; (3) online computing, vendor access; (4)
+distributed, networked, and mass computing.'' \cite{info.ret.4.phases}, with
+the last three substantially contributed to by the invention of the Internet
+\cite{history.internet}, and consequently the emergence of search engines in
+the 1990s \cite{history.search.engines, history.internet.search.engines}.
+For the next two decades, search engines greatly expanded in speed and
+coverage and has been significantly impacting the society's information for at
+least a decade \cite{search.engine.impact.1, search.engine.impact.2}.
+
+LLMs have undoubtedly entered and transformed many areas, including daily life,
+business and the industry, and research \cite{llm.impact.1}. One strong appeal
+of LLMs is that they could process user's natural language input and generate
+natural language output in return with remarkable resemblence to what a human
+would say \cite{llm.power.1, llm.power.2}. However, because of the inherent
+limit of neural networks, some argue that they could not formally reason about
+what they output \cite{llm.limit.1, llm.limit.2, llm.limit.3}. Indeed, hallucination 
+\cite{llm.hallucination.1, llm.hallucination.2} and other forms of distortion
+of facts, is a big problem of LLMs. On the other hand, although search engines
+rely on determinstic algorithms that give precise reference to searched result,
+they could not compare with LLMs' ability to process search prompt and
+summarize results. 
+
+Therefore, various attempts have been made to integrate LLMs with search
+engines \cite{llm.meet.search.1, llm.meet.search.2, llm.meet.search.3}.
+Specifically, Xiong
+et al.\ proposes to categorize them into ``LLM4Search'' and ``Search4LLM'',
+where ``A4B`` means using A to improve B \cite{llm.meet.search.1}. Here is
+where my thesis will build upon. Previously, one would need to carefully craft
+search engine prompts into clearly and precise list of words or a short
+sentence. Now, with the help with LLMs that can easily process frivolous
+natural language input, I plan to integrate them together to boost information
+retrieval further, especially in the area of business school teaching content
+discovery.
+
+\section{Methods} 
 
 \section{Results}
 

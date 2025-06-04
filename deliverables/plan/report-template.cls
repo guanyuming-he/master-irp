@@ -17,7 +17,6 @@
 \RequirePackage[utf8]{inputenc}
 \RequirePackage{listings}
 \RequirePackage[en-GB]{datetime2}
-\DTMlangsetup{showdayofmonth=false}
 \RequirePackage{setspace}
 \RequirePackage{xcolor}
 \RequirePackage{hyperref}
