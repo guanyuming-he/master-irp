@@ -30,15 +30,15 @@ TBD.
 
 \section{Introduction}
 \subsection{Problem background}
-Since the emergence of the first Business schools in the late 19th century
+Since the emergence of Business schools in the late 19th century
 \cite{first.bis.school.1, first.bis.school.2}, several distinct pedagogical
-teaching strategies have been applied.  First institutionalized at Harvard
-Business School \cite{case.method.origin.1, case.method.origin.2} in the early
-20th century, a method about teaching students with real world business cases
-(will be called \emph{\casemethod} in the rest of the document) has been found
-more effective and engaging \cite{case.method.support.1, case.method.support.2,
-case.method.support.3} than traditional big lecture methods, and gained
-wide adoption across the world \cite{case.method.adoption.1,
+teaching strategies have been used.  First institutionalized at Harvard
+Business School \cite{case.method.origin.1, case.method.origin.2}, a method
+about teaching students with real world business cases (will be called
+\emph{\casemethod} in the rest of the document) has been found more effective
+and engaging \cite{case.method.support.1, case.method.support.2,
+case.method.support.3} than traditional big lecture methods, and gained wide
+adoption across the world \cite{case.method.adoption.1,
 case.method.adoption.2}.
 
 However, the case method is constrained by the availability and
@@ -49,35 +49,28 @@ article that instructors would have to conduct ``extensive preparation''
 importance of up-to-date material \cite{case.method.limit.4,case.method.limit.5}.
 
 \subsection{Past advancements in information retrieval}
-During the past two centuries, a number of key developments have profoundly
-expanded an individual's capacity to retrieve information about the world. In
-the early 19th century, the transmission of information was still traditional
---- carried by person on paper or simply remembered. The invention of
-telegraph in the 1840s by Morse, Cornell, and Henry \cite{history.telegraph.1,
-history.telegraph.2}, was perhaps the first big advancement in history. This
-technological innovation was considerably improved by the invention of the
-telephone by Bell in 1876 \cite{history.telephone.1, history.telephone.2},
-enabling communication directly by human voice, instead of encoded Morse code.
+In the early 19th century, the transmission of information was still
+traditional --- carried by person on paper or simply remembered. The invention
+of telegraph in the 1840s by Morse, Cornell, and Henry
+\cite{history.telegraph.1, history.telegraph.2}, was perhaps the first big
+advancement in history. This technological innovation was considerably improved
+by the invention of the telephone by Bell in 1876 \cite{history.telephone.1,
+history.telephone.2}.
 
 Wired communication is critically limited by geographical
 features on where the wires were laid. Around the late 19th century, 
-Marconi's experiments with wireless telegraphy \cite{history.wireless.1} and
-the first successful transatlantic signal in 1901
-\cite{history.first.atlantic.broadcast} introduced electromagnetic wave-based
-wireless communication, eventually accumulating into the world's first voice
-broadcast by radio in 1906 \cite{first.voice.broadcast}. 
+Marconi's experiments with wireless telegraphy \cite{history.wireless.1}
+introduced electromagnetic wave-based wireless communication, eventually
+accumulating into the world's first voice broadcast by radio in 1906
+\cite{first.voice.broadcast}. 
 
 The next many decades have seen people improving on the serious limitations of
-wireless communication: signal strength, interferences and attenuation,
-carrying capacity, and even deliberate sabotage during war times
-\cite{wireless.weakness.1, wireless.weakness.2, wireless.weakness.3}.
-Theoretically, Hartley observed a logritham pattern of information capacity
-\cite{hartley.log.information} and then Shannon expanded on it to first define
-\emph{bits} and \emph{entropy}, giving a formal mathematical theory of
-information \cite{shannon.theory.communication} in 1948. Meanwhile,
-engineers were experimenting with alternative modulation techniques, notably
-frequency modulation (FM), and the concepts were formalized in the 1930s
-\cite{history.modulation}. 
+the communication methods. \cite{wireless.weakness.1, wireless.weakness.2,
+wireless.weakness.3}.  Theoretically, Hartley observed a logritham pattern of
+information capacity \cite{hartley.log.information} and then Shannon expanded
+on it to first define \emph{bits} and \emph{entropy}, giving a formal
+mathematical theory of information \cite{shannon.theory.communication} in 1948.
+Another notable discovery was modulation techniques \cite{history.modulation}. 
 
 As the theoretical understanding of information progressed, people began to
 have the idea of \emph{searching} for information based on content
@@ -92,20 +85,19 @@ distributed, networked, and mass computing.'' \cite{info.ret.4.phases}, with
 the last three substantially contributed to by the invention of the Internet
 \cite{history.internet}, and consequently the emergence of search engines in
 the 1990s \cite{history.search.engines, history.internet.search.engines}.
-For the next two decades, search engines greatly expanded in speed and
+Henceforth, search engines greatly expanded in speed and
 coverage and has been significantly impacting the society's information for at
 least a decade \cite{search.engine.impact.1, search.engine.impact.2}.
 
 Recently, LLMs have had a huge impact on various areas \cite{llm.impact.1}. One
 strong appeal of LLMs is that they could easily work with natural language
-input \& output \cite{llm.power.1, llm.power.2}. However, because of the
-inherent limit of neural networks, some argue that they could not formally
+input \& output \cite{llm.power.1, llm.power.2}. However, some argue that they
+could not inherently
 reason about what they output \cite{llm.limit.1, llm.limit.2, llm.limit.3}.
 Indeed, hallucination \cite{llm.hallucination.1, llm.hallucination.2} and other
 forms of distortion of facts, is a big problem of LLMs. On the other hand,
 although search engines rely on determinstic algorithms that give precise
-reference to searched result, they could not compare with LLMs' ability to
-process search prompts and summarize results. 
+reference to searched result, they could not compare with LLMs' NLP abilities.
 
 Therefore, it is a current research direction to integrate LLMs with search
 engines \cite{llm.meet.search.1, llm.meet.search.2, llm.meet.search.3}.
@@ -115,31 +107,25 @@ Specifically, Xiong et al.\ proposes to categorize them into ``LLM4Search'' and
 
 \subsection{Goals}
 In this project, I will attempt to improve the current state of information
-retrieval (mostly limited to business teach related information) further by
-designing and developing a software
-system. More precisely, these are the goals:
+retrieval further by designing and developing a software system. More
+precisely, these are the goals:
 \begin{enumerate}
 	\item By combining LLMs and search engines, compensate each other's
 		weakeness in information retrieval.
 		\begin{enumerate}
-		\item The system shall improve search engines on prompt engineering to
-			the extent that a user would only need to give a rough and vague
-			natural language description of the target information to the
-			system.
+		\item The system shall be able to take unstructured data describing the
+		desired kinds of information.
 		\item The system shall improve LLMs on result credibility and
-			interpretibility. If pure LLMs lack the two properties, then
-			combination with deterministic and well-designed ranking and
-			searching algorithms in search engines will compensate for that.
+			interpretibility. 
 		\end{enumerate}
 	\item Enhance the automation of the current general public information
-		retrieval tools, e.g., Google search, ChatGPT, to the extent that a
-		user would only need to occasionally configure the system to run them.
+		retrieval tools so that	user would only need to occasionally configure
+		the system to run them.
 	\item Specially tailor the system to business teaching related information,
 		aiming to gather information from authentic and reliable sources.
 	\item The system shall support up-to-date information retrieval. More
-		precisely, the system shall support the user to specify a time range of
-		information, and the user is allowed to set the end of the range to the
-		current time.
+		precisely, the system shall support a specification of desired time
+		range.	
 	\item The system could support user feedback and learning from it to
 		provide information more close to one's need.
 \end{enumerate}
@@ -171,10 +157,7 @@ Based on the configured running frequency, the tool will
 	\item The processed results may be summarized by LLMs.
 	\item The results are sent to the users via the configured ways.
 	\item Optionally, the user gives feedback to the results. The tool can
-		thus improve on the search engine prompts, the information processing,
-		and LLM parameters, based on the feedback. The improvement algorithm
-		may use something like recommendation algorithms. Then, the tool can
-		iterate on the user's configuration automatically.
+		thus improve on feedback
 \end{enumerate}
 
 Figure~\ref{fig.arch.flow} demonstrates my architecture design and the workflow
@@ -221,11 +204,6 @@ of the system.
 \label{fig.arch.flow}
 \end{figure} 	
 
-What directs the system is the user's configuration, which is expected to
-include a time range of information to retrieve, a natural language description
-of the types of information to retrieve, how the retrieved information is sent
-to the user, and a frequency of running the tool.
-
 \subsection{Implementation plan}
 In this section, I give the plan of my implementation. It is only meaningful
 for the project plan, as it will be replaced by the specifics in the final
@@ -235,8 +213,8 @@ report.
 LLMs have demonstrated unprecedented ability to process unstructured data
 \cite{llm.unstructured.data.1, llm.unstructured.data.2}. Thus, it is desirable
 for the system to accept unstructured configuration from the user. The user may
-give a natural language description of the wanted information, give some
-examples, e.g., URLs, or simply feed the LLM the teaching slides and videos
+give a natural language description of the wanted information, some
+examples, e.g., URLs, or simply the teaching slides and videos
 from previous classes.
 
 Nevertheless, there are a few configurations that must be formatted.
@@ -259,13 +237,6 @@ information retrieved. LLMs for this task will be specifically tuned to ensure
 		will contribute relatively more information.
 \end{itemize}
 
-\subsubsection{Scheduled Execution} Based on the configured running frequency,
-the system will run every once a while automatically. The scheduling component
-must handle different frequencies (daily, weekly, monthly) and manage execution
-timing to avoid overwhelming external APIs or generating excessive costs. This
-involves implementing a robust scheduling system that can handle failures,
-retries, and load balancing across multiple users.
-
 \subsubsection{Multi-Source Search Integration} 
 One problem of search engine APIs is that they have ungenerous search limits
 \cite{search.api.limit.1}, allowing about 1000 queries per month, which is not
@@ -276,46 +247,31 @@ search engines, which do only a small amount of tasks that truly require whole
 Internet searching. The majority of the searching will be handled by scraping a
 limited sets of websites, most likely.
 
-\subsubsection{Content Processing and Filtering} Search results will be
-gathered and processed through a multi-stage filtering system. This involves
-content deduplication, relevance scoring, source credibility assessment, and
-quality filtering. The processing pipeline will need to handle various content
-formats including articles, reports, videos, and social media posts.
+\subsubsection{Content Processing and Filtering} The filtering system could
+utilize
+content deduplication, relevance scoring, and source credibility assessment.
+The processing pipeline will need to handle various content formats including
+urls, texts, images, and videos.
 
-The filtering system will combine rule-based approaches (such as keyword
-matching and source whitelisting) with machine learning techniques for
-relevance scoring and content classification. Natural language processing
-techniques will be employed to extract key information and assess content
-quality. The system will also need to handle different languages and cultural
-contexts in business information.
-
-\subsubsection{LLM-Based Summarization} Processed results will be summarized
-using LLMs with business-focused prompting strategies. The summarization
-component must balance comprehensiveness with conciseness, ensuring that key
-business insights are preserved while making information digestible for
-educators. This involves developing prompting strategies that can identify the
-most relevant information for case method teaching and present it in a
-structured format.
-
-The summarization process may involve extractive techniques (selecting key
-sentences from original content) and abstractive techniques (generating new
-summaries). Different summarization styles may be needed for different types of
-content and user preferences.
+\subsubsection{Summarization tuning} Processed results will be summarized
+with business-focused prompting strategies. It is where the system
+will be seriously tuned to avoid hallucination and ensure the completeness of
+the summary.
 
 \subsubsection{Delivery and User Interface} Results shall be sent to users via
-configured methods, which may include email summaries, web dashboards, or
-integration with existing educational platforms. The delivery component shall
-handle different user preferences and ensure information is presented in a
-format suitable for educational use.
+configured methods, which may include email addresses or
+educational/collaboration online platforms. The delivery component shall handle
+different user preferences and ensure information is presented in a format
+suitable for educational use.
 
 \subsubsection{Feedback and Adaptation System} The system shall collect user
-feedback on result quality and relevance, using this information to improve
+feedback to improve
 future searches. This involves designing feedback mechanisms that capture both
 explicit user ratings and implicit behavioral signals. Possible algorithms
 include recommendation algorithms and other machine learning models.
 
 \subsection{Technical Considerations} 
-The system will be a high-level program, which calls for simple programming
+The system will be a high-level program, which benefits from simple programming
 languages like Python. On the other hand, the system may have specific
 performance requirements, especially for LLMs and other machine learning
 algorithms. The likely result is then a combination of different programming
