@@ -237,7 +237,7 @@ information retrieved. LLMs for this task will be specifically tuned to ensure
 		will contribute relatively more information.
 \end{itemize}
 
-\subsubsection{Multi-Source Search Integration} 
+\subsubsection{Searching implementation} 
 One problem of search engine APIs is that they have ungenerous search limits
 \cite{search.api.limit.1}, allowing about 1000 queries per month, which is not
 enough for frequent testing and prototyping.
@@ -247,39 +247,39 @@ search engines, which do only a small amount of tasks that truly require whole
 Internet searching. The majority of the searching will be handled by scraping a
 limited sets of websites, most likely.
 
-\subsubsection{Content Processing and Filtering} The filtering system could
-utilize
-content deduplication, relevance scoring, and source credibility assessment.
-The processing pipeline will need to handle various content formats including
-urls, texts, images, and videos.
+\subsubsection{Content processing \& filtering} The content processing could
+utilize content deduplication, relevance scoring, and source credibility
+assessment.  The processing pipeline will need to handle various content
+formats including urls, texts, images, and videos.
 
 \subsubsection{Summarization tuning} Processed results will be summarized
 with business-focused prompting strategies. It is where the system
 will be seriously tuned to avoid hallucination and ensure the completeness of
 the summary.
 
-\subsubsection{Delivery and User Interface} Results shall be sent to users via
+\subsubsection{Information delivery} Results shall be sent to users via
 configured methods, which may include email addresses or
 educational/collaboration online platforms. The delivery component shall handle
 different user preferences and ensure information is presented in a format
 suitable for educational use.
 
-\subsubsection{Feedback and Adaptation System} The system shall collect user
+\subsubsection{Feedback system} The system shall collect user
 feedback to improve
 future searches. This involves designing feedback mechanisms that capture both
 explicit user ratings and implicit behavioral signals. Possible algorithms
 include recommendation algorithms and other machine learning models.
 
-\subsection{Technical Considerations} 
+\subsection{Technical considerations} 
 The system will be a high-level program, which benefits from simple programming
 languages like Python. On the other hand, the system may have specific
 performance requirements, especially for LLMs and other machine learning
 algorithms. The likely result is then a combination of different programming
 languages and technical frameworks.
 
-\subsection{Evaluation and Validation} 
+\subsection{Evaluation and validation} 
 It may be desirable to develop an external evaluation framework for the system,
-if I have enough time in the end.
+if I have enough time in the end. My supervisor my also have people to provide
+external human feedback.
 
 \clearpage
 
