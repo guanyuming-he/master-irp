@@ -9,4 +9,5 @@
 	cp ./thesis/thesis.pdf ./gh124-final-report.pdf
 
 .PHONY : all
-all : ./gh124-project-plan.pdf ./gh124-final-report.pdf
+# all : ./gh124-project-plan.pdf ./gh124-final-report.pdf
+all : ./gh124-final-report.pdf
