@@ -31,3 +31,19 @@ I briefed them my literature review and very rough plan.
 ### Work plan before next meeting:
 I will polish my plan before the deadline, and try to work on a prototype as
 much as I can.
+
+## Meeting (13 June 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+I presented my finished project plan and a small LLM prototype that can for now
+turn text into search engine prompts.
+
+### Feedback received:
+- He thought my plan was good.
+- He thought the prompts were close to the text given, but he thought they were
+  too academic. Need to direct the search engines towards real examples.
+
+### Work plan before next meeting:
+I will improve that part and also continue working on a custom search
+component.
