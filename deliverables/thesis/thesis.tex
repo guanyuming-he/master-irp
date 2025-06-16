@@ -278,11 +278,9 @@ include a time range of information to retrieve, a natural language description
 of the types of information to retrieve, how the retrieved information is sent
 to the user, and a frequency of running the tool.
 
-\subsection{Implementation plan}
-In this section, I give the plan of my implementation. It is for the project
-plan and only has specific directions, not concrete programming language, tool,
-or frameworks, as they will subject to tests and changes during the project.
-In the thesis, I will replace them with details.
+\subsection{Implementation detail}
+Different from in project plan, here the details of the implementation, instead
+of the directions and plans, are provided.
 
 \subsubsection{Configuration format} 
 LLMs have demonstrated unprecedented ability to process unstructured data
@@ -319,15 +317,20 @@ avoid overwhelming external APIs or generating excessive costs. This involves
 implementing a robust scheduling system that can handle failures, retries, and
 load balancing across multiple users.
 
-\subsubsection{Multi-Source Search Integration} 
+\subsubsection{Custom search engine} 
 One problem of search engine APIs is that they have ungenerous search limits
 \cite{search.api.limit.1}, allowing about 1000 queries per month, which is not
 enough for frequent testing and prototyping.
 
-As a result, I plan to use some other self-developed system in parallel with
-search engines, which do only a small amount of tasks that truly require whole
-Internet searching. The majority of the searching will be handled by scraping a
-limited sets of websites, most likely.
+As a result, I develop a custom search engine that is much less powerful but
+much more specific, crawling only a limited subset of website domains, instead
+of the whole Internet.
+
+The search engine is implemented in C++ with
+\href{https://curl.se/libcurl/}{\ttfamily libcurl} for url handling,
+\href{https://lexbor.com/}{\ttfamily lexbor} for HTML parsing, and
+\href{https://xapian.org/docs/}{\ttfamily xapian} for search indexing.
+
 
 \subsubsection{Content Processing and Filtering} Search results will be
 gathered and processed through a multi-stage filtering system. This involves
