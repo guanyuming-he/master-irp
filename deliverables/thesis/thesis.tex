@@ -331,6 +331,13 @@ The search engine is implemented in C++ with
 \href{https://lexbor.com/}{\ttfamily lexbor} for HTML parsing, and
 \href{https://xapian.org/docs/}{\ttfamily xapian} for search indexing.
 
+The search engine's algorithm is similar to the mainstream ones: Starting from
+initial urls, scrap each. And for every url found in each, scrap them too.
+However, one difference is that my engine will select a set of domains as
+first-class domains. Only those urls that match the domains will contribute to
+new scrap urls. That is, if a url does not match the domains, all urls found
+within it will not be processed.
+
 
 \subsubsection{Content Processing and Filtering} Search results will be
 gathered and processed through a multi-stage filtering system. This involves
