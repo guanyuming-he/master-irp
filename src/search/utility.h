@@ -18,3 +18,11 @@ extern "C" {
 
 // lxb_char_t is unsigned char, so I call this ustring.
 using ustring = std::basic_string<lxb_char_t>;
+
+/**
+ * This function must be called before all
+ * to initialize core components.
+ *
+ * This must be called in the master thread before any more thread is forked.
+ */
+void global_init();

@@ -11,61 +11,50 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 #include <chrono>
 namespace ch = std::chrono;
 
-#include "utility.h"
-
-// lexbor
 extern "C" {
-#include <lexbor/html/parser.h>
-#include <lexbor/html/interface.h>
+#include <lexbor/html/interfaces/document.h>
 }
 
-/**
- * This struct encapsulates the HTML parser.
- * 
- * More precisely, it only encapsulates its creation and destruction.
- * Everything else is exposed.
- */
-struct parser final
-{
-public:
-	parser();
-	~parser();
+#include "utility.h"
 
-	lxb_html_parser_t * const handle;
-};
+class url2html;
 
 /**
- * The struct contains the HTML content of a webpage.
+ * The struct contains the HTML tree of a webpage.
  */
 struct html final 
 {
 public:
 	// html content of no webpage is not accepted.
 	html() = delete;
-	/**
-	 * Parses the content of a HTML
-	 * @param content the byte-string content of a HTML document.
-	 */
-	html(const ustring& content, parser& pser);
+	explicit html(lxb_html_document_t* const handle):
+		handle(handle)
+	{}
 	~html();
 
 public:
 	// These two are for webpage metadata
 	std::string get_title() const;
-	std::string get_date() const;
+	ch::year_month_day get_date() const;
 
 	/**
 	 * This is for index building.
 	 * @returns all the text of the HTML document, in lowercase.
 	 */
 	std::string get_text() const;
+	/**
+	 * This is for recursive scraping.
+	 * @returns a list of all urls referred to by the HTML document.
+	 */
+	std::vector<std::string> get_urls() const;
 
 private:
 	lxb_html_document_t* const handle;
-	
+
 };
 
 /**
@@ -86,15 +75,23 @@ public:
 	);
 
 	// 2. loads from url, reads the HTML, and calculates the metadata.
-	explicit webpage(const std::string& url);
+	webpage(const std::string& url, url2html& convertor);
 
 public:
 	// @returns the text in lowercase or "" if not loaded.
 	inline std::string get_text() const 
 	{ return html_tree ? html_tree->get_text() : ""; }
+	
+	// @returns a vector of urls in the HTML, or {} if not loaded.
+	inline std::vector<std::string> get_urls() const 
+	{ return html_tree ? html_tree->get_urls() : std::vector<std::string>{}; }
 
 private: // declare this first as it needs to be inited first.
+	// for now, I don't know if it should be const.
+	// I leave it as not to open the possibility of parsing
+	// the HTML later.
 	std::optional<html> html_tree;
+
 public: // since they are immutable, no need to go private.
 	const std::string url;
 	const std::string title;
