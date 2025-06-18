@@ -8,19 +8,32 @@
  */
 
 #include "url2html.h"
-#include <curl/header.h>
-#include <lexbor/core/types.h>
-#include <lexbor/html/interface.h>
+#include <lexbor/html/tokenizer.h>
+#include <ranges>
 
 extern "C" {
 #include <lexbor/core/base.h>
 #include <lexbor/html/parser.h>
+#include <lexbor/html/tokenizer.h>
+#include <lexbor/html/interfaces/document.h>
+#include <lexbor/dom/interfaces/element.h>
+#include <lexbor/dom/dom.h>
+#include <curl/header.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 }
 
 #include <stdexcept>
 #include <string>
+#include <iomanip>
+#include <chrono>
+
+
+html::~html()
+{
+	lxb_html_document_destroy(handle);
+}
+
 
 parser::parser() :
 	handle(lxb_html_parser_create())
@@ -30,6 +43,9 @@ parser::parser() :
 	{
 		throw std::runtime_error("Can't create a HTML parser.");
 	}
+
+	my_ctx.ori_callback = handle->tkz->callback_token_done;
+	my_ctx.ori_ctx = handle->tkz->callback_token_ctx;
 }
 
 parser::~parser()
@@ -38,17 +54,65 @@ parser::~parser()
 }
 
 lxb_html_document_t* parser::parse(
-	const lxb_char_t* buf, size_t size
+	const lxb_char_t* buf, size_t size,
+	std::string* all_text
 ) {
+	if (!buf)
+		return nullptr;
+
+	if (nullptr != all_text)
+	{
+		all_text->clear();
+		all_text->reserve(32*1024);
+		my_ctx.new_ctx = all_text;
+		lxb_html_tokenizer_callback_token_done_set(
+			handle->tkz, &token_callback, &my_ctx
+		);
+	}
+	else 
+	{
+		lxb_html_tokenizer_callback_token_done_set(
+			handle->tkz, 
+			my_ctx.ori_callback, my_ctx.ori_ctx
+		);
+	}
+
 	auto* doc = lxb_html_parse(
 		handle, buf, size
 	);
 	if (!doc)
 		throw std::runtime_error("Can't parse HTML.");
 
+	// the parser needs to be reset after each use.
+	lxb_html_parser_clean(handle);
+
 	return doc;
 }
 	
+lxb_html_token_t* parser::token_callback(
+	lxb_html_tokenizer_t *tkz, 
+	lxb_html_token_t *token, void *ctx
+) {
+	const tkz_ctx& big_ctx = 
+		*static_cast<tkz_ctx*>(ctx);
+
+	// Only process the text tokens, and only
+	// process when str is not nullptr.
+    if (token->tag_id == LXB_TAG__TEXT) 
+	{
+		auto& str = *(big_ctx.new_ctx);
+		str.insert(
+			str.cend(),
+			token->text_start, token->text_end
+		);
+    }
+
+	// then, call original callback
+	return big_ctx.ori_callback(
+		tkz, token, big_ctx.ori_ctx
+	);
+
+}
 
 void scraper::global_init()
 {
@@ -144,15 +208,131 @@ size_t scraper::int_writeback(
 }
 
 
-lxb_html_document_t* url2html::convert(
+html url2html::convert(
 	const std::string& url
 ) {
-	std::string content{ s.transfer(url) };	
+	// I only care about the date for now.
+	std::map<std::string, std::string> headers {
+		{ "date", "" }
+	};
+
+	std::string content{ s.transfer(url, headers) };	
 	// curl returns char array, but lxb expect unsigned char array.
 	// Anyway, if lxb only expected bytes, then it's fine.
-	return p.parse(
+	std::string text;
+	auto* doc =  p.parse(
 		reinterpret_cast<const lxb_char_t*>(content.c_str()),
-	   	content.size()
+	   	content.size(),
+		&text
+	);
+
+	return html(
+		doc, 
+		std::move(headers), std::move(text)
 	);
 
 }
+
+std::string html::get_title() const 
+{
+	size_t size;
+    const lxb_char_t* title = lxb_html_document_title(
+			handle, &size
+	);
+    if (!title) return "";
+
+    return std::string(reinterpret_cast<const char*>(title), size);
+}
+ 
+ch::year_month_day html::get_date() const
+{
+	auto now = ch::system_clock::now();
+
+	if (!headers.contains("date"))
+	{
+		// return today.
+		return ch::year_month_day(
+			ch::floor<ch::days>(now)
+		);
+	}
+
+	// get the date from the header.
+	std::istringstream is{ headers.at("date") };
+	// The Date format uses en_US locale.
+	// (which is the default one)
+	is.imbue(std::locale());
+	
+	std::tm time;
+	// don't waste time to parse the time after the year.
+	is >> std::get_time(
+		&time, "%a, %d %b %Y"
+	);
+	if (is.fail())
+	{
+		// The HTTP response header is corrupted.
+		// But don't fail loudly.
+		// Just return today.
+		return ch::year_month_day(
+			ch::floor<ch::days>(now)
+		);
+	}
+	
+	ch::year_month_day date{
+		ch::year{time.tm_year+1900}, 
+		ch::month{static_cast<unsigned>(time.tm_mon+1)}, 
+		ch::day{static_cast<unsigned>(time.tm_mday)}
+	};
+	return date;
+}
+
+std::vector<std::string> html::get_urls() const 
+{
+    std::vector<std::string> urls;
+
+	// No official doc for how to do this. 
+	// The code is modified from the example
+	// https://github.com/lexbor/lexbor/blob/master/examples/
+	// lexbor/html/elements_by_tag_name.c
+
+    auto* a_tags = lxb_dom_collection_make(
+		&handle->dom_document, 128
+	);
+
+    if (!a_tags) {
+        throw std::runtime_error("Could not make lexbor collection.");
+	}
+
+	auto status = lxb_dom_elements_by_tag_name(
+		lxb_dom_interface_element(handle),
+        a_tags, 
+		(const lxb_char_t *)"a", 1
+	);
+	if (LXB_STATUS_OK != status)
+		throw std::runtime_error("Can't get HTML a tags.");
+
+
+	// for how to do the following, see 
+	// https://github.com/lexbor/lexbor/blob/master/examples/
+	// lexbor/html/element_attributes.c
+    for (size_t i = 0; i < lxb_dom_collection_length(a_tags); ++i) 
+	{
+        auto* element = lxb_dom_collection_element(
+			a_tags, i
+		);
+		size_t attr_len;
+		auto* attr = lxb_dom_element_get_attribute(
+			element, 
+			(const lxb_char_t*)"href", 4, 
+			&attr_len
+		);
+		if (!attr) // might not have href.
+			continue;
+
+        urls.emplace_back(
+			(const char*)attr, attr_len
+		);
+    }
+
+    return urls;
+}
+

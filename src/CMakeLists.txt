@@ -3,10 +3,13 @@ project(search_eng)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Define the main source files
-add_executable(search_eng
-	search/test.cpp
+
+add_library(search_eng
+	search/utility.cpp
+	search/webpage.cpp
+	search/url2html.cpp
 )
+
 
 # curl has some problem with find_package.
 # Instead, use curl-config, which is recommended by its website.
@@ -36,3 +39,26 @@ target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
 # lexbor doesn't support find_project either.
 # Just make sure I installed it.
 target_link_libraries(search_eng PRIVATE lexbor)
+
+
+target_compile_options(
+	search_eng
+	PRIVATE -Wall -Wextra -ggdb
+)
+
+############### TESTS ####################
+add_executable(parser_html_test
+	search/tests.cpp
+)
+target_link_libraries(parser_html_test
+	PRIVATE search_eng
+)
+# The test needs lexbor.
+target_link_libraries(parser_html_test
+	PRIVATE lexbor
+)
+target_compile_options(
+	parser_html_test
+	PRIVATE -Wall -Wextra -ggdb
+)
+

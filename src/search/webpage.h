@@ -9,6 +9,7 @@
  * @author Guanyuming He
  */
 
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -19,43 +20,8 @@ extern "C" {
 #include <lexbor/html/interfaces/document.h>
 }
 
-#include "utility.h"
+#include "url2html.h"
 
-class url2html;
-
-/**
- * The struct contains the HTML tree of a webpage.
- */
-struct html final 
-{
-public:
-	// html content of no webpage is not accepted.
-	html() = delete;
-	explicit html(lxb_html_document_t* const handle):
-		handle(handle)
-	{}
-	~html();
-
-public:
-	// These two are for webpage metadata
-	std::string get_title() const;
-	ch::year_month_day get_date() const;
-
-	/**
-	 * This is for index building.
-	 * @returns all the text of the HTML document, in lowercase.
-	 */
-	std::string get_text() const;
-	/**
-	 * This is for recursive scraping.
-	 * @returns a list of all urls referred to by the HTML document.
-	 */
-	std::vector<std::string> get_urls() const;
-
-private:
-	lxb_html_document_t* const handle;
-
-};
 
 /**
  * The class represents a webpage.
@@ -80,7 +46,7 @@ public:
 public:
 	// @returns the text in lowercase or "" if not loaded.
 	inline std::string get_text() const 
-	{ return html_tree ? html_tree->get_text() : ""; }
+	{ return html_tree ? html_tree->text : ""; }
 	
 	// @returns a vector of urls in the HTML, or {} if not loaded.
 	inline std::vector<std::string> get_urls() const 
