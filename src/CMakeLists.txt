@@ -57,6 +57,11 @@ target_link_libraries(parser_html_test
 target_link_libraries(parser_html_test
 	PRIVATE lexbor
 )
+find_package(Boost 1.81 COMPONENTS unit_test_framework REQUIRED)
+# The test uses boost.test
+target_link_libraries(parser_html_test
+	PRIVATE Boost::unit_test_framework
+)
 target_compile_options(
 	parser_html_test
 	PRIVATE -Wall -Wextra -ggdb

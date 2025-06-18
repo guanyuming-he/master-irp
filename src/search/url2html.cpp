@@ -8,6 +8,7 @@
  */
 
 #include "url2html.h"
+#include <cctype>
 #include <lexbor/html/tokenizer.h>
 #include <ranges>
 
@@ -101,10 +102,18 @@ lxb_html_token_t* parser::token_callback(
     if (token->tag_id == LXB_TAG__TEXT) 
 	{
 		auto& str = *(big_ctx.new_ctx);
-		str.insert(
-			str.cend(),
-			token->text_start, token->text_end
+		// turn everything lowercase here.
+		str.reserve(
+			str.size() + (token->text_end - token->text_start)
 		);
+		for (
+			auto* c = token->text_start; 
+			c != token->text_end; ++c
+		) {
+			str.push_back(std::tolower(
+				*reinterpret_cast<const char*>(c)
+			));
+		}
     }
 
 	// then, call original callback

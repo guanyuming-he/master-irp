@@ -85,6 +85,7 @@ public: // no need to be private since they are immutable.
 	// keep-alive
 	const std::map<std::string, std::string> headers;
 	// all the text in the HTML document, concated together.
+	// In lowercase.
 	const std::string text;
 
 };

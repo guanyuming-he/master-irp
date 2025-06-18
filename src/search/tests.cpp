@@ -4,12 +4,13 @@
  * The file is licensed under the GNU GPL v3.
  * 
  * Tests are written using Boost.Test
+ * Tests were generated using Claude.ai 
+ * and then modified by myself.
  */
-
-#include <boost/test/tools/old/interface.hpp>
-#include <cctype>
 #define BOOST_TEST_MODULE HTMLParserTests
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
+
+#include <cctype>
 
 #include "url2html.h"
 #include "webpage.h"
@@ -299,10 +300,10 @@ BOOST_AUTO_TEST_CASE(get_text_basic) {
     std::string text = h.text;
     
     // Text should be in lowercase
-    BOOST_CHECK(text.find("Hello World") != std::string::npos);
-    BOOST_CHECK(text.find("This is a test paragraph.") != std::string::npos);
+    BOOST_CHECK(text.find("hello world") != std::string::npos);
+    BOOST_CHECK(text.find("this is a test paragraph.") != std::string::npos);
 	// should not exist.
-    BOOST_CHECK(text.find("HELLO") == std::string::npos); 
+    BOOST_CHECK(text.find("Hello") == std::string::npos); 
 }
 
 BOOST_AUTO_TEST_CASE(get_text_complex) {
@@ -310,11 +311,11 @@ BOOST_AUTO_TEST_CASE(get_text_complex) {
     std::string text = h.text;
     
     // Check that various text elements are extracted
-    BOOST_CHECK(text.find("Main Heading") != std::string::npos);
-    BOOST_CHECK(text.find("First paragraph with some text.") != std::string::npos);
-    BOOST_CHECK(text.find("Subheading") != std::string::npos);
-    BOOST_CHECK(text.find("List item 1") != std::string::npos);
-    BOOST_CHECK(text.find("List item 2") != std::string::npos);
+    BOOST_CHECK(text.find("main heading") != std::string::npos);
+    BOOST_CHECK(text.find("first paragraph with some text.") != std::string::npos);
+    BOOST_CHECK(text.find("subheading") != std::string::npos);
+    BOOST_CHECK(text.find("list item 1") != std::string::npos);
+    BOOST_CHECK(text.find("list item 2") != std::string::npos);
     
 	// even code and style are included
     BOOST_CHECK(text.find("console.log") != std::string::npos);
@@ -480,8 +481,8 @@ BOOST_AUTO_TEST_CASE(nested_elements) {
     BOOST_CHECK(std::find(urls.begin(), urls.end(), "deep.html") != urls.end());
     
     std::string text = h.text;
-    BOOST_CHECK(text.find("Deeply nested ") != std::string::npos);
-    BOOST_CHECK(text.find("More nesting with ") != std::string::npos);
+    BOOST_CHECK(text.find("deeply nested ") != std::string::npos);
+    BOOST_CHECK(text.find("more nesting with ") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(html_with_comments) {
@@ -511,9 +512,9 @@ BOOST_AUTO_TEST_CASE(html_with_comments) {
     BOOST_CHECK_EQUAL(urls[0], "real-link.html");
     
     std::string text = h.text;
-    BOOST_CHECK(text.find("Visible text") != std::string::npos);
+    BOOST_CHECK(text.find("visible text") != std::string::npos);
 	// this is commented out.
-    BOOST_CHECK(text.find("Commented link") == std::string::npos);
+    BOOST_CHECK(text.find("commented link") == std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
