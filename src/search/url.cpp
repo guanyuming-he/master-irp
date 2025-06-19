@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstddef>
 #include <curl/urlapi.h>
+#include <optional>
 #include <stdexcept>
 #include <string>
 extern "C" {
@@ -274,67 +275,92 @@ url url::url_resolution(
 
 	// Next, check if relative is absolute.
 	// If so, then I just return it.
-	class url ret{relative};
-	curl_str scheme_rel;
-	rc = curl_url_get(
-		ret.get_handle(), 
-		CURLUPART_SCHEME, &scheme_rel.str, 0
-	);
-	if (CURLUE_OK == rc) // relative is absolute.
-		return ret;
+	std::optional<url> test_scheme;
+	try 
+	{
+		test_scheme.emplace(relative);
+	}
+	catch (const std::runtime_error& e)
+	{
+		// if relative has no scheme,
+		// an exception will be thrown.
+		// do nothing here.
+	}
+	if (test_scheme) // relative is absolute, as construction was successful.
+		return test_scheme.value();
 	
-	// Now, relative is not absolute.
-	// Perform the resolution algorithm in 
-	// https://datatracker.ietf.org/doc/html/rfc3986#section-5.2
-	
-	// 1. use base.scheme 
+
+	// Here's a simplified version of RFC 3986 section 5.2 algorithm.
+	// In particular, query and fragments are ignored.
+	auto* ret = curl_url();
+	// 1. use base.scheme.
 	curl_url_set(
-		ret.get_handle(), CURLUPART_SCHEME, scheme_base.str, 0
+		ret, CURLUPART_SCHEME, scheme_base.str, 0 
 	);
 
 	// 2. use base.authority if rel does not have it.
-	curl_str authority_rel, path_rel, path_base;
+	curl_str authority_rel, path_base;
 	rc = curl_url_get(
-		ret.get_handle(), CURLUPART_HOST, &authority_rel.str, 0
+		ret, CURLUPART_HOST, &authority_rel.str, 0
 	);
 	if (CURLUE_NO_HOST == rc)
 	{
 		// use base authority.
 		curl_url_set(
-			ret.get_handle(), CURLUPART_HOST,
+			ret, CURLUPART_HOST,
 			base.get_host().str,
+			0
+		);
+		curl_url_set(
+			ret, CURLUPART_PORT,
+			base.get_port().str,
+			0
+		);
+		curl_url_set(
+			ret, CURLUPART_USER,
+			base.get_user().str,
 			0
 		);
 	}
 
-	// finally, concat base path with relative path.
-	curl_url_get(
-		ret.get_handle(), CURLUPART_PATH, &path_rel.str, 0
-	);
-	if (!path_rel) // doesn't have a path.
-		return ret;
+	// finally, handle path.
+	std::string final_path;
+	// if relative path starts with '/', then it's an absolute path. just use
+	// it.
+	if (relative[0] == '/')
+		final_path = std::move(relative);
+	else // otherwise, concat them. 
+	{
+		path_base = base.get_path();
+		// RFC 3986: if path_base is empty,
+		// then return "/" + relative.
+		// Otherwise, remove the last segment of path_base,
+		// and concat them.
+		if (!path_base || std::string(path_base).empty())
+		{
+			final_path += '/';
+			final_path += relative;
+		}
+		else 
+		{
+			final_path += path_base.str; 
+			auto last_slash = final_path.find_last_of('/');
+			if (std::string::npos != last_slash)
+				final_path.erase(last_slash+1);
+			final_path += relative;
+		}
 
-	path_base = base.get_path();
-	// see if there's a '/' at the end of path_base
-	// or at the start of path_rel.
-	std::string concat_path(path_base);
-	if (
-		concat_path.back() != '/' &&
-		path_rel.str[0] != '/'
-	) {
-		concat_path.push_back('/');
 	}
-	concat_path.append(path_rel.str);
 	
 	// first, we set path back.
 	curl_url_set(
-		ret.get_handle(), CURLUPART_PATH, concat_path.c_str(), 0 
+		ret, CURLUPART_PATH, final_path.c_str(), 0 
 	);
 	// then, retrieve the url, and return a new CURLU*.
 	// Doing this will cause curl to normalize the path.
 	curl_str raw_url;
 	curl_url_get(
-		ret.get_handle(), CURLUPART_URL, &raw_url.str, 0
+		ret, CURLUPART_URL, &raw_url.str, 0
 	);
 	return url(raw_url.str);
 

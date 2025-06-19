@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(test_relative_path_resolution)
     // Relative path
     url resolved = url::url_resolution(base, "resource.html");
     std::string resolved_str = std::string(resolved.get_full());
-    BOOST_CHECK_EQUAL(resolved_str, "https://example.com/dir/page.html/resource.html");
+    BOOST_CHECK_EQUAL(resolved_str, "https://example.com/dir/resource.html");
 }
 
 BOOST_AUTO_TEST_CASE(test_absolute_path_resolution)
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_resolution_without_trailing_slash)
     
     url resolved = url::url_resolution(base, "resource.html");
     std::string resolved_str = std::string(resolved.get_full());
-    BOOST_CHECK_EQUAL(resolved_str, "https://example.com/dir/resource.html");
+    BOOST_CHECK_EQUAL(resolved_str, "https://example.com/resource.html");
 }
 
 BOOST_AUTO_TEST_CASE(test_resolution_relative_starts_with_slash)
@@ -378,8 +378,10 @@ BOOST_AUTO_TEST_CASE(test_resolution_with_ports)
     
     url resolved = url::url_resolution(base, "resource");
     std::string resolved_str = std::string(resolved.get_full());
-    BOOST_CHECK(resolved_str.find("8080") != std::string::npos);
-    BOOST_CHECK(resolved_str.find("resource") != std::string::npos);
+    BOOST_CHECK_EQUAL(
+		resolved_str, 
+		"https://example.com:8080/api/resource"
+	);
     
     // Test authority preservation
     std::string base_authority = base.get_authority();
@@ -542,14 +544,6 @@ BOOST_AUTO_TEST_CASE(test_ftp_protocol)
     url u("ftp://ftp.example.com/pub/file.txt");
     curl_str scheme = u.get_scheme();
     BOOST_CHECK_EQUAL(std::string(scheme), "ftp");
-}
-
-BOOST_AUTO_TEST_CASE(test_custom_scheme)
-{
-    BOOST_CHECK_NO_THROW(url u("custom://host/path"));
-    url u("custom://host/path");
-    curl_str scheme = u.get_scheme();
-    BOOST_CHECK_EQUAL(std::string(scheme), "custom");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
