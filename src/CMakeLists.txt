@@ -8,6 +8,7 @@ add_library(search_eng
 	search/utility.cpp
 	search/webpage.cpp
 	search/url2html.cpp
+	search/url.cpp
 )
 
 
@@ -47,23 +48,33 @@ target_compile_options(
 )
 
 ############### TESTS ####################
-add_executable(parser_html_test
-	search/tests.cpp
+add_executable(test_parser_html
+	search/test_parser_html.cpp
 )
-target_link_libraries(parser_html_test
-	PRIVATE search_eng
+add_executable(test_url 
+	search/test_url.cpp
 )
-# The test needs lexbor.
-target_link_libraries(parser_html_test
+# This test needs lexbor.
+target_link_libraries(test_parser_html
 	PRIVATE lexbor
 )
+
+# Common test settings
+set(testsList 
+	test_parser_html test_url
+)
 find_package(Boost 1.81 COMPONENTS unit_test_framework REQUIRED)
-# The test uses boost.test
-target_link_libraries(parser_html_test
-	PRIVATE Boost::unit_test_framework
-)
-target_compile_options(
-	parser_html_test
-	PRIVATE -Wall -Wextra -ggdb
-)
+foreach (test IN LISTS testsList)
+	target_link_libraries(${test}
+		PRIVATE search_eng
+	)
+	# The test uses boost.test
+	target_link_libraries(${test}
+		PRIVATE Boost::unit_test_framework
+	)
+	target_compile_options(
+		${test}
+		PRIVATE -Wall -Wextra -ggdb
+	)
+endforeach()
 

@@ -21,14 +21,23 @@ webpage::webpage(
 	url(url), title(title), date(date)
 {}
 
-webpage::webpage(const std::string& url, url2html& convertor):
-	html_tree(convertor.convert(url)),
-	url(url),
-	title(html_tree->get_title()),
-	date(html_tree->get_date())
+std::vector<class url> webpage::get_urls() const
 {
+	if (!html_tree)
+		return {};
+	
+	// we need to turn each relative one into an absolute one.
+	auto raw_urls = html_tree->get_urls();
 
+	std::vector<class url> ret;
+	ret.reserve(raw_urls.size());
+
+	for (const auto& raw : raw_urls)
+	{
+		ret.emplace_back(url::url_resolution(
+			this->url, raw
+		));
+	}
+
+	return ret;
 }
-
-
-

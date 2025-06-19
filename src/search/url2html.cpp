@@ -8,6 +8,8 @@
  */
 
 #include "url2html.h"
+#include "url.h"
+
 #include <cctype>
 #include <lexbor/html/tokenizer.h>
 #include <ranges>
@@ -19,7 +21,6 @@ extern "C" {
 #include <lexbor/html/interfaces/document.h>
 #include <lexbor/dom/interfaces/element.h>
 #include <lexbor/dom/dom.h>
-#include <curl/header.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 }
@@ -28,6 +29,7 @@ extern "C" {
 #include <string>
 #include <iomanip>
 #include <chrono>
+
 
 
 html::~html()
@@ -168,7 +170,7 @@ scraper::~scraper()
 }
  
 std::string scraper::transfer(
-	const std::string& url,
+	const url& url,
 	std::map<std::string, std::string>& headers
 ) {
 	buffer.clear();
@@ -177,7 +179,7 @@ std::string scraper::transfer(
 	// and also does not waste much if the website is small.
 	buffer.reserve(64*1024u);
 
-	curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(handle, CURLOPT_CURLU, url.get_handle());
 	curl_easy_perform(handle);
 
 	// check the headers
@@ -218,7 +220,7 @@ size_t scraper::int_writeback(
 
 
 html url2html::convert(
-	const std::string& url
+	const url& url
 ) {
 	// I only care about the date for now.
 	std::map<std::string, std::string> headers {

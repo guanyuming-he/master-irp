@@ -28,7 +28,6 @@ extern "C" {
 #include <chrono>
 namespace ch = std::chrono;
 
-
 /**
  * The struct contains the HTML tree of a webpage.
  */
@@ -141,6 +140,8 @@ private:
 	tkz_ctx my_ctx;
 };
 
+class url;
+
 /**
  * Encapsulates a curl handle that does the scraping.
  *
@@ -171,7 +172,7 @@ public:
 	 * @returns the HTML content, in string, of the url.
 	 */
 	std::string transfer(
-		const std::string& url,
+		const url& url,
 		std::map<std::string, std::string>& headers
 	);
 
@@ -217,7 +218,7 @@ public:
 	{}
 
 public:
-	html convert(const std::string& url);
+	html convert(const url& url);
 
 private:
 	scraper s;
