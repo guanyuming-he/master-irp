@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(search_eng)
+enable_testing()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 
 add_library(search_eng
@@ -54,6 +55,9 @@ add_executable(test_parser_html
 add_executable(test_url 
 	search/test_url.cpp
 )
+add_executable(test_onewebpage 
+	search/test_onewebpage.cpp
+)
 # This test needs lexbor.
 target_link_libraries(test_parser_html
 	PRIVATE lexbor
@@ -61,7 +65,7 @@ target_link_libraries(test_parser_html
 
 # Common test settings
 set(testsList 
-	test_parser_html test_url
+	test_parser_html test_url test_onewebpage
 )
 find_package(Boost 1.81 COMPONENTS unit_test_framework REQUIRED)
 foreach (test IN LISTS testsList)
@@ -75,6 +79,10 @@ foreach (test IN LISTS testsList)
 	target_compile_options(
 		${test}
 		PRIVATE -Wall -Wextra -ggdb
+	)
+	add_test(
+		NAME run${test}
+		COMMAND ${test}
 	)
 endforeach()
 

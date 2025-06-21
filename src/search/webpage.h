@@ -33,7 +33,6 @@ extern "C" {
 class webpage final 
 {
 public:
-	// Two different constructors.
 	// 1. loads from file, which only has metadata. 
 	webpage(
 		const std::string& url,
@@ -41,18 +40,24 @@ public:
 		const ch::year_month_day& date
 	);
 
-	// 2. loads from url, reads the HTML, and calculates the metadata.
-	template <typename U>
-	requires std::is_same_v<
-		std::remove_cvref_t<U>, url
-	>
-	webpage(U&& url, url2html& convertor):
-		html_tree(convertor.convert(url)),
+	// 2. (3) uses this which directly accepts a html.
+	template <typename H, typename U>
+	requires 
+		std::is_same_v<std::remove_cvref_t<H>, html> &&
+		std::is_same_v<std::remove_cvref_t<U>, url>
+	webpage(U&& url, H&& html_tree):
+		html_tree(std::forward<H>(html_tree)),
 		url(std::forward<U>(url)),
-		title(html_tree->get_title()),
-		date(html_tree->get_date())
+		title(this->html_tree->get_title()),
+		date(this->html_tree->get_date())
 	{}
-
+	
+	// 3. loads from url, reads the HTML, and calculates the metadata.
+	template <typename U>
+	requires std::is_same_v<std::remove_cvref_t<U>, url>
+	webpage(U&& url, url2html& convertor):
+		webpage(std::forward<U>(url), convertor.convert(url))
+	{}
 
 public:
 	// @returns the text in lowercase or "" if not loaded.

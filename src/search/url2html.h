@@ -37,6 +37,15 @@ public:
 	// html content of no webpage is not accepted.
 	html() = delete;
 
+	// no copy. only move
+	html(const html&) = delete;
+	html(html&& other) noexcept:
+		handle(other.handle), 
+		headers(std::move(other.headers)), text(std::move(other.text))
+	{
+		other.handle = nullptr;
+	}
+
 	// forward the map, supporting both copy and move.
 	template <typename M, typename S>
 	requires std::is_same_v<
@@ -69,7 +78,7 @@ public:
 	std::vector<std::string> get_urls() const;
 
 private:
-	lxb_html_document_t* const handle;
+	lxb_html_document_t* handle;
 
 public: // no need to be private since they are immutable.
 	// HTTP response headers are in key: val format.
