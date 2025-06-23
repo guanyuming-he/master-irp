@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
-project(search_eng)
+project(
+	search_eng
+	LANGUAGES CXX C
+)
 enable_testing()
+include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -42,12 +46,6 @@ target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
 # Just make sure I installed it.
 target_link_libraries(search_eng PRIVATE lexbor)
 
-
-target_compile_options(
-	search_eng
-	PRIVATE -Wall -Wextra -ggdb
-)
-
 ############### TESTS ####################
 add_executable(test_parser_html
 	search/test_parser_html.cpp
@@ -72,13 +70,9 @@ foreach (test IN LISTS testsList)
 	target_link_libraries(${test}
 		PRIVATE search_eng
 	)
-	# The test uses boost.test
+	# The tests use boost.test
 	target_link_libraries(${test}
 		PRIVATE Boost::unit_test_framework
-	)
-	target_compile_options(
-		${test}
-		PRIVATE -Wall -Wextra -ggdb
 	)
 	add_test(
 		NAME run${test}
@@ -86,3 +80,9 @@ foreach (test IN LISTS testsList)
 	)
 endforeach()
 
+################# Debug options ################
+if (STREQUAL CMAKE_BUILD_TYPE "Debug")
+	add_compile_options(
+		-Wall -Wextra -ggdb
+	)
+endif()

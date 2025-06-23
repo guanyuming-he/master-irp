@@ -55,7 +55,7 @@ public:
  * For historical reasons, people still use URLs to refer to URIs.
  *
  * Important: I discard all query and fragment (as defined in RFC 3986)
- * in the url. That is, I only care about the host (authority)
+ * in the url. That is, I only care about the scheme, authority,
  * and the path.
  */
 class url final 
