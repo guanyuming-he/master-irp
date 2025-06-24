@@ -32,7 +32,6 @@ class webpage;
 
 /**
  * The index class handles the main database stored on disk,
- * and a url2id map which prevents duplicate url indexing.
  *
  * In the end, when it is destructed, or when directly commanded, 
  * it is written back to the disk.
@@ -40,14 +39,21 @@ class webpage;
 class index final
 {
 public:
-	/**
-	 * As Xapian::Database does not store urls to documents,
-	 * it is my responsibility to map each url to a docid.
-	 *
-	 * @param key returned by url::get_essential().
-	 * @param value returned by xp::WritableDatabase::add_document().
-	 */
-	using idmap_t = std::unordered_map<std::string, xp::docid>;
+	///**
+	// * As Xapian::Database does not store urls to documents,
+	// * it is my responsibility to map each url to a docid.
+	// *
+	// * @param key returned by url::get_essential().
+	// * @param value returned by xp::WritableDatabase::add_document().
+	// */
+	//using idmap_t = std::unordered_map<std::string, xp::docid>;
+	//
+	
+private:
+	enum value_slots : xp::valueno
+	{
+		DATE_SLOT = 1,
+	};
 
 public:
 	// Empty index not allowed.
@@ -62,23 +68,23 @@ public:
 	 * @param dbpath path to the directory that the db is stored in. If no
 	 * db is found or if the dir is not present, then it will be created.
 	 * Otherwise, it will be opened.  
-	 * @param mappath path to the url2id map file. If not present, it will be
-	 * created.
-	 *
-	 * @throws std::runtime_error if db and url2id mismatch.
-	 * I can't check if every doc id is present in the db, which is too time
-	 * consuming, but I will compare their sizes.
 	 */
-	index(
-		const fs::path& dbpath, const fs::path& mappath
+	explicit index(
+		const fs::path& dbpath
 	);
 
 public:
-	// @returns true if url has already been indexed.
-	bool has_document(const class url& url) const;
+	// @returns the document with the internal id, if present.
+	std::optional<xp::Document> get_document(const xp::docid id) const;
+	// @returns the document with the url, if present.
+	std::optional<xp::Document> get_document(const class url& url) const;
 	// @returns true if doc's url has already been indexed.
-	bool has_document(const webpage& doc) const;
+	std::optional<xp::Document> get_document(const webpage& doc) const;
 
+	inline auto num_documents() const
+	{ return db.get_doccount(); }
+
+public:
 	/**
 	 * Adds document to the index.
 	 * You MUST manually call has_document() to check 
@@ -104,52 +110,52 @@ public:
 	void synchronize();
 
 private:
-	fs::path dbpath, url2idpath;
-
+	fs::path dbpath;
 	xp::WritableDatabase db;
-	/**
-	 * idmap format:
-		  <64bit unsigned number of elements>.
-		  elements
-	 *
-	 * elements:
-	 	  <exactly that number>*element
-	 * 
-	 * element:
-	 	  \0-terminated-string docid.
-	 */	  
-	idmap_t url2id;
-	
-	// To not rewrite the whole map everytime even if only a few are added,
-	// I record the difference here.
-	// Since for now I only allow appending, only the new entries are recorded.
-	idmap_t url2id_diff{};
 
 	// Used to turn free text in a document into terms that are indexed.
 	// From the official doc, it seems that it can be reused across multiple
 	// documents.
 	xp::TermGenerator tg{};
 
-	// Whether the in memory content has changed since 
-	// its construction from disk.
-	// If paths is valid and dirty = true,
-	// then the content will be updated to disk at destruction time.
-	bool dirty = false;
+	//// commented out for now as I plan to use SHA256(url) as unique
+	///identifier.
+	///**
+	// * idmap format:
+	//	  <64bit unsigned number of elements>.
+	//	  elements
+	// *
+	// * elements:
+	// 	  <exactly that number>*element
+	// * 
+	// * element:
+	// 	  \0-terminated-string docid.
+	// */	  
+	//idmap_t url2id;
+	//
+	//// To not rewrite the whole map everytime even if only a few are added,
+	//// I record the difference here.
+	//// Since for now I only allow appending, only the new entries are recorded.
+	//idmap_t url2id_diff{};
 
 private:
-	/** 
-	 * Loads url2id map pointed to by path.
-	 * If the file's not present, an empty idmap is returned.
-	 * The function will not create the file on that occasion, 
-	 * because later the index class will do that, writing the empty map to the
-	 * file.
-	 */
-	static idmap_t load_idmap(const fs::path& path);
+	// @returns "Q" + SHA256(url.get_essential()).
+	static std::string url2hashid(const class url& url);
 
-	/**
-	 * Only has effect if paths is valid.
-	 * For now, it's an append only impl.
-	 * It will only append new diff to the idmap.
-	 */
-	void save_idmap();
+	//// commented out for now as I plan to use SHA256(url) as unique
+	///** 
+	// * Loads url2id map pointed to by path.
+	// * If the file's not present, an empty idmap is returned.
+	// * The function will not create the file on that occasion, 
+	// * because later the index class will do that, writing the empty map to the
+	// * file.
+	// */
+	//static idmap_t load_idmap(const fs::path& path);
+
+	///**
+	// * Only has effect if paths is valid.
+	// * For now, it's an append only impl.
+	// * It will only append new diff to the idmap.
+	// */
+	//void save_idmap();
 };

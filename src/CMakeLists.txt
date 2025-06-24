@@ -7,7 +7,7 @@ enable_testing()
 include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 23)
-
+set(CMAKE_C_STANDARD 11)
 
 add_library(search_eng
 	search/utility.cpp
@@ -15,6 +15,8 @@ add_library(search_eng
 	search/url2html.cpp
 	search/url.cpp
 	search/index.cpp
+	# This file comes from external library https://github.com/amosnier/sha-2
+	sha-2/sha-256.c
 )
 
 
@@ -39,6 +41,7 @@ target_link_libraries(
 	PRIVATE ${curl_lflags}
 )
 
+# Xapian
 find_package(xapian REQUIRED)
 target_include_directories(search_eng PRIVATE ${XAPIAN_INCLUDE_DIRS})
 target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
@@ -46,6 +49,7 @@ target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
 # lexbor doesn't support find_project either.
 # Just make sure I installed it.
 target_link_libraries(search_eng PRIVATE lexbor)
+
 
 ############### TESTS ####################
 
@@ -72,10 +76,9 @@ endforeach()
 
 # Specific test settings.
 # This test needs lexbor.
-target_link_libraries(test_parser_html
-	PRIVATE lexbor
-)
-# This test needs xapian
+target_link_libraries(test_parser_html PRIVATE lexbor)
+# This test needs xapian and lexbor
+target_link_libraries(test_index PRIVATE lexbor)
 target_include_directories(test_index PRIVATE ${XAPIAN_INCLUDE_DIRS})
 target_link_libraries(test_index PRIVATE ${XAPIAN_LIBRARIES})
 
