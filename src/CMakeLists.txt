@@ -14,6 +14,7 @@ add_library(search_eng
 	search/webpage.cpp
 	search/url2html.cpp
 	search/url.cpp
+	search/index.cpp
 )
 
 
@@ -47,26 +48,15 @@ target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
 target_link_libraries(search_eng PRIVATE lexbor)
 
 ############### TESTS ####################
-add_executable(test_parser_html
-	search/test_parser_html.cpp
-)
-add_executable(test_url 
-	search/test_url.cpp
-)
-add_executable(test_onewebpage 
-	search/test_onewebpage.cpp
-)
-# This test needs lexbor.
-target_link_libraries(test_parser_html
-	PRIVATE lexbor
-)
 
 # Common test settings
 set(testsList 
-	test_parser_html test_url test_onewebpage
+	test_parser_html test_url test_onewebpage test_index
 )
 find_package(Boost 1.81 COMPONENTS unit_test_framework REQUIRED)
 foreach (test IN LISTS testsList)
+	add_executable(${test} search/${test}.cpp)
+
 	target_link_libraries(${test}
 		PRIVATE search_eng
 	)
@@ -80,8 +70,17 @@ foreach (test IN LISTS testsList)
 	)
 endforeach()
 
+# Specific test settings.
+# This test needs lexbor.
+target_link_libraries(test_parser_html
+	PRIVATE lexbor
+)
+# This test needs xapian
+target_include_directories(test_index PRIVATE ${XAPIAN_INCLUDE_DIRS})
+target_link_libraries(test_index PRIVATE ${XAPIAN_LIBRARIES})
+
 ################# Debug options ################
-if (STREQUAL CMAKE_BUILD_TYPE "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_compile_options(
 		-Wall -Wextra -ggdb
 	)
