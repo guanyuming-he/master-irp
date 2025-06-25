@@ -4,6 +4,8 @@
  *
  * The file tests the url class.
  * @author Guanyuming He
+ * @deprecated switch to boost.url, because libcurl's uri handling is so
+ * terrible.
  *
  * Test cases are generated using Claude.ai, and modified 
  * by me.
@@ -284,8 +286,9 @@ BOOST_AUTO_TEST_CASE(test_absolute_relative_url)
     url base("https://example.com/dir/page.html");
     
     // Absolute URL should return as-is
-    url resolved = url::url_resolution(base, "https://other.com/resource");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "https://other.com/resource");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://other.com/resource");
 }
 
@@ -294,8 +297,9 @@ BOOST_AUTO_TEST_CASE(test_relative_path_resolution)
     url base("https://example.com/dir/page.html");
     
     // Relative path
-    url resolved = url::url_resolution(base, "resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://example.com/dir/resource.html");
 }
 
@@ -304,8 +308,9 @@ BOOST_AUTO_TEST_CASE(test_absolute_path_resolution)
     url base("https://example.com/dir/page.html");
     
     // Absolute path (starts with /)
-    url resolved = url::url_resolution(base, "/newpath/resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "/newpath/resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://example.com/newpath/resource.html");
 }
 
@@ -313,8 +318,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_with_trailing_slash)
 {
     url base("https://example.com/dir/");
     
-    url resolved = url::url_resolution(base, "resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://example.com/dir/resource.html");
 }
 
@@ -322,8 +328,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_without_trailing_slash)
 {
     url base("https://example.com/dir");
     
-    url resolved = url::url_resolution(base, "resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://example.com/resource.html");
 }
 
@@ -331,8 +338,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_relative_starts_with_slash)
 {
     url base("https://example.com/dir/page.html");
     
-    url resolved = url::url_resolution(base, "/resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "/resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "https://example.com/resource.html");
 }
 
@@ -340,8 +348,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_complex_paths)
 {
     url base("https://example.com/path1/path2/page.html");
     
-    url resolved = url::url_resolution(base, "../sibling.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "../sibling.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     // libcurl should normalize the path
     BOOST_CHECK(resolved_str.find("example.com") != std::string::npos);
     BOOST_CHECK(resolved_str.find("sibling.html") != std::string::npos);
@@ -351,8 +360,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_dot_paths)
 {
     url base("https://example.com/dir/");
     
-    url resolved = url::url_resolution(base, "./resource.html");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "./resource.html");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK(resolved_str.find("example.com") != std::string::npos);
     BOOST_CHECK(resolved_str.find("resource.html") != std::string::npos);
 }
@@ -362,13 +372,14 @@ BOOST_AUTO_TEST_CASE(test_resolution_different_schemes)
     url base("https://example.com/path");
     
     // Different scheme should be treated as absolute
-    url resolved = url::url_resolution(base, "http://other.com/resource");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "http://other.com/resource");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "http://other.com/resource");
     
     // FTP scheme
     resolved = url::url_resolution(base, "ftp://files.example.com/file.txt");
-    resolved_str = std::string(resolved.get_full());
+    resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(resolved_str, "ftp://files.example.com/file.txt");
 }
 
@@ -376,8 +387,9 @@ BOOST_AUTO_TEST_CASE(test_resolution_with_ports)
 {
     url base("https://example.com:8080/api/");
     
-    url resolved = url::url_resolution(base, "resource");
-    std::string resolved_str = std::string(resolved.get_full());
+    auto resolved = url::url_resolution(base, "resource");
+	BOOST_TEST(resolved.has_value());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK_EQUAL(
 		resolved_str, 
 		"https://example.com:8080/api/resource"
@@ -385,7 +397,7 @@ BOOST_AUTO_TEST_CASE(test_resolution_with_ports)
     
     // Test authority preservation
     std::string base_authority = base.get_authority();
-    std::string resolved_authority = resolved.get_authority();
+    std::string resolved_authority = resolved->get_authority();
     BOOST_CHECK_EQUAL(base_authority, "example.com:8080");
 }
 
@@ -395,19 +407,29 @@ BOOST_AUTO_TEST_CASE(test_resolution_base_not_absolute)
     BOOST_CHECK_THROW({
         url relative_base("example.com/path");  // This might throw during construction
         url::url_resolution(relative_base, "resource.html");
-    }, std::exception);  // Could be runtime_error from construction or logic_error from resolution
+    }, std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(test_resolution_empty_relative)
 {
     url base("https://example.com/dir/page.html");
     
-    url resolved = url::url_resolution(base, "");
+    auto resolved = url::url_resolution(base, "");
     // Empty relative URL should resolve to base without fragment
-    std::string resolved_str = std::string(resolved.get_full());
+    std::string resolved_str = std::string(resolved->get_full());
     BOOST_CHECK(resolved_str.find("example.com") != std::string::npos);
 }
 
+// Newly added after a bug.
+BOOST_AUTO_TEST_CASE(test_resolution_invalid_url)
+{
+    url base("https://example.com/dir/page.html");
+    
+    auto resolved = url::url_resolution(base, "????");
+	BOOST_TEST(!resolved.has_value());
+    auto resolved1 = url::url_resolution(base, "https:abc/");
+	BOOST_TEST(!resolved1.has_value());
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(CurlStrTests)

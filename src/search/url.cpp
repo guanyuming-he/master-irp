@@ -5,6 +5,8 @@
  * The file implements the url class that 
  * represents a url
  *
+ * @deprecated switch to boost.url, because libcurl's uri handling is so
+ * terrible.
  * @author Guanyuming He
  */
 
@@ -12,6 +14,7 @@
 #include <cmath>
 #include <cstddef>
 #include <curl/urlapi.h>
+#include <exception>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -260,8 +263,8 @@ void url::strip_query_frag()
 	);
 }
 
-url url::url_resolution(
-	const class url& base, const std::string &relative
+std::optional<url> url::url_resolution(
+	const class url& base, const std::string_view relative
 ) {
 	CURLUcode rc;
 	
@@ -278,7 +281,7 @@ url url::url_resolution(
 	std::optional<url> test_scheme;
 	try 
 	{
-		test_scheme.emplace(relative);
+		test_scheme.emplace(std::string(relative));
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -286,7 +289,7 @@ url url::url_resolution(
 		// an exception will be thrown.
 		// do nothing here.
 	}
-	if (test_scheme) // relative is absolute, as construction was successful.
+	if (test_scheme.has_value()) // relative is absolute, as construction was successful.
 		return test_scheme.value();
 	
 
@@ -362,6 +365,19 @@ url url::url_resolution(
 	curl_url_get(
 		ret, CURLUPART_URL, &raw_url.str, 0
 	);
-	return url(raw_url.str);
+	
+	// Sometimes the relative url in the website is just not correct for some
+	// reason. Fail gracefully on that occasion by returning the base simply.
+	// The base won't be indexed anyway, as it already has been.
+	std::optional<url> final_val;
+	try {
+		final_val.emplace(raw_url.str);
+	}
+	catch (const std::runtime_error&)
+	{
+		// Do not fail ungracefully.
+		return std::nullopt;
+	}
 
+	return final_val;
 }

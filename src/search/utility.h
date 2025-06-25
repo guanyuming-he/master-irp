@@ -7,6 +7,8 @@
  * @author Guanyuming He
  */
 
+#include <iostream>
+#include <source_location>
 #include <stdexcept>
 #include <string>
 extern "C" {
@@ -26,3 +28,32 @@ using ustring = std::basic_string<lxb_char_t>;
  * This must be called in the master thread before any more thread is forked.
  */
 void global_init();
+
+enum class log_levels : int 
+{
+	NO_LOG,
+	VERBOSE_1,
+	VERBOSE_2
+};
+
+constexpr log_levels log_level = log_levels::VERBOSE_1;
+
+template <log_levels L = log_level>
+void util_log(
+	const std::string_view msg, 
+	const std::source_location loc = std::source_location::current()
+) {
+	// for debug log, it's better to use endl to force flushing.
+	if constexpr (L == log_levels::VERBOSE_1)
+	{
+		std::cout << msg << std::endl;
+	}
+	else if (L == log_levels::VERBOSE_2)
+	{
+		std::cout 
+			<< loc.file_name() << '('
+			<< loc.line() << ':'
+			<< loc.column() << ") :\n"
+			<< msg << std::endl;
+	}
+}

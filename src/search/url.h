@@ -3,12 +3,12 @@
  * The file is licensed under the GNU GPL v3
  * Copyright (C) Guanyuming He 2025
  *
- * The file defines the url class that 
- * represents a url
- *
+ * @deprecated switch to boost.url, because libcurl's uri handling is so
+ * terrible.
  * @author Guanyuming He
  */
 
+#include <optional>
 #include <string>
 
 // forward decl of CURLU;
@@ -17,6 +17,7 @@ typedef struct Curl_URL CURLU;
 
 // strings returned by libcurl needs to be freed
 // by curl_free().
+// @deprecated No longer needed.
 struct curl_str 
 {
 public:
@@ -53,10 +54,13 @@ public:
  * URIs are defined in RFC 3986, see 
  * https://datatracker.ietf.org/doc/html/rfc3986.
  * For historical reasons, people still use URLs to refer to URIs.
+ * That's why I still call this class url.
  *
  * Important: I discard all query and fragment (as defined in RFC 3986)
  * in the url. That is, I only care about the scheme, authority,
  * and the path.
+ *
+ * @deprecated switch to boost.url
  */
 class url final 
 {
@@ -75,6 +79,8 @@ public:
 	url(CURLU* handle):
 		handle(handle) {}
 	url(const char* str);
+	// I can't accept a string_view here, because that would lead to overload
+	// resolution ambiguity.
 	url(const std::string& str) :
 		url(str.c_str()) {}
 	// some uris are relative within a host.
@@ -141,13 +147,14 @@ public:
 	 * part, every full URI is absolute.)
 	 * @param relative relative url found in a resource of base.
 	 * May or may not be relative.
-	 * @returns the param "relative" in its absolute form
+	 * @returns the param "relative" in its absolute form, or nullopt if the
+	 * relative string is ill-formed.
 	 * @throws std::logic_error if base is not in absolute form.
 	 */
-	static url
+	static std::optional<url>
 	url_resolution(
 		const class url& base,
-		const std::string& relative
+		const std::string_view relative
 	);
 
 };

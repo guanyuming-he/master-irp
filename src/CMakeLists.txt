@@ -13,12 +13,20 @@ add_library(search_eng
 	search/utility.cpp
 	search/webpage.cpp
 	search/url2html.cpp
-	search/url.cpp
+	# deprecated.
+	# search/url.cpp
 	search/index.cpp
+	search/indexer.cpp
 	# This file comes from external library https://github.com/amosnier/sha-2
 	sha-2/sha-256.c
 )
 
+add_executable(indexer
+	search/indexer_main.cpp
+)
+target_link_libraries(indexer PRIVATE search_eng)
+
+############## External libs ###############
 
 # curl has some problem with find_package.
 # Instead, use curl-config, which is recommended by its website.
@@ -50,14 +58,23 @@ target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
 # Just make sure I installed it.
 target_link_libraries(search_eng PRIVATE lexbor)
 
+find_package(Boost 
+	1.81 
+	REQUIRED
+	COMPONENTS unit_test_framework url
+)
+target_link_libraries(search_eng PUBLIC Boost::url)
 
 ############### TESTS ####################
 
 # Common test settings
 set(testsList 
-	test_parser_html test_url test_onewebpage test_index
+	test_parser_html 
+	# deprecated
+	# test_url 
+	test_onewebpage 
+	test_index
 )
-find_package(Boost 1.81 COMPONENTS unit_test_framework REQUIRED)
 foreach (test IN LISTS testsList)
 	add_executable(${test} search/${test}.cpp)
 

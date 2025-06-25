@@ -28,6 +28,9 @@ extern "C" {
 #include <chrono>
 namespace ch = std::chrono;
 
+#include <boost/url.hpp>
+namespace urls = boost::urls;
+
 /**
  * The struct contains the HTML tree of a webpage.
  */
@@ -73,6 +76,11 @@ public:
 
 	/**
 	 * This is for recursive scraping.
+	 * Note that each is the text *as-is* in a href,
+	 * even if the href is nonsense or is an invalid url.
+	 * It is my class webpage's responsibility to filter out 
+	 * incorrect ones and turn all into valid urls.
+	 *
 	 * @returns a list of all urls referred to by the HTML document.
 	 */
 	std::vector<std::string> get_urls() const;
@@ -149,7 +157,7 @@ private:
 	tkz_ctx my_ctx;
 };
 
-class url;
+
 
 /**
  * Encapsulates a curl handle that does the scraping.
@@ -175,13 +183,15 @@ public:
 	 * Transfers the HTML document for url.
 	 * Clearly, since the content is returned, the function blocks.
 	 *
-	 * @param url the url of the website
+	 * @param url the url of the website. I cannot use a url_view here,
+	 * for I need a c_str() to pass to libcurl.
 	 * @param headers every key in the header will be filled with the
 	 * corresponding value. For example, 
-	 * @returns the HTML content, in string, of the url.
+	 * @returns the HTML content, in string, of the url. If the transfer fails,
+	 * then the content will be empty.
 	 */
 	std::string transfer(
-		const url& url,
+		const urls::url& url,
 		std::map<std::string, std::string>& headers
 	);
 
@@ -227,7 +237,12 @@ public:
 	{}
 
 public:
-	html convert(const url& url);
+	/**
+	 * Converts a url to html.
+	 * @param url a syntatically valid url. I cannot use a url_view here
+	 * as I need its c_str().
+	 */
+	html convert(const urls::url& url);
 
 private:
 	scraper s;

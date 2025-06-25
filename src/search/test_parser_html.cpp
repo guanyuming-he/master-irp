@@ -7,6 +7,7 @@
  * Tests were generated using Claude.ai 
  * and then modified by myself.
  */
+#include <boost/test/tools/old/interface.hpp>
 #define BOOST_TEST_MODULE HTMLParserTests
 #include <boost/test/unit_test.hpp>
 
@@ -89,6 +90,41 @@ namespace test_data {
 </body>
 </html>
 )";
+
+	// Its links have whitespaces around.
+    const std::string html_with_link_ws = 
+"<!DOCTYPE html>                                                            "
+"<html>                                                                     "
+"<head>                                                                     "
+"    <title>Links Test</title>                                              "
+"</head>                                                                    "
+"<body>                                                                     "
+"    <h1>Link Testing</h1>                                                  "
+"    <a href=\"https://example.com \">Example Link</a>                        "
+"    <a href=\"/relative/path\t\n\">Relative Link</a>                         "
+"    <a href=\"//example.com/abc\r\n\">Email Link</a>                  "
+"    <a>Link without href</a>                                               "
+"    <p>Some text with <a href=\" https://example.com/def\">GitHub</a> link.</p>    "
+"</body>                                                                    "
+"</html>                                                                    "
+;
+	// Some of its links are illformed
+    const std::string html_with_illformed_links = 
+"<!DOCTYPE html>                                                            "
+"<html>                                                                     "
+"<head>                                                                     "
+"    <title>Links Test</title>                                              "
+"</head>                                                                    "
+"<body>                                                                     "
+"    <h1>Link Testing</h1>                                                  "
+"    <a href=\"123https:/example.com \">Example Link</a>                        "
+"    <a href=\"/relative/path\t\n\">Relative Link</a>                         "
+"    <a href=\"!*&^%$#@()\">Email Link</a>                  "
+"    <a>Link without href</a>                                               "
+"    <p>Some text with <a href=\" https://example.com/def\">GitHub</a> link.</p>    "
+"</body>                                                                    "
+"</html>                                                                    "
+;
 
     const std::string html_with_text = R"(
 <!DOCTYPE html>
@@ -293,6 +329,52 @@ BOOST_AUTO_TEST_CASE(get_urls_unicode) {
     
     BOOST_CHECK_EQUAL(urls.size(), 1);
     BOOST_CHECK_EQUAL(urls[0], "https://example.com/测试");
+}
+
+// From a bug during running my indexer.
+BOOST_AUTO_TEST_CASE(test_get_urls_space_around_url)
+{
+    auto h = create_html(test_data::html_with_link_ws);
+	// Now, test if webpage can strip off the spaces and get the true urls.
+	webpage pg(urls::url("https://example.com"), std::move(h));
+	auto urls{pg.get_urls()};
+	
+	BOOST_CHECK_EQUAL(urls.size(), 4);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[0].c_str()), 
+		"https://example.com"
+	);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[1].c_str()), 
+		"https://example.com/relative/path"
+	);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[2].c_str()), 
+		"https://example.com/abc"
+	);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[3].c_str()), 
+		"https://example.com/def"
+	);
+}
+
+BOOST_AUTO_TEST_CASE(test_get_urls_illformed)
+{
+    auto h = create_html(test_data::html_with_illformed_links);
+	// Now, test if webpage can strip off the spaces and get the true urls.
+	webpage pg(urls::url("https://example.com"), std::move(h));
+	auto urls{pg.get_urls()};
+	
+	// illformed links will be ignored
+	BOOST_CHECK_EQUAL(urls.size(), 2);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[0].c_str()), 
+		"https://example.com/relative/path"
+	);
+	BOOST_CHECK_EQUAL(
+		std::string(urls[1].c_str()), 
+		"https://example.com/def"
+	);
 }
 
 BOOST_AUTO_TEST_CASE(get_text_basic) {

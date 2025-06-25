@@ -20,9 +20,13 @@ extern "C" {
 #include "../sha-2/sha-256.h"
 }
 
-std::string index::url2hashid(const class url& u)
+std::string index::url2hashid(const urls::url& u)
 {
-	auto essential{ u.get_essential() };
+	// essential = authority + path
+	std::string essential{ 
+		std::string(u.encoded_authority()) + 
+		std::string(u.encoded_path())
+	};
 	uint8_t sha256[32];
 	calc_sha_256(sha256, essential.c_str(), essential.size());
 
@@ -55,7 +59,7 @@ index::~index()
 	 */
 }
 
-std::optional<xp::Document> index::get_document(const url& u) const 
+std::optional<xp::Document> index::get_document(const urls::url& u) const 
 {
 	// Query the document with the unique term.
 	xp::Enquire enquire(db);
@@ -123,7 +127,7 @@ void index::add_document(const webpage& w)
 
 	// Store the full URL + title for display purposes
 	doc.set_data(
-		std::string(w.url.get_full().str) + "\t" + w.title
+		std::string(w.url.c_str()) + "\t" + w.title
 	);
 
 	// This will be the unique identifier of the doc;

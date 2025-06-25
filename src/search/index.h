@@ -27,7 +27,12 @@
 namespace fs = std::filesystem;
 namespace xp = Xapian;
 
-class url;
+namespace boost {
+	namespace urls {
+		class url;
+	}
+}
+namespace urls = boost::urls;
 class webpage;
 
 /**
@@ -77,7 +82,7 @@ public:
 	// @returns the document with the internal id, if present.
 	std::optional<xp::Document> get_document(const xp::docid id) const;
 	// @returns the document with the url, if present.
-	std::optional<xp::Document> get_document(const class url& url) const;
+	std::optional<xp::Document> get_document(const urls::url& url) const;
 	// @returns true if doc's url has already been indexed.
 	std::optional<xp::Document> get_document(const webpage& doc) const;
 
@@ -140,7 +145,7 @@ private:
 
 private:
 	// @returns "Q" + SHA256(url.get_essential()).
-	static std::string url2hashid(const class url& url);
+	static std::string url2hashid(const urls::url& url);
 
 	//// commented out for now as I plan to use SHA256(url) as unique
 	///** 

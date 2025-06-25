@@ -21,7 +21,6 @@
 
 #include "index.h"
 #include "webpage.h"
-#include "url.h"
 #include "url2html.h"
 
 namespace fs = std::filesystem;
@@ -96,7 +95,7 @@ webpage create_mock_webpage(
 		const std::string& url_str, const std::string&
 		title, const std::string& content = ""
 ) {
-    url page_url(url_str);
+	urls::url page_url(url_str);
     html html_obj = MockHtml::create_html_object(title, content);
 
     return webpage(std::move(page_url), std::move(html_obj));

@@ -21,7 +21,6 @@
 // Include your headers
 #include "webpage.h"
 #include "url2html.h"
-#include "url.h"
 #include "utility.h"
 
 namespace ch = std::chrono;
@@ -41,42 +40,11 @@ struct WebScrapingFixture {
 
 BOOST_FIXTURE_TEST_SUITE(WebScrapingIntegrationTests, WebScrapingFixture)
 
-BOOST_AUTO_TEST_CASE(test_url_construction_and_parsing)
-{
-    BOOST_TEST_MESSAGE("Testing URL construction and parsing");
-    
-    // Test URL construction from string
-    url test_url(test_url_str);
-    
-    // Test basic URL components
-    auto scheme = test_url.get_scheme();
-    BOOST_TEST(scheme);
-    BOOST_TEST(std::string(scheme) == "https");
-    
-    auto host = test_url.get_host();
-    BOOST_TEST(host);
-    BOOST_TEST(std::string(host) == "www.theguardian.com");
-    
-    auto path = test_url.get_path();
-    BOOST_TEST(path);
-    BOOST_TEST(std::string(path) == "/uk/business");
-    
-    // Test full URL reconstruction
-    auto full_url = test_url.get_full();
-    BOOST_TEST(full_url);
-    BOOST_TEST(std::string(full_url) == test_url_str);
-    
-    // Test essential part (authority + path)
-    std::string essential = test_url.get_essential();
-    BOOST_TEST(!essential.empty());
-    BOOST_TEST(essential == "www.theguardian.com/uk/business");
-}
-
 BOOST_AUTO_TEST_CASE(test_url2html_conversion)
 {
     BOOST_TEST_MESSAGE("Testing URL to HTML conversion");
     
-    url test_url(test_url_str);
+	urls::url test_url(test_url_str);
     url2html converter;
     
     // Convert URL to HTML
@@ -117,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_url2html_conversion)
     
 	// relative urls will be resoluted to have theguardian.
     for (const auto& u : urls) {
-		auto authority = u.get_authority();
+		auto authority = u.encoded_authority();
 		if (authority.contains("www.theguardian.com"))
             has_guardian_links = true;
 		else
@@ -133,15 +101,14 @@ BOOST_AUTO_TEST_CASE(test_webpage_construction_from_url)
 {
     BOOST_TEST_MESSAGE("Testing webpage construction from URL");
     
-    url test_url(test_url_str);
+    urls::url test_url(test_url_str);
     url2html converter;
     
     // Create webpage from URL (uses template constructor)
     webpage page(std::move(test_url), converter);
     
     // Test webpage properties
-    BOOST_TEST(page.url.get_full());
-    BOOST_TEST(std::string(page.url.get_full()) == test_url_str);
+    BOOST_TEST(std::string(page.url.c_str()) == test_url_str);
     
     BOOST_TEST(!page.title.empty());
     BOOST_TEST_MESSAGE("Webpage title: " << page.title);
@@ -157,16 +124,14 @@ BOOST_AUTO_TEST_CASE(test_webpage_construction_from_url)
     BOOST_TEST(is_lowercase);
     
     // Test URL extraction with absolute conversion
-    std::vector<url> page_urls = page.get_urls();
+    std::vector<urls::url> page_urls = page.get_urls();
     BOOST_TEST(!page_urls.empty());
     BOOST_TEST_MESSAGE("Number of absolute URLs: " << page_urls.size());
     
     // Verify that all URLs are absolute
     for (const auto& url_obj : page_urls) {
-        auto scheme = url_obj.get_scheme();
-        BOOST_TEST(scheme); // Should have a scheme (http/https)
-        auto host = url_obj.get_host();
-        BOOST_TEST(host); // Should have a host
+        BOOST_TEST(url_obj.has_scheme()); // Should have a scheme (http/https)
+        BOOST_TEST(url_obj.has_authority()); // Should have a host
     }
 }
 
@@ -175,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_content_validation)
 {
     BOOST_TEST_MESSAGE("Testing content validation and expected patterns");
     
-    url test_url(test_url_str);
+    urls::url test_url(test_url_str);
     url2html converter;
     webpage page(std::move(test_url), converter);
     
@@ -240,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_error_handling)
     
     for (const auto& invalid_url_str : invalid_urls) {
         try {
-            url invalid_url(invalid_url_str);
+			urls::url invalid_url(invalid_url_str);
             // Some invalid URLs might still construct but fail during conversion
             try {
                 html result = converter.convert(invalid_url);
@@ -264,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_large_page_handling)
     
     auto start_time = std::chrono::high_resolution_clock::now();
     
-    url test_url(test_url_str);
+    urls::url test_url(test_url_str);
     url2html converter;
     webpage page(std::move(test_url), converter);
     
@@ -291,16 +256,18 @@ BOOST_AUTO_TEST_CASE(test_concurrent_access)
     url2html converter1;
     url2html converter2;
     
-    url test_url1(test_url_str);
-    url test_url2(test_url_str);
+    urls::url test_url1(test_url_str);
+    urls::url test_url2(test_url_str);
     
     html result1 = converter1.convert(test_url1);
     html result2 = converter2.convert(test_url2);
     
     // Both should match
-    BOOST_CHECK_EQUAL(result1.text, result2.text);
-    BOOST_CHECK_EQUAL(result1.get_title(), result2.get_title());
-    BOOST_CHECK_EQUAL(result1.get_urls().size(), result2.get_urls().size());
+	// It turns out that the page may be edited while I am scraping. Should not
+	// make these comparisons.
+    // BOOST_CHECK_EQUAL(result1.text, result2.text);
+    // BOOST_CHECK_EQUAL(result1.get_title(), result2.get_title());
+    // BOOST_CHECK_EQUAL(result1.get_urls().size(), result2.get_urls().size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

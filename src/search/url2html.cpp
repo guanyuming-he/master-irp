@@ -8,7 +8,6 @@
  */
 
 #include "url2html.h"
-#include "url.h"
 
 #include <cctype>
 #include <lexbor/html/tokenizer.h>
@@ -170,7 +169,7 @@ scraper::~scraper()
 }
  
 std::string scraper::transfer(
-	const url& url,
+	const urls::url& url,
 	std::map<std::string, std::string>& headers
 ) {
 	buffer.clear();
@@ -179,7 +178,7 @@ std::string scraper::transfer(
 	// and also does not waste much if the website is small.
 	buffer.reserve(64*1024u);
 
-	curl_easy_setopt(handle, CURLOPT_CURLU, url.get_handle());
+	curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
 	curl_easy_perform(handle);
 
 	// check the headers
@@ -220,7 +219,7 @@ size_t scraper::int_writeback(
 
 
 html url2html::convert(
-	const url& url
+	const urls::url& url
 ) {
 	// I only care about the date for now.
 	std::map<std::string, std::string> headers {
