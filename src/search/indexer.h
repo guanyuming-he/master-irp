@@ -31,8 +31,7 @@
  * 	page of each in (1).
  * 3. Then, it works like a BFS: for each url, it is indexed. Then, all urls
  * found within it are added to the queue. 
- * 4. A filtering criterion is that urls not having one of the hosts will be
- * indexed, but its urls will not be added to the queue.
+ * 4. A filtering criterion is used, which the user, not this class, controls.
  * 5. Also, repeated urls will not be processed.
  *
  * As web I/O takes a long time, and curl's easy interface is blocking,
@@ -50,8 +49,9 @@
 class indexer
 {
 public:
-	// Type of the set of domains.
-	using dset_t = std::unordered_set<std::string>;
+	// Type of the filter function.
+	using filter_func_t = bool (urls::url&);
+	// Type of the queue of urls.
 	using uque_t = std::queue<urls::url>;
 
 public:
@@ -65,22 +65,24 @@ public:
 	 * @param q_path Should the indexing be interrupted, the queue then will be
 	 * stored to this path.
 	 * @param q_init The initial queue.
-	 * @param domains The set of authentic information source domains.
+	 * @param index_filter only those urls satisfying this will be indexed.
+	 * @param recurse_filter only those urls satisfying this will be recursed.
 	 */
-	template <typename P, typename Q, typename S>
+	template <typename P, typename Q>
 	requires
 		std::is_same_v<fs::path, std::remove_cvref_t<P>> &&
-		std::is_same_v<uque_t, std::remove_cvref_t<Q>> &&
-		std::is_same_v<dset_t, std::remove_cvref_t<S>>
+		std::is_same_v<uque_t, std::remove_cvref_t<Q>> 
 	indexer(
 		P&& db_path, P&& q_path,
 		Q&& q_init,
-		S&& domains,
+		filter_func_t* index_filter,
+		filter_func_t* recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
 		db(std::forward<P>(db_path)),
 		q_path(std::forward<P>(q_path)),
-		q(std::forward<Q>(q_init)), domains(std::forward<S>(domains)),
+		q(std::forward<Q>(q_init)),
+		index_filter(index_filter), recurse_filter(recurse_filter),
 		index_limit(index_limit)
 	{}
 	/**
@@ -89,21 +91,22 @@ public:
 	 * @param q_path Path to a queue that saved the progress of a previously
 	 * interrupted indexing.
 	 * @param db_path Path to the database that is updated by the indexer.
-	 * @param domains The set of authentic information source domains.
+	 * @param index_filter only those urls satisfying this will be indexed.
+	 * @param recurse_filter only those urls satisfying this will be recursed.
 	 */
-	template <typename P, typename S>
+	template <typename P>
 	requires
-		std::is_same_v<fs::path, std::remove_cvref_t<P>> &&
-		std::is_same_v<dset_t, std::remove_cvref_t<S>>
+		std::is_same_v<fs::path, std::remove_cvref_t<P>>
 	indexer(
 		P&& db_path, P&& q_path,
-		S&& domains,
+		filter_func_t* index_filter,
+		filter_func_t* recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
 		db(std::forward<P>(db_path)),
 		q_path(std::forward<P>(q_path)),
 		q(load_url_q(this->q_path)), 
-		domains(std::forward<S>(domains)),
+		index_filter(index_filter), recurse_filter(recurse_filter),
 		index_limit(index_limit)
 	{}
 
@@ -144,7 +147,13 @@ private:
 	const fs::path q_path;
 	uque_t q;
 
-	const dset_t domains;
+	// The url will be indexed if this filter returns true.
+	filter_func_t* index_filter;
+	// The url will be recursed (i.e. adding all of its urls to the queue)
+	// if this filter returns true.
+	// Note that recurse doesn't have to stop when index_filter returns false.
+	// This design gives more flexibility.
+	filter_func_t* recurse_filter;
 
 	url2html convertor{};
 
@@ -152,4 +161,5 @@ private:
 	const size_t index_limit{};
 
 	bool interrupted = false;
+
 };

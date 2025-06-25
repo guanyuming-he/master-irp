@@ -15,11 +15,34 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
-const indexer::dset_t authentic_domains{
-	"www.theguardian.com",
-		"www.theatlantic.com"
+/**
+ * For my indexer, my filter rule is:
+ * 1. If the host is one of the keys, recurse.
+ * 2. If (1) and also if the val is the front of the substring.
+ */
+const std::unordered_map<std::string, std::string> filtermap {
+	{std::string("www.theguardian.com"), std::string("/business")},
+	{std::string("www.theatlantic.com"), std::string("/economy")},
 };
+
+bool index_filter(urls::url& u)
+{
+	std::string key{u.encoded_host()};
+	if (!filtermap.contains(key))
+		return false;
+
+	auto val {filtermap.at(key)};
+	return u.encoded_path().starts_with(val);
+}
+
+bool recurse_filter(urls::url& u)
+{
+	return filtermap.contains(
+		std::string(u.encoded_host())
+	);
+}
 
 // Whether use this or load from file depends on the cmd args.
 indexer::uque_t start_queue;
@@ -58,7 +81,7 @@ int main(int argc, char* argv[])
 	{		
 		i = std::make_unique<indexer>(
 			fs::path(argv[1]), fs::path(argv[2]),
-			authentic_domains,
+			&index_filter, &recurse_filter,
 			index_limit
 		);
 	}
@@ -76,7 +99,7 @@ int main(int argc, char* argv[])
 		i = std::make_unique<indexer>(
 			fs::path(argv[1]), fs::path(argv[2]),
 			std::move(start_queue),
-			authentic_domains,
+			&index_filter, &recurse_filter,
 			index_limit
 		);
 	}

@@ -93,19 +93,23 @@ void indexer::start_indexing()
 		if (db.get_document(url).has_value())
 			continue;
 
-		// Not indexed. Index it.
+		// Not indexed.
 		webpage pg(url, convertor);
-		db.add_document(pg);
+		// Only index if this filter returns true.
+		if (index_filter(url))
+		{
+			db.add_document(pg);
+			// log the webpage indexed:
+			util_log(
+				std::to_string(num_indexed) + "th indexed: " +
+				url.c_str()
+			);
+			++num_indexed;
+		}
 
-		// log the webpage indexed:
-		util_log(
-			std::to_string(num_indexed) + "th indexed: " +
-			url.c_str()
-		);
 
-		// If it's within the authentic domains, then add all urls 
-		// of it to the queue.
-		if (domains.contains(std::string(url.encoded_host())))
+		// Only recurse when this filter returns true.
+		if (recurse_filter(url))
 		{
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
@@ -114,7 +118,6 @@ void indexer::start_indexing()
 			}
 		}
 
-		++num_indexed;
 	}
 }
 
