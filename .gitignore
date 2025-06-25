@@ -33,3 +33,6 @@ papers/
 # binary files
 bin/
 
+# Search engine indexing database and queue.
+db/
+que
