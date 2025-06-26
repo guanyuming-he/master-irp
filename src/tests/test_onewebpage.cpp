@@ -19,9 +19,9 @@
 #include <algorithm>
 
 // Include your headers
-#include "webpage.h"
-#include "url2html.h"
-#include "utility.h"
+#include "../search/webpage.h"
+#include "../search/url2html.h"
+#include "../search/utility.h"
 
 namespace ch = std::chrono;
 

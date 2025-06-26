@@ -12,7 +12,7 @@
  */
 #define BOOST_TEST_MODULE URLTests
 #include <boost/test/included/unit_test.hpp>
-#include "url.h"
+#include "../search/url.h"
 #include <stdexcept>
 #include <string>
 

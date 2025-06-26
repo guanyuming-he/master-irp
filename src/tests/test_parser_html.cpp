@@ -13,9 +13,9 @@
 
 #include <cctype>
 
-#include "url2html.h"
-#include "webpage.h"
-#include "utility.h"
+#include "../search/url2html.h"
+#include "../search/webpage.h"
+#include "../search/utility.h"
 
 #include <chrono>
 #include <map>

@@ -19,9 +19,9 @@
 #include <optional>
 #include <fstream>
 
-#include "index.h"
-#include "webpage.h"
-#include "url2html.h"
+#include "../search/index.h"
+#include "../search/webpage.h"
+#include "../search/url2html.h"
 
 namespace fs = std::filesystem;
 namespace xp = Xapian;
