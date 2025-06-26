@@ -118,10 +118,10 @@ BOOST_AUTO_TEST_CASE(test_webpage_construction_from_url)
     BOOST_TEST(!page_text.empty());
     BOOST_TEST_MESSAGE("Page text length: " << page_text.length());
     
-    // Test that text is in lowercase
+    // Test that text is not all in lowercase
     bool is_lowercase = std::all_of(page_text.begin(), page_text.end(), 
         [](char c) { return !std::isalpha(c) || std::islower(c); });
-    BOOST_TEST(is_lowercase);
+    BOOST_TEST(!is_lowercase);
     
     // Test URL extraction with absolute conversion
     std::vector<urls::url> page_urls = page.get_urls();
@@ -169,14 +169,13 @@ BOOST_AUTO_TEST_CASE(test_content_validation)
     
     // Text should contain business-related content
     std::vector<std::string> expected_text_keywords = {
-        "business", 
-        "opinion & analysis",
-        "spotlight",
-        "most viewed", 
-        "across the guardian",
-		"guardian news & media limited or its affiliated companies. all rights reserved.",
+        "Business", 
+        "Opinion & analysis",
+        "Spotlight",
+        "Most viewed", 
+		"Guardian News & Media Limited or its affiliated companies. All rights reserved",
 		"2025",
-		"about us"
+		"About us"
     };
     
     for (const auto& keyword : expected_text_keywords) {

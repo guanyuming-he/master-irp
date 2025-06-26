@@ -9,22 +9,49 @@
  */
 
 #include "indexer.h"
+#include "webpage.h"
 
 #include <csignal>
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <regex>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
+using path_filter_func_t = bool(const std::string_view);
+
+// At least three words in a 
+// word-word-word-... pattern
+// This is common it news article addresses.
+static const std::string words_sep_dash_pattern("[A-Za-z](-[A-Za-z]+){2,}");
+static const std::regex words_sep_dash_re(words_sep_dash_pattern);
+bool has_words_separated_by_dash(const std::string_view p)
+{
+	return std::regex_search(
+		p.begin(), p.end(), 
+		words_sep_dash_re
+	);
+}
 /**
  * For my indexer, my filter rule is:
  * 1. If the host is one of the keys, recurse.
- * 2. If (1) and also if the val is the front of the substring.
+ * 2. If (1) and also the path can be filtered by the value.
  */
-const std::unordered_map<std::string, std::string> filtermap {
-	{std::string("www.theguardian.com"), std::string("/business")},
-	{std::string("www.theatlantic.com"), std::string("/economy")},
+const std::unordered_map<std::string, path_filter_func_t*> filtermap {
+	{std::string("www.theguardian.com"), 
+		[](const std::string_view p) { return p.starts_with("/business"); }},
+	{std::string("www.theatlantic.com"), 
+		[](const std::string_view p) { return p.starts_with("/economy"); }},
+	{std::string("www.bloomberg.com"), 
+		[](const std::string_view p) { 
+			return p.starts_with("/economics") || has_words_separated_by_dash(p);
+	}},
+	{std::string("www.businessinsider.com"), 
+		[](const std::string_view p) { 
+			return p.starts_with("/business") || has_words_separated_by_dash(p);
+	}},
 };
 
 bool index_filter(urls::url& u)
@@ -34,14 +61,34 @@ bool index_filter(urls::url& u)
 		return false;
 
 	auto val {filtermap.at(key)};
-	return u.encoded_path().starts_with(val);
+	return val(u.encoded_path());
 }
 
 bool recurse_filter(urls::url& u)
 {
-	return filtermap.contains(
-		std::string(u.encoded_host())
-	);
+	// Let's use the strict version for now and see what happens.
+	return index_filter(u);
+
+	//return filtermap.contains(
+	//	std::string(u.encoded_host())
+	//);
+}
+
+bool wp_index_filter(webpage& pg)
+{
+	// for now just return true if the year
+	// is within 5 years and the text is not empty.
+	return 
+		(int)pg.date.year() >= 2020 &&
+		!pg.get_text().empty();
+}
+
+bool wp_recurse_filter(webpage& pg)
+{
+	// recurse only if either its title or its text is not empty.
+	return 
+		!pg.get_text().empty() &&
+		!pg.title.empty();
 }
 
 // Whether use this or load from file depends on the cmd args.
@@ -82,14 +129,17 @@ int main(int argc, char* argv[])
 		i = std::make_unique<indexer>(
 			fs::path(argv[1]), fs::path(argv[2]),
 			&index_filter, &recurse_filter,
+			&wp_index_filter, &wp_recurse_filter,
 			index_limit
 		);
 	}
 	else // use start_queue.
 	{
 		auto urls = {
-			urls::url{"https://www.theguardian.com/uk/business"},
-			urls::url{"https://www.theatlantic.com/economy/"}
+			//urls::url{"https://www.theguardian.com/business"},
+			//urls::url{"https://www.theatlantic.com/economy"},
+			urls::url{"https://www.bloomberg.com/economics"},
+			urls::url{"https://www.businessinsider.com/business"}
 		};
 		for (auto&& u : urls)
 		{
@@ -100,6 +150,7 @@ int main(int argc, char* argv[])
 			fs::path(argv[1]), fs::path(argv[2]),
 			std::move(start_queue),
 			&index_filter, &recurse_filter,
+			&wp_index_filter, &wp_recurse_filter,
 			index_limit
 		);
 	}

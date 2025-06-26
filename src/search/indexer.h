@@ -49,8 +49,14 @@
 class indexer
 {
 public:
-	// Type of the filter function.
+	// Type of the filter functions.
+	// Why not const reference?
+	// Because somehow boost.url's some observers
+	// cannot be used const (maybe that is a bug with this 
+	// version of boost.url lib, because its documentation
+	// certains marks that observer as const).
 	using filter_func_t = bool (urls::url&);
+	using wp_filter_func_t = bool (webpage&);
 	// Type of the queue of urls.
 	using uque_t = std::queue<urls::url>;
 
@@ -77,12 +83,15 @@ public:
 		Q&& q_init,
 		filter_func_t* index_filter,
 		filter_func_t* recurse_filter,
+		wp_filter_func_t* wp_index_filter,
+		wp_filter_func_t* wp_recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
 		db(std::forward<P>(db_path)),
 		q_path(std::forward<P>(q_path)),
 		q(std::forward<Q>(q_init)),
 		index_filter(index_filter), recurse_filter(recurse_filter),
+		wp_index_filter(wp_index_filter), wp_recurse_filter(wp_recurse_filter),
 		index_limit(index_limit)
 	{}
 	/**
@@ -101,12 +110,15 @@ public:
 		P&& db_path, P&& q_path,
 		filter_func_t* index_filter,
 		filter_func_t* recurse_filter,
+		wp_filter_func_t* wp_index_filter,
+		wp_filter_func_t* wp_recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
 		db(std::forward<P>(db_path)),
 		q_path(std::forward<P>(q_path)),
 		q(load_url_q(this->q_path)), 
 		index_filter(index_filter), recurse_filter(recurse_filter),
+		wp_index_filter(wp_index_filter), wp_recurse_filter(wp_recurse_filter),
 		index_limit(index_limit)
 	{}
 
@@ -147,13 +159,24 @@ private:
 	const fs::path q_path;
 	uque_t q;
 
-	// The url will be indexed if this filter returns true.
-	filter_func_t* index_filter;
-	// The url will be recursed (i.e. adding all of its urls to the queue)
-	// if this filter returns true.
+	// Two stages:
+	// When a url is retrieved from a recursed webpage,
+	// index_filter and recurse_filter will be called on the url.
+	// If none of them is true, then the url is discarded.
+	//
+	// The url may be indexed if index_filter returns true.
+	// The url may be recursed (i.e. adding all of its urls to the queue)
+	// if recurse_filter returns true.
 	// Note that recurse doesn't have to stop when index_filter returns false.
 	// This design gives more flexibility.
+	//
+	// I say *may*, because, when the url is scraped and parsed to form a
+	// webpage, another two more detailed checks,
+	// wp_index_filter, and wp_recurse_filter will apply.
+	filter_func_t* index_filter;
 	filter_func_t* recurse_filter;
+	wp_filter_func_t* wp_index_filter;
+	wp_filter_func_t* wp_recurse_filter;
 
 	url2html convertor{};
 

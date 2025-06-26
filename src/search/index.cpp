@@ -13,6 +13,7 @@
 
 #include <bits/chrono.h>
 #include <chrono>
+#include <cstdio>
 #include <optional>
 #include <xapian.h>
 
@@ -118,12 +119,18 @@ void index::add_document(const webpage& w)
 	tg.index_text(w.get_text());
 
 	// Add the date as a value.
-	// Because Xapian expects a sortable string or an integer,
-	// I convert the date to the number of days since the epoch.
-	auto days_epoch = ch::duration_cast<ch::days>(
-		ch::sys_days{w.date}.time_since_epoch()
-	).count();
-	doc.add_value(DATE_SLOT, xp::sortable_serialise(days_epoch));
+	// Xapian supports date string parsing during searching,
+	// I use the DD/MM/YYYY format.
+	std::string date_str(2+1+2+1+4, '\0'); 
+	std::snprintf(
+		date_str.data(),
+		date_str.size()+1,
+		"%2d/%2d/%4d", 
+		(unsigned)w.date.day(),
+		(unsigned)w.date.month(), 
+		(int)w.date.year() 
+	);
+	doc.add_value(DATE_SLOT, date_str);
 
 	// Store the full URL + title for display purposes
 	doc.set_data(

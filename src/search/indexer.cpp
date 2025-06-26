@@ -96,7 +96,7 @@ void indexer::start_indexing()
 		// Not indexed.
 		webpage pg(url, convertor);
 		// Only index if this filter returns true.
-		if (index_filter(url))
+		if (wp_index_filter(pg))
 		{
 			db.add_document(pg);
 			// log the webpage indexed:
@@ -109,12 +109,17 @@ void indexer::start_indexing()
 
 
 		// Only recurse when this filter returns true.
-		if (recurse_filter(url))
+		if (wp_recurse_filter(pg))
 		{
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
 			{
-				q.emplace(u);
+				// if url can neither be indexed nor recursed,
+				// then don't put it into the queue at all.
+				if (
+					index_filter(u) || recurse_filter(u)
+				)
+					q.emplace(u);
 			}
 		}
 

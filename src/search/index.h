@@ -43,6 +43,8 @@ class webpage;
  */
 class index final
 {
+	friend class searcher;
+
 public:
 	///**
 	// * As Xapian::Database does not store urls to documents,

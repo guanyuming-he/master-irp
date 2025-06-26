@@ -17,6 +17,7 @@ add_library(search_eng
 	# search/url.cpp
 	search/index.cpp
 	search/indexer.cpp
+	search/searcher.cpp
 	# This file comes from external library https://github.com/amosnier/sha-2
 	sha-2/sha-256.c
 )
@@ -25,6 +26,11 @@ add_executable(indexer
 	search/indexer_main.cpp
 )
 target_link_libraries(indexer PRIVATE search_eng)
+
+add_executable(searcher
+	search/searcher_main.cpp
+)
+target_link_libraries(searcher PRIVATE search_eng)
 
 ############## External libs ###############
 
@@ -64,6 +70,9 @@ find_package(Boost
 	COMPONENTS unit_test_framework url
 )
 target_link_libraries(search_eng PUBLIC Boost::url)
+
+target_include_directories(searcher PRIVATE ${XAPIAN_INCLUDE_DIRS})
+target_link_libraries(searcher PRIVATE ${XAPIAN_LIBRARIES})
 
 ############### TESTS ####################
 

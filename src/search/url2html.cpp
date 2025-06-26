@@ -103,18 +103,12 @@ lxb_html_token_t* parser::token_callback(
     if (token->tag_id == LXB_TAG__TEXT) 
 	{
 		auto& str = *(big_ctx.new_ctx);
-		// turn everything lowercase here.
+		// Don't have to lowercase everything, as Xapian 
+		// can handle character cases.
 		str.reserve(
 			str.size() + (token->text_end - token->text_start)
 		);
-		for (
-			auto* c = token->text_start; 
-			c != token->text_end; ++c
-		) {
-			str.push_back(std::tolower(
-				*reinterpret_cast<const char*>(c)
-			));
-		}
+		str.append(token->text_start, token->text_end);
     }
 
 	// then, call original callback
