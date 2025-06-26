@@ -154,9 +154,11 @@ private:
 	//// Since for now I only allow appending, only the new entries are recorded.
 	//idmap_t url2id_diff{};
 
-public:
+private:
 	// @returns "Q" + SHA256(url.get_essential()).
 	static std::string url2hashid(const urls::url& url);
+
+	void setup_tg();
 
 private:
 	//// commented out for now as I plan to use SHA256(url) as unique

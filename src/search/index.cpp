@@ -45,6 +45,7 @@ index::index(
 	dbpath(dbpath),
 	db(dbpath.string(), xp::DB_CREATE_OR_OPEN)
 {
+	setup_tg();
 }
 
 
@@ -155,6 +156,11 @@ void index::rm_document(const urls::url& u)
 void index::synchronize()
 {
 	db.commit();
+}
+
+void index::setup_tg()
+{
+	tg.set_stemmer(xp::Stem("en"));
 }
 
 //// commented out for now as I plan to use SHA256(url) as unique

@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
 	else // use start_queue.
 	{
 		auto urls = {
-			//urls::url{"https://www.theguardian.com/business"},
-			//urls::url{"https://www.theatlantic.com/economy"},
+			urls::url{"https://www.theguardian.com/business"},
+			urls::url{"https://www.theatlantic.com/economy"},
 			urls::url{"https://www.bloomberg.com/economics"},
 			urls::url{"https://www.businessinsider.com/business"}
 		};
