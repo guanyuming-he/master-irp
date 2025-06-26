@@ -147,6 +147,11 @@ void index::add_document(const webpage& w)
 	db.replace_document(hashid, doc);
 }
 
+void index::rm_document(const urls::url& u)
+{
+	db.delete_document((url2hashid(u)));
+}
+
 void index::synchronize()
 {
 	db.commit();

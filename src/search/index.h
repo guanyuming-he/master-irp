@@ -101,6 +101,15 @@ public:
 	void add_document(const webpage& doc);
 
 	/**
+	 * Attempts to remove the document identified by url 
+	 * from the db.
+	 *
+	 * Xapian delete_document() does not return a value to indicate
+	 * whether that succeeds or not, so I can't either.
+	 */
+	void rm_document(const urls::url& u);
+
+	/**
 	 * Updates disk content with in memory content.
 	 * Does nothing if dirty = false or paths is invalid.
 	 * dirty will be set to false after it.
@@ -145,10 +154,11 @@ private:
 	//// Since for now I only allow appending, only the new entries are recorded.
 	//idmap_t url2id_diff{};
 
-private:
+public:
 	// @returns "Q" + SHA256(url.get_essential()).
 	static std::string url2hashid(const urls::url& url);
 
+private:
 	//// commented out for now as I plan to use SHA256(url) as unique
 	///** 
 	// * Loads url2id map pointed to by path.

@@ -32,6 +32,10 @@ add_executable(searcher
 )
 target_link_libraries(searcher PRIVATE search_eng)
 
+add_executable(rm_doc
+	search/rm_doc.cpp
+)
+target_link_libraries(rm_doc PRIVATE search_eng)
 ############## External libs ###############
 
 # curl has some problem with find_package.
