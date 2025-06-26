@@ -76,7 +76,7 @@ set(testsList
 	test_index
 )
 foreach (test IN LISTS testsList)
-	add_executable(${test} search/${test}.cpp)
+	add_executable(${test} tests/${test}.cpp)
 
 	target_link_libraries(${test}
 		PRIVATE search_eng
