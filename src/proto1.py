@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
+from tkinter import font as tkfont
 import requests
 import mimetypes
 import json
@@ -111,28 +112,36 @@ def upd_filenames():
 root = tk.Tk()
 root.title("Prototype 1")
 
+# Base font
+base_font = tkfont.Font(family="Helvetica", size=22)
+
 frame = tk.Frame(root, padx=10, pady=10)
 frame.pack(fill=tk.BOTH, expand=True)
 
 # Textual description.
-text_input = scrolledtext.ScrolledText(frame, wrap=tk.WORD, height=10)
+text_input = scrolledtext.ScrolledText(
+    frame, wrap=tk.WORD, height=10,
+    font=base_font
+)
 text_input.pack(fill=tk.BOTH, expand=True, pady=5)
 
 # Display attached file paths.
-attached_filenames = tk.Text(frame, height=5)
+attached_filenames = tk.Text(frame, height=5, font=base_font)
 attached_filenames.pack()
 attached_filenames.config(state=tk.DISABLED)
 
 # Attach files
-btn_file = tk.Button(frame, text="Attach file(s)", command=on_file_drop)
+btn_file = tk.Button(frame, text="Attach file(s)", command=on_file_drop,
+                     font=base_font)
 btn_file.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Start generation
-btn_start = tk.Button(frame, text="Start", command=on_start)
+btn_start = tk.Button(frame, text="Start", command=on_start, font=base_font)
 btn_start.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Clear all attached files
-btn_clear = tk.Button(frame, text="Clear files", command=clear_files)
+btn_clear = tk.Button(frame, text="Clear files", command=clear_files,
+                      font=base_font)
 btn_clear.pack(side=tk.LEFT, padx=5, pady=5)
 
 
