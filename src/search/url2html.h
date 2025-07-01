@@ -24,6 +24,7 @@ extern "C" {
 
 #include <string>
 #include <vector>
+#include <optional>
 #include <map>
 #include <chrono>
 namespace ch = std::chrono;
@@ -103,6 +104,17 @@ public: // no need to be private since they are immutable.
 	// all the text in the HTML document, concated together.
 	// In lowercase.
 	const std::string text;
+
+	/**
+	 * No harm in making it public; advantage in doing so:
+	 * easy to test.
+	 * 
+	 * Try to parse a str that may indicate a valid date.
+	 * @returns a valid year_month_day iff parsing is succesful
+	 */
+	static std::optional<ch::year_month_day> try_parse_date_str(
+		std::string_view str
+	);
 
 };
 

@@ -95,6 +95,7 @@ set(testsList
 	# test_url 
 	test_onewebpage 
 	test_index
+	test_date_parsing
 )
 foreach (test IN LISTS testsList)
 	add_executable(${test} tests/${test}.cpp)

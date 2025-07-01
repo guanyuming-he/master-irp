@@ -11,7 +11,6 @@
 
 #include <cctype>
 #include <lexbor/html/tokenizer.h>
-#include <ranges>
 
 extern "C" {
 #include <lexbor/core/base.h>
@@ -24,10 +23,12 @@ extern "C" {
 #include <curl/easy.h>
 }
 
-#include <stdexcept>
-#include <string>
 #include <iomanip>
 #include <chrono>
+#include <ranges>
+#include <regex>
+#include <stdexcept>
+#include <string>
 
 
 
@@ -250,6 +251,14 @@ std::string html::get_title() const
  
 ch::year_month_day html::get_date() const
 {
+	/**
+	 * A few stages to try to get the most accurate date:
+	 * 1. Search for all possible tages, date, published, etc.
+	 * with in the HTML.
+	 * 2. If 1 fails, then fall back to using the Date: HTTP response header.
+	 * 3. If all fail, then fall back to using today.
+	 */
+
 	auto now = ch::system_clock::now();
 
 	if (!headers.contains("date"))
@@ -340,3 +349,83 @@ std::vector<std::string> html::get_urls() const
     return urls;
 }
 
+std::optional<ch::year_month_day> html::try_parse_date_str(
+	std::string_view str
+) {
+	/**
+	 * Try to match the string with any of the these,
+	 * where %t means {0,1}*<white-space>
+	 */
+	static const std::string formats[] = {
+		"%Y-%m-%d",			// 2025-02-01
+		"%m/%d/%Y",			// 01/02/2025
+		// I can't put more variants of - or / here,
+		// as %Y doesn't force reading 4 digits, but instead may read just 2 digits.
+		"%b%t%d%t%Y",		// Feb(urary) 1 2025
+		"%b%t%d,%t%Y",		// Feb(urary) 1, 2025
+		"%d%t%b%t%Y",		// 1 Feb(urary) 2025
+		"%d%t%b,%t%Y",		// 1 Feb(urary), 2025
+		"%a%t%d%t%b%t%Y",	// Sat 1 Feb 2025	
+		"%a,%t%d%t%b%t%Y",	// Sat, 1 Feb 2025	
+		"%a%t%b%t%d%t%Y",	// Sat Feb 1 2025	
+		"%a,%t%b%t%d%t%Y",	// Sat, Feb 1 2025	
+		"%a,%t%b%t%d,%t%Y",	// Sat, Feb 1, 2025	
+	};
+	// regex of matching ordinal
+	// 1st, 2nd, ...
+	// Because a day of a month can be expressed by at most 2 digits,
+	// it's 
+	static const std::string ord_pattern(
+		R"(([\d]{0,1})(st|nd|rd|th))"
+	);
+	static const std::regex ord_regex(ord_pattern);
+	static const std::string conseq_spaces_pattern(
+		"[\\s]+"
+	);
+	static const std::regex  conseq_spaces_regex(
+		conseq_spaces_pattern
+	);
+	
+	// Preprocessing:
+	// 1. remove head and trailing spaces, also
+	// turn all other consequtive space sequences into one space.
+	while (
+		!str.empty() && std::isspace(str.front())
+	)
+		str.remove_prefix(1);
+	while (
+		!str.empty() && std::isspace(str.back())
+	)
+		str.remove_suffix(1);
+	std::string space_trimmed_str;
+	std::regex_replace(
+		std::back_inserter(space_trimmed_str),
+		str.begin(), str.end(),
+		conseq_spaces_regex, " "
+	);
+
+	// 2. remove ordinal suffixes like "23rd", "1st"
+	// In the end, we need a stream, not a string, for 
+	// ch::parse.
+	std::stringstream proced_str;
+	std::regex_replace(
+		std::ostreambuf_iterator<char>(proced_str),
+		space_trimmed_str.begin(), space_trimmed_str.end(),
+		ord_regex, "$1"
+	);
+	
+	for (const auto& fmt : formats) {
+		ch::year_month_day date;
+		proced_str >> ch::parse(fmt, date);
+		if (!proced_str.fail()) {
+			// this one matches.
+			return date;
+		}
+
+		// reset the stream to the beginning to be able to feed again.
+		proced_str.clear(); proced_str.seekg(0);
+	}
+	
+	// Could not parse in any way listed in formats.
+	return std::nullopt;
+}
