@@ -114,12 +114,18 @@ void indexer::start_indexing()
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
 			{
+				// if url is already indexed, don't put it into queue at all.
+				if(db.get_document(u).has_value())
+					continue;
+
 				// if url can neither be indexed nor recursed,
 				// then don't put it into the queue at all.
 				if (
-					index_filter(u) || recurse_filter(u)
+					!index_filter(u) && !recurse_filter(u)
 				)
-					q.emplace(u);
+					continue;
+
+				q.emplace(u);
 			}
 		}
 

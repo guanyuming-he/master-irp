@@ -7,7 +7,6 @@
  * @author Guanyuming He
  */
 
-#include "utility.h"
 #include "index.h"
 #include "webpage.h"
 
@@ -121,15 +120,16 @@ void index::add_document(const webpage& w)
 
 	// Add the date as a value.
 	// Xapian supports date string parsing during searching,
-	// I use the DD/MM/YYYY format.
-	std::string date_str(2+1+2+1+4, '\0'); 
+	// I use the same format as the example:
+	// YYYYMMDD
+	std::string date_str(4+2+2, '\0'); 
 	std::snprintf(
 		date_str.data(),
 		date_str.size()+1,
-		"%2d/%2d/%4d", 
-		(unsigned)w.date.day(),
+		"%4d%2d%2d", 
+		(int)w.date.year(), 
 		(unsigned)w.date.month(), 
-		(int)w.date.year() 
+		(unsigned)w.date.day()
 	);
 	doc.add_value(DATE_SLOT, date_str);
 
@@ -151,6 +151,33 @@ void index::add_document(const webpage& w)
 void index::rm_document(const urls::url& u)
 {
 	db.delete_document((url2hashid(u)));
+}
+
+void index::upd_document(
+	const urls::url& u, doc_upd_func_t* upd_func
+) {
+	auto doc = get_document(u);
+	if (doc)
+	{
+		// replace only if updated.
+		if(upd_func(doc.value()))
+			db.replace_document(doc->get_docid(), doc.value());
+	}
+}
+
+void index::upd_all(doc_upd_func_t* upd_func)
+{
+	// The doc says passing "" to it will yield an iter 
+	// over all documents.
+	auto beg = db.postlist_begin("");
+	auto end = db.postlist_end("");
+	for (auto i = beg; i != end; ++i)
+	{
+		auto doc = db.get_document(*i);
+		// replace only if updated.
+		if(upd_func(doc))
+			db.replace_document(*i, doc);
+	}
 }
 
 void index::synchronize()

@@ -37,9 +37,10 @@ def send_to_ollama(model: str, prompt: str, images=[]):
         "stream" : False
     }
     if prompt is not None and prompt != "":
-        payload["prompt"] = prompt
+        payload["prompt"] = prompt + " search engine prompts"
     else: # images not empty
-        payload["prompt"] = "see attached images."
+        payload["prompt"] = "see attached images and generate search engine"
+        + "prompts"
     if len(images) != 0:
         payload["images"] = images
     try:

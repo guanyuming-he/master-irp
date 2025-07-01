@@ -43,7 +43,9 @@ void searcher::setup_qparser()
     qparser.add_prefix("text", "XD");
  
 	xp::DateRangeProcessor date_proc(
-		index::DATE_SLOT
+		index::DATE_SLOT, 
+		xp::RP_DATE_PREFER_MDY,
+		1860
 	);
 	qparser.add_rangeprocessor(&date_proc);
 } 

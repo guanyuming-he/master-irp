@@ -13,6 +13,7 @@
 #include "searcher.h"
 
 #include <iostream>
+#include <stdexcept>
 
 int main(int argc, char* argv[])
 {
@@ -30,16 +31,36 @@ int main(int argc, char* argv[])
 	std::string query_str;
 	for (int i = 2; i < argc; ++i)
 	{
+		if (i != 2)
+			query_str += ' ';
 		query_str += argv[i];
-		query_str += ' ';
 	}
 
-	xp::MSet result = s.query(query_str);
+	std::cout << "query_str=" << query_str << '\n';
 
-	std::cout << "Found " << result.size() << " results\n";
-	for (auto i = result.begin(); i != result.end(); ++i)
+	try 
 	{
-		std::cout << i.get_document().get_data() << '\n';
+		xp::MSet result = s.query(query_str);
+
+		std::cout << "Found " << result.size() << " results\n";
+		for (auto i = result.begin(); i != result.end(); ++i)
+		{
+			std::cout << i.get_document().get_data() << '\n';
+		}
+	}
+	catch (const xp::Error& e)
+	{
+		std::cerr 
+			<< "Unexpected xp error:\n"
+			<< e.get_description()
+			<< std::endl;
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr 
+			<< "Unexpected std error:\n"
+			<< e.what()
+			<< std::endl;
 	}
 
 	return 0;

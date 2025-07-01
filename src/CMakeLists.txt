@@ -9,6 +9,9 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_STANDARD 11)
 
+############# Export compile_commands.json for clangd ########
+set(CMAKE_EXPORT_COMPILE_COMMANDS true)
+
 add_library(search_eng
 	search/utility.cpp
 	search/webpage.cpp
@@ -36,6 +39,11 @@ add_executable(rm_doc
 	search/rm_doc.cpp
 )
 target_link_libraries(rm_doc PRIVATE search_eng)
+
+add_executable(tmp
+	search/tmp_replace_date.cpp
+)
+target_link_libraries(tmp PRIVATE search_eng)
 ############## External libs ###############
 
 # curl has some problem with find_package.
@@ -111,6 +119,10 @@ target_link_libraries(test_parser_html PRIVATE lexbor)
 target_link_libraries(test_index PRIVATE lexbor)
 target_include_directories(test_index PRIVATE ${XAPIAN_INCLUDE_DIRS})
 target_link_libraries(test_index PRIVATE ${XAPIAN_LIBRARIES})
+
+add_executable(test_bug3 tests/test_bug3.cpp)
+target_link_libraries(test_bug3 PRIVATE search_eng)
+target_link_libraries(test_bug3 PRIVATE ${XAPIAN_LIBRARIES})
 
 ################# Debug options ################
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

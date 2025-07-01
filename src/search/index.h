@@ -46,6 +46,11 @@ class index final
 	friend class searcher;
 
 public:
+	/**
+	 * @returns true iff doc is updated.
+	 */
+	using doc_upd_func_t = bool(xp::Document&);
+
 	///**
 	// * As Xapian::Database does not store urls to documents,
 	// * it is my responsibility to map each url to a docid.
@@ -55,8 +60,7 @@ public:
 	// */
 	//using idmap_t = std::unordered_map<std::string, xp::docid>;
 	//
-	
-private:
+
 	enum value_slots : xp::valueno
 	{
 		DATE_SLOT = 1,
@@ -108,6 +112,15 @@ public:
 	 * whether that succeeds or not, so I can't either.
 	 */
 	void rm_document(const urls::url& u);
+
+	/**
+	 * Updates the document indicated by u with upd_func.
+	 */
+	void upd_document(const urls::url& u, doc_upd_func_t* upd_func);
+	/**
+	 * Updates all documents with upd_func.
+	 */
+	void upd_all(doc_upd_func_t* upd_func);
 
 	/**
 	 * Updates disk content with in memory content.
