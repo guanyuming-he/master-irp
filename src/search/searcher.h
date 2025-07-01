@@ -68,6 +68,17 @@ public:
 private: 
 	xp::Database db;
 	xp::QueryParser qparser;
+	
+	/**
+	 * As it turned out, despite its having a release() function
+	 * that releases the reference count and thus seems like a handle,
+	 * QueryParser::add_rangeprocessor() does not copy it,
+	 * but instead just maintains a raw pointer to it.
+	 * What a strange design! It gave birth to a bug that I spent hours to 
+	 * uncover, just because its API mislead me into thinking it's a handle 
+	 * and would be copied.
+	 */
+	xp::DateRangeProcessor daterp;
 
 	query_params g_pars;
 

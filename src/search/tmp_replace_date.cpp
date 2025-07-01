@@ -31,6 +31,11 @@ bool replace_date_fun(xp::Document& doc)
 
 	//doc.remove_value(index::DATE_SLOT);
 	//doc.add_value(index::DATE_SLOT, date_str);
+	
+	if (date_str.size() != 8)
+	{
+		std::cout << "date_str=" << date_str << ".size() != 8\n";
+	}
 
 	++num_upd;
 	if (num_upd % 1000 == 1)

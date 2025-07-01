@@ -9,10 +9,13 @@
 #include "searcher.h"
 #include <xapian.h>
 
+#include <iostream>
+
 searcher::searcher(
 	const fs::path& dbpath, const query_params& par
 ):
-	db(dbpath.string()), g_pars(par)
+	db(dbpath.string()), g_pars(par),
+	daterp(index::DATE_SLOT)
 {
 	apply_def_params();
 	setup_qparser();
@@ -21,7 +24,9 @@ searcher::searcher(
 searcher::searcher(
 	index& inddb, const query_params& par
 ):
-	db(inddb.db), g_pars(par)
+	db(inddb.db), g_pars(par),
+	daterp(index::DATE_SLOT)
+
 {
 	apply_def_params();
 	setup_qparser();
@@ -35,19 +40,14 @@ void searcher::apply_def_params()
 
 void searcher::setup_qparser()
 {
-    qparser.set_stemmer(xp::Stem("en"));
+    qparser.set_stemmer(Xapian::Stem("en"));
     qparser.set_stemming_strategy(qparser.STEM_SOME);
-	
-    // Start of prefix configuration.
     qparser.add_prefix("title", "S");
-    qparser.add_prefix("text", "XD");
- 
-	xp::DateRangeProcessor date_proc(
-		index::DATE_SLOT, 
-		xp::RP_DATE_PREFER_MDY,
-		1860
-	);
-	qparser.add_rangeprocessor(&date_proc);
+    qparser.add_prefix("description", "XD");
+
+	// Do not create a temp daterp here.
+	// @see the comment before daterp.
+    qparser.add_rangeprocessor(&daterp);
 } 
 
 xp::MSet searcher::query(
