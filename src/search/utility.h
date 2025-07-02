@@ -28,6 +28,10 @@ using ustring = std::basic_string<lxb_char_t>;
  * This must be called in the master thread before any more thread is forked.
  */
 void global_init();
+/**
+ * This function must be called after everything is done.
+ */
+void global_uninit();
 
 enum class log_levels : int 
 {

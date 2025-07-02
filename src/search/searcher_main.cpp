@@ -11,12 +11,16 @@
  */
 
 #include "searcher.h"
+#include "utility.h"
 
 #include <iostream>
 #include <stdexcept>
 
 int main(int argc, char* argv[])
 {
+	// Not needed.
+	// global_init();
+
 	if (argc < 3)
 	{
 		std::cerr 
@@ -62,6 +66,9 @@ int main(int argc, char* argv[])
 			<< e.what()
 			<< std::endl;
 	}
+	
+	// Not needed.
+	// global_uninit();
 
 	return 0;
 }

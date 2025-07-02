@@ -46,6 +46,38 @@ add_executable(tmp
 target_link_libraries(tmp PRIVATE search_eng)
 ############## External libs ###############
 
+# Python 3 C API
+# Use my anaconda's Python3.
+set(CONDA_PREFIX "/home/anony/anaconda3/envs/daily")
+set(Python3_ROOT_DIR ${CONDA_PREFIX})
+set(Python3_EXECUTABLE "${CONDA_PREFIX}/bin/python3")
+set(Python3_INCLUDE_DIRS "${CONDA_PREFIX}/include/python3.13")
+set(Python3_LIBRARY_DIRS "${CONDA_PREFIX}/lib")
+set(Python3_LIBRARIES 
+	"${CONDA_PREFIX}/lib/libpython3.so"
+	"${CONDA_PREFIX}/lib/libpython3.13.so.1.0"
+) 
+# Do not use this stupid FindPython3, which works like shit 
+# with Anaconda.
+#set(Python3_FIND_STRATEGY LOCATION)
+#set(Python3_FIND_VIRTUALENV ONLY)
+#find_package(
+#	Python3 3.13 REQUIRED
+#	COMPONENTS Development
+#)
+target_include_directories(
+	search_eng
+	PRIVATE ${Python3_INCLUDE_DIRS}
+)
+target_link_directories(
+	search_eng
+	PRIVATE ${Python3_LIBRARY_DIRS}
+)
+target_link_libraries(
+	search_eng
+	PRIVATE ${Python3_LIBRARIES}
+)
+
 # curl has some problem with find_package.
 # Instead, use curl-config, which is recommended by its website.
 execute_process(

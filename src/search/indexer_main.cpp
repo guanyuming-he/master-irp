@@ -8,6 +8,7 @@
  * @author Guanyuming He
  */
 
+#include "utility.h"
 #include "indexer.h"
 #include "webpage.h"
 
@@ -97,6 +98,8 @@ std::unique_ptr<indexer> i;
 
 int main(int argc, char* argv[])
 {
+	global_init();
+
 	if (argc < 3 || argc > 5)
 	{
 		std::cerr 
@@ -165,6 +168,8 @@ int main(int argc, char* argv[])
 	);	
 	std::cout << "Indexing started. Press Ctrl+C to interrupt.\n";
 	i->start_indexing();
+
+	global_uninit();
 
 	return 0;
 }

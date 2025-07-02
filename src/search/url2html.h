@@ -51,7 +51,7 @@ public:
 	}
 
 	// forward the map, supporting both copy and move.
-	template <typename M, typename S>
+template <typename M, typename S>
 	requires std::is_same_v<
 		std::remove_cvref_t<M>, 
 		std::map<std::string, std::string>
@@ -61,10 +61,12 @@ public:
 	>
 	html(
 		lxb_html_document_t* const handle,
-		M&& headers, S&& text
+		M&& headers, S&& text,
+		std::optional<ch::year_month_day>&& date = std::nullopt
 	):
 		handle(handle), headers(std::forward<M>(headers)),
-		text(std::forward<S>(text))
+		text(std::forward<S>(text)),
+		date(std::move(date))
 	{}
 	~html();
 
@@ -72,8 +74,17 @@ public:
 	// @returns the title of the webpage or empty if it doesn't have a title
 	std::string get_title() const;
 
-	// @returns the date of the page or today if it doesn't have a date.
-	ch::year_month_day get_date() const;
+	/**
+	 * Try to get the date from the Header.
+	 * Previously, I also try to parse the HTML myself, a task
+	 * which turned out to be too tedious to do well.
+	 * As such, I stop doing that here, but instead seek
+	 * to use Python's htmldate to do the work.
+	 * Therefore, a url2html class will first try that,
+	 * and only if it doesn't work, does that class fallback to calling
+	 * this method.
+	 */
+	ch::year_month_day get_date();
 
 	/**
 	 * This is for recursive scraping.
@@ -88,6 +99,9 @@ public:
 
 private:
 	lxb_html_document_t* handle;
+	// May be passed through ctor.
+	// If not, calculated in get_date();
+	std::optional<ch::year_month_day> date;
 
 public: // no need to be private since they are immutable.
 	// HTTP response headers are in key: val format.
@@ -115,6 +129,16 @@ public: // no need to be private since they are immutable.
 	static std::optional<ch::year_month_day> try_parse_date_str(
 		std::string_view str
 	);
+
+	/**
+	 * No harm in making it public; advantage in doing so:
+	 * easy to test.
+	 * 
+	 * Try to parse the Date: in headers.
+	 * @returns a valid year_month_day iff parsing is succesful
+	 */
+	std::optional<ch::year_month_day> 
+	try_parse_header_date() const;
 
 };
 
@@ -235,6 +259,9 @@ private:
 
 };
 
+// Forward decl of PyObject.
+struct _object;
+typedef struct _object PyObject;
 
 /**
  * Using a parser and a scraper,
@@ -259,4 +286,29 @@ public:
 private:
 	scraper s;
 	parser p;
+
+public:
+	/**
+	 * Made public for testing.
+	 *
+	 * Try to use Python's htmldate to get a date out of the HTML.
+	 * Unfortunately, as that uses a different internal rep of 
+	 * a HTML document, I will have to parse each document twice, I guess.
+	 *
+	 * @param html_content returned by the scraper.
+	 * @param u htmldate may scan the url for date info
+	 */
+	static std::optional<ch::year_month_day> 
+	date_outof_html(
+		const std::string& html_content,
+		const urls::url& u
+	);
+
+	static void global_init();
+	static void global_uninit();
+
+private:
+	static constexpr const char* module_name = "htmldate";
+	static PyObject* htmldate_module;
+	static PyObject* find_date_func;
 };

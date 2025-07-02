@@ -30,13 +30,210 @@ extern "C" {
 #include <stdexcept>
 #include <string>
 
+#include <Python.h>
 
+PyObject* url2html::htmldate_module;
+PyObject* url2html::find_date_func;
 
 html::~html()
 {
 	lxb_html_document_destroy(handle);
 }
 
+std::string html::get_title() const 
+{
+	size_t size;
+    const lxb_char_t* title = lxb_html_document_title(
+			handle, &size
+	);
+    if (!title) return "";
+
+    return std::string(reinterpret_cast<const char*>(title), size);
+}
+ 
+ch::year_month_day html::get_date()
+{
+	if (!date)
+	{
+		/**
+		 * A few stages to try to get the most accurate date:
+		 * 1. Try to get the date from the header.
+		 * 2. If all fail, then fall back to using today.
+		 */
+		auto res1 = try_parse_header_date();
+		if (res1) 
+		{
+			date.swap(res1);
+		}
+		else
+		{
+			// Now everything else fails. 
+			// Return today instead of failing ungracefully.
+			auto now = ch::system_clock::now();
+			date.emplace(
+				ch::floor<ch::days>(now)
+			);
+		}
+	}
+
+	return date.value();
+}
+
+std::vector<std::string> html::get_urls() const 
+{
+    std::vector<std::string> urls;
+
+	// No official doc for how to do this. 
+	// The code is modified from the example
+	// https://github.com/lexbor/lexbor/blob/master/examples/
+	// lexbor/html/elements_by_tag_name.c
+
+    auto* a_tags = lxb_dom_collection_make(
+		&handle->dom_document, 128
+	);
+
+    if (!a_tags) {
+        throw std::runtime_error("Could not make lexbor collection.");
+	}
+
+	auto status = lxb_dom_elements_by_tag_name(
+		lxb_dom_interface_element(handle),
+        a_tags, 
+		(const lxb_char_t *)"a", 1
+	);
+	if (LXB_STATUS_OK != status)
+		throw std::runtime_error("Can't get HTML a tags.");
+
+
+	// for how to do the following, see 
+	// https://github.com/lexbor/lexbor/blob/master/examples/
+	// lexbor/html/element_attributes.c
+    for (size_t i = 0; i < lxb_dom_collection_length(a_tags); ++i) 
+	{
+        auto* element = lxb_dom_collection_element(
+			a_tags, i
+		);
+		size_t attr_len;
+		auto* attr = lxb_dom_element_get_attribute(
+			element, 
+			(const lxb_char_t*)"href", 4, 
+			&attr_len
+		);
+		if (!attr) // might not have href.
+			continue;
+
+        urls.emplace_back(
+			(const char*)attr, attr_len
+		);
+    }
+
+    return urls;
+}
+
+std::optional<ch::year_month_day> html::try_parse_date_str(
+	std::string_view str
+) {
+	/**
+	 * Try to match the string with any of the these,
+	 * where %t means {0,1}*<white-space>
+	 */
+	static const std::string formats[] = {
+		"%Y-%m-%d",			// 2025-02-01
+		"%m/%d/%Y",			// 01/02/2025
+		// I can't put more variants of - or / here,
+		// as %Y doesn't force reading 4 digits, but instead may read just 2 digits.
+		"%b%t%d%t%Y",		// Feb(urary) 1 2025
+		"%b%t%d,%t%Y",		// Feb(urary) 1, 2025
+		"%d%t%b%t%Y",		// 1 Feb(urary) 2025
+		"%d%t%b,%t%Y",		// 1 Feb(urary), 2025
+		"%a%t%d%t%b%t%Y",	// Sat 1 Feb 2025	
+		"%a,%t%d%t%b%t%Y",	// Sat, 1 Feb 2025	
+		"%a%t%b%t%d%t%Y",	// Sat Feb 1 2025	
+		"%a,%t%b%t%d%t%Y",	// Sat, Feb 1 2025	
+		"%a,%t%b%t%d,%t%Y",	// Sat, Feb 1, 2025	
+	};
+	// regex of matching ordinal
+	// 1st, 2nd, ...
+	// Because a day of a month can be expressed by at most 2 digits,
+	// it's 
+	static const std::string ord_pattern(
+		R"(([\d]{0,1})(st|nd|rd|th))"
+	);
+	static const std::regex ord_regex(ord_pattern);
+	static const std::string conseq_spaces_pattern(
+		"[\\s]+"
+	);
+	static const std::regex  conseq_spaces_regex(
+		conseq_spaces_pattern
+	);
+	
+	// Preprocessing:
+	// 1. remove head and trailing spaces, also
+	// turn all other consequtive space sequences into one space.
+	while (
+		!str.empty() && std::isspace(str.front())
+	)
+		str.remove_prefix(1);
+	while (
+		!str.empty() && std::isspace(str.back())
+	)
+		str.remove_suffix(1);
+	std::string space_trimmed_str;
+	std::regex_replace(
+		std::back_inserter(space_trimmed_str),
+		str.begin(), str.end(),
+		conseq_spaces_regex, " "
+	);
+
+	// 2. remove ordinal suffixes like "23rd", "1st"
+	// In the end, we need a stream, not a string, for 
+	// ch::parse.
+	std::stringstream proced_str;
+	// use default en locale.
+	proced_str.imbue(std::locale());
+	std::regex_replace(
+		std::ostreambuf_iterator<char>(proced_str),
+		space_trimmed_str.begin(), space_trimmed_str.end(),
+		ord_regex, "$1"
+	);
+	
+	for (const auto& fmt : formats) {
+		ch::year_month_day date;
+		proced_str >> ch::parse(fmt, date);
+		if (!proced_str.fail()) {
+			// this one matches.
+			return date;
+		}
+
+		// reset the stream to the beginning to be able to feed again.
+		proced_str.clear(); proced_str.seekg(0);
+	}
+	
+	// Could not parse in any way listed in formats.
+	return std::nullopt;
+}
+
+std::optional<ch::year_month_day>
+html::try_parse_header_date() const 
+{
+	if (!headers.contains("date"))
+		return std::nullopt;
+
+	// get the date from the header.
+	std::istringstream is{ headers.at("date") };
+	// use default en locale.
+	is.imbue(std::locale());
+	
+	ch::year_month_day date;
+	// don't waste time to parse the time after the year.
+	is >> ch::parse(
+		"%a, %d %b %Y", date
+	);
+
+	return is.fail() ?
+		std::nullopt : 
+		std::optional<ch::year_month_day>(date);
+}
 
 parser::parser() :
 	handle(lxb_html_parser_create())
@@ -231,201 +428,110 @@ html url2html::convert(
 		&text
 	);
 
+	auto date_from_html = date_outof_html(
+		text, url
+	);
 	return html(
 		doc, 
-		std::move(headers), std::move(text)
+		std::move(headers), std::move(text),
+		std::move(date_from_html)
 	);
 
 }
 
-std::string html::get_title() const 
-{
-	size_t size;
-    const lxb_char_t* title = lxb_html_document_title(
-			handle, &size
+std::optional<ch::year_month_day> 
+url2html::date_outof_html(
+	const std::string& h_content,
+	const urls::url& u
+) {
+	// h_content might be empty if the webpage is bad.
+	if (h_content.empty())
+		return std::nullopt;
+
+	PyObject* prop_args = PyTuple_New(1);
+	PyTuple_SetItem(
+		prop_args, 
+		0, PyUnicode_FromString(h_content.c_str())
+	);  
+
+	PyObject* kw_args = PyDict_New();
+	PyDict_SetItemString(
+		kw_args,
+		"url", PyUnicode_FromString(u.c_str())
 	);
-    if (!title) return "";
-
-    return std::string(reinterpret_cast<const char*>(title), size);
-}
- 
-ch::year_month_day html::get_date() const
-{
-	/**
-	 * A few stages to try to get the most accurate date:
-	 * 1. Search for all possible tages, date, published, etc.
-	 * with in the HTML.
-	 * 2. If 1 fails, then fall back to using the Date: HTTP response header.
-	 * 3. If all fail, then fall back to using today.
-	 */
-
-	auto now = ch::system_clock::now();
-
-	if (!headers.contains("date"))
-	{
-		// return today.
-		return ch::year_month_day(
-			ch::floor<ch::days>(now)
-		);
-	}
-
-	// get the date from the header.
-	std::istringstream is{ headers.at("date") };
-	// The Date format uses en_US locale.
-	// (which is the default one)
-	is.imbue(std::locale());
 	
-	std::tm time;
-	// don't waste time to parse the time after the year.
-	is >> std::get_time(
-		&time, "%a, %d %b %Y"
+	// calls htmldate.find_date(
+	// 	h_content.c_str(), url=u.c_str()
+	// )
+	PyObject* call_res = PyObject_Call(
+		find_date_func, prop_args, kw_args
 	);
-	if (is.fail())
-	{
-		// The HTTP response header is corrupted.
-		// But don't fail loudly.
-		// Just return today.
-		return ch::year_month_day(
-			ch::floor<ch::days>(now)
-		);
-	}
+	Py_DECREF(prop_args);
+	Py_DECREF(kw_args);
 	
-	ch::year_month_day date{
-		ch::year{time.tm_year+1900}, 
-		ch::month{static_cast<unsigned>(time.tm_mon+1)}, 
-		ch::day{static_cast<unsigned>(time.tm_mday)}
-	};
-	return date;
+	const char* date_result;
+	if (call_res) 
+	{
+		if (PyUnicode_Check(call_res)) 
+		{
+		    date_result = PyUnicode_AsUTF8(call_res);
+		} 
+		else 
+		{
+		    Py_DECREF(call_res);
+			// Do not fail ungracefully.
+			return std::nullopt;
+		    //throw std::runtime_error(
+			//	"Unexpected return type from find_date"
+			//);
+		}
+		Py_DECREF(call_res);
+	} 
+	else 
+	{
+		// Do not fail ungracefully.
+		return std::nullopt;
+	    // throw std::runtime_error("Call to find_date failed");
+	}
+
+	ch::year_month_day ret;
+	std::istringstream ss(date_result);
+	// Default output format is this.
+	ss >> ch::parse(
+		"%Y-%m-%d", ret
+	);
+	return ss.fail() ? 
+		std::nullopt :
+		std::optional<ch::year_month_day>(ret);
 }
 
-std::vector<std::string> html::get_urls() const 
+void url2html::global_init()
 {
-    std::vector<std::string> urls;
+	Py_Initialize();
 
-	// No official doc for how to do this. 
-	// The code is modified from the example
-	// https://github.com/lexbor/lexbor/blob/master/examples/
-	// lexbor/html/elements_by_tag_name.c
+	htmldate_module = PyImport_ImportModule(module_name);
+	if (!htmldate_module)
+		throw std::runtime_error(
+			"Could not import htmldate. Is it installed?"
+		);
 
-    auto* a_tags = lxb_dom_collection_make(
-		&handle->dom_document, 128
+	find_date_func = PyObject_GetAttrString(
+		htmldate_module, "find_date"
 	);
-
-    if (!a_tags) {
-        throw std::runtime_error("Could not make lexbor collection.");
-	}
-
-	auto status = lxb_dom_elements_by_tag_name(
-		lxb_dom_interface_element(handle),
-        a_tags, 
-		(const lxb_char_t *)"a", 1
-	);
-	if (LXB_STATUS_OK != status)
-		throw std::runtime_error("Can't get HTML a tags.");
-
-
-	// for how to do the following, see 
-	// https://github.com/lexbor/lexbor/blob/master/examples/
-	// lexbor/html/element_attributes.c
-    for (size_t i = 0; i < lxb_dom_collection_length(a_tags); ++i) 
+	if (!find_date_func || !PyCallable_Check(find_date_func)) 
 	{
-        auto* element = lxb_dom_collection_element(
-			a_tags, i
-		);
-		size_t attr_len;
-		auto* attr = lxb_dom_element_get_attribute(
-			element, 
-			(const lxb_char_t*)"href", 4, 
-			&attr_len
-		);
-		if (!attr) // might not have href.
-			continue;
-
-        urls.emplace_back(
-			(const char*)attr, attr_len
+		Py_XDECREF(find_date_func);
+		Py_DECREF(htmldate_module);
+		throw std::runtime_error(
+			"Cannot find callable 'find_date' in htmldate module"
 		);
     }
-
-    return urls;
 }
 
-std::optional<ch::year_month_day> html::try_parse_date_str(
-	std::string_view str
-) {
-	/**
-	 * Try to match the string with any of the these,
-	 * where %t means {0,1}*<white-space>
-	 */
-	static const std::string formats[] = {
-		"%Y-%m-%d",			// 2025-02-01
-		"%m/%d/%Y",			// 01/02/2025
-		// I can't put more variants of - or / here,
-		// as %Y doesn't force reading 4 digits, but instead may read just 2 digits.
-		"%b%t%d%t%Y",		// Feb(urary) 1 2025
-		"%b%t%d,%t%Y",		// Feb(urary) 1, 2025
-		"%d%t%b%t%Y",		// 1 Feb(urary) 2025
-		"%d%t%b,%t%Y",		// 1 Feb(urary), 2025
-		"%a%t%d%t%b%t%Y",	// Sat 1 Feb 2025	
-		"%a,%t%d%t%b%t%Y",	// Sat, 1 Feb 2025	
-		"%a%t%b%t%d%t%Y",	// Sat Feb 1 2025	
-		"%a,%t%b%t%d%t%Y",	// Sat, Feb 1 2025	
-		"%a,%t%b%t%d,%t%Y",	// Sat, Feb 1, 2025	
-	};
-	// regex of matching ordinal
-	// 1st, 2nd, ...
-	// Because a day of a month can be expressed by at most 2 digits,
-	// it's 
-	static const std::string ord_pattern(
-		R"(([\d]{0,1})(st|nd|rd|th))"
-	);
-	static const std::regex ord_regex(ord_pattern);
-	static const std::string conseq_spaces_pattern(
-		"[\\s]+"
-	);
-	static const std::regex  conseq_spaces_regex(
-		conseq_spaces_pattern
-	);
-	
-	// Preprocessing:
-	// 1. remove head and trailing spaces, also
-	// turn all other consequtive space sequences into one space.
-	while (
-		!str.empty() && std::isspace(str.front())
-	)
-		str.remove_prefix(1);
-	while (
-		!str.empty() && std::isspace(str.back())
-	)
-		str.remove_suffix(1);
-	std::string space_trimmed_str;
-	std::regex_replace(
-		std::back_inserter(space_trimmed_str),
-		str.begin(), str.end(),
-		conseq_spaces_regex, " "
-	);
+void url2html::global_uninit()
+{
+	Py_DECREF(find_date_func);
+	Py_DECREF(htmldate_module);
 
-	// 2. remove ordinal suffixes like "23rd", "1st"
-	// In the end, we need a stream, not a string, for 
-	// ch::parse.
-	std::stringstream proced_str;
-	std::regex_replace(
-		std::ostreambuf_iterator<char>(proced_str),
-		space_trimmed_str.begin(), space_trimmed_str.end(),
-		ord_regex, "$1"
-	);
-	
-	for (const auto& fmt : formats) {
-		ch::year_month_day date;
-		proced_str >> ch::parse(fmt, date);
-		if (!proced_str.fail()) {
-			// this one matches.
-			return date;
-		}
-
-		// reset the stream to the beginning to be able to feed again.
-		proced_str.clear(); proced_str.seekg(0);
-	}
-	
-	// Could not parse in any way listed in formats.
-	return std::nullopt;
+	Py_Finalize();
 }

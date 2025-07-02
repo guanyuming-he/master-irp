@@ -25,15 +25,18 @@
 
 namespace ch = std::chrono;
 
+struct global_setup {
+	global_setup() { global_init(); }
+	~global_setup() { global_uninit(); }
+};
+BOOST_GLOBAL_FIXTURE(global_setup);
+
 // Global settings for web scraping.
 struct WebScrapingFixture {
     WebScrapingFixture() :
 		test_url_str("https://www.theguardian.com/uk/business")
-	{
-        global_init();
-    }
-    
-    ~WebScrapingFixture() = default;
+	{}
+	~WebScrapingFixture() {}
 
     const std::string test_url_str;
 };

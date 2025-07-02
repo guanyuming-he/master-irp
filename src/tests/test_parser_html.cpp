@@ -27,7 +27,7 @@ namespace ch = std::chrono;
 
 struct global_setup {
 	global_setup() { global_init(); }
-	~global_setup() = default;
+	~global_setup() { global_uninit(); }
 };
 BOOST_GLOBAL_FIXTURE(global_setup);
 

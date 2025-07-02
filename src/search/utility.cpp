@@ -11,5 +11,11 @@
 
 void global_init()
 {
-	scraper::global_init();
+	scraper::	global_init();
+	url2html::	global_init();
+}
+
+void global_uninit()
+{
+	url2html::	global_uninit();
 }
