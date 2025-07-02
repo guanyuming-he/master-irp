@@ -12,6 +12,7 @@
 #include "indexer.h"
 #include "webpage.h"
 
+#include <execinfo.h>
 #include <csignal>
 #include <iostream>
 #include <limits>
@@ -47,7 +48,17 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 		[](const std::string_view p) { return p.starts_with("/economy"); }},
 	{std::string("www.bloomberg.com"), 
 		[](const std::string_view p) { 
-			return p.starts_with("/economics") || has_words_separated_by_dash(p);
+			return p.starts_with("/economics") || p.starts_with("news/articles");
+	}},
+	{std::string("www.ibtimes.com"), 
+		[](const std::string_view p) { 
+			return p.starts_with("/economy-markets") || 
+			has_words_separated_by_dash(p);
+	}},
+	{std::string("www.forbes.com"), 
+		[](const std::string_view p) { 
+			return p.starts_with("/sites") ||
+				p.starts_with("/business");
 	}},
 	{std::string("www.businessinsider.com"), 
 		[](const std::string_view p) { 
@@ -78,9 +89,9 @@ bool recurse_filter(urls::url& u)
 bool wp_index_filter(webpage& pg)
 {
 	// for now just return true if the year
-	// is within 5 years and the text is not empty.
+	// is within last 2 years and the text is not empty.
 	return 
-		(int)pg.date.year() >= 2020 &&
+		(int)pg.date.year() >= 2024 &&
 		!pg.get_text().empty();
 }
 
@@ -96,8 +107,22 @@ bool wp_recurse_filter(webpage& pg)
 indexer::uque_t start_queue;
 std::unique_ptr<indexer> i;
 
+void segfault_handler(int sig) {
+	// Get void*'s for all entries on the stack
+	void *array[64];
+	int size = backtrace(array, 64);
+
+	// Print to stderr
+	fprintf(stderr, "Error: signal %d:\n", sig);
+	backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+	_exit(-1); // Exit immediately (don't call destructors)
+}
+
 int main(int argc, char* argv[])
 {
+	std::signal(SIGSEGV, segfault_handler);
+	
 	global_init();
 
 	if (argc < 3 || argc > 5)
@@ -142,6 +167,8 @@ int main(int argc, char* argv[])
 			urls::url{"https://www.theguardian.com/business"},
 			urls::url{"https://www.theatlantic.com/economy"},
 			urls::url{"https://www.bloomberg.com/economics"},
+			urls::url{"https://www.ibtimes.com/economy-markets"},
+			urls::url{"https://www.forbes.com/business"},
 			urls::url{"https://www.businessinsider.com/business"}
 		};
 		for (auto&& u : urls)

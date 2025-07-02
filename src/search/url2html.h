@@ -45,13 +45,14 @@ public:
 	html(const html&) = delete;
 	html(html&& other) noexcept:
 		handle(other.handle), 
-		headers(std::move(other.headers)), text(std::move(other.text))
+		headers(std::move(other.headers)), text(std::move(other.text)),
+		date(std::move(other.date))
 	{
 		other.handle = nullptr;
 	}
 
 	// forward the map, supporting both copy and move.
-template <typename M, typename S>
+	template <typename M, typename S>
 	requires std::is_same_v<
 		std::remove_cvref_t<M>, 
 		std::map<std::string, std::string>

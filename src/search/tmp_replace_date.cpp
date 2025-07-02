@@ -38,7 +38,7 @@ bool replace_date_fun(xp::Document& doc)
 	}
 
 	++num_upd;
-	if (num_upd % 1000 == 1)
+	if (num_upd % 1 == 0)
 	{
 	//	std::cout
 	//		<< std::to_string(num_upd) << "th updated.\n";

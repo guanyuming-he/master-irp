@@ -46,10 +46,10 @@ class index final
 	friend class searcher;
 
 public:
-	/**
-	 * @returns true iff doc is updated.
-	 */
+	// @returns true iff doc is updated.
 	using doc_upd_func_t = bool(xp::Document&);
+	// @returns true iff doc should be rmed.
+	using doc_rm_func_t = doc_upd_func_t;
 
 	///**
 	// * As Xapian::Database does not store urls to documents,
@@ -112,6 +112,12 @@ public:
 	 * whether that succeeds or not, so I can't either.
 	 */
 	void rm_document(const urls::url& u);
+
+	/**
+	 * Iterate through all documents.
+	 * Remove if func returns true.
+	 */
+	void rm_if(doc_rm_func_t* func);
 
 	/**
 	 * Updates the document indicated by u with upd_func.

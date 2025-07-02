@@ -126,7 +126,7 @@ void index::add_document(const webpage& w)
 	std::snprintf(
 		date_str.data(),
 		date_str.size()+1,
-		"%4d%2d%2d", 
+		"%4d%02d%02d", 
 		(int)w.date.year(), 
 		(unsigned)w.date.month(), 
 		(unsigned)w.date.day()
@@ -151,6 +151,35 @@ void index::add_document(const webpage& w)
 void index::rm_document(const urls::url& u)
 {
 	db.delete_document((url2hashid(u)));
+}
+	
+void index::rm_if(doc_rm_func_t* func)
+{
+	// Don't rm too much without commiting,
+	// otherwise the database would be corrupt.
+	static unsigned rmed_since_last_commit = 0;
+	static constexpr unsigned rm_commit_thresh = 2000;
+
+	// The doc says passing "" to it will yield an iter 
+	// over all documents.
+	auto beg = db.postlist_begin("");
+	auto end = db.postlist_end("");
+	for (auto i = beg; i != end; ++i)
+	{
+		auto doc = db.get_document(*i);
+		// rm if func returns true.
+		if(func(doc))
+		{
+			++rmed_since_last_commit;
+			db.delete_document(*i);
+		}
+
+		if (rmed_since_last_commit >= rm_commit_thresh)
+		{
+			db.commit();
+			rmed_since_last_commit = 0;
+		}
+	}
 }
 
 void index::upd_document(

@@ -186,27 +186,27 @@ std::optional<ch::year_month_day> html::try_parse_date_str(
 	);
 
 	// 2. remove ordinal suffixes like "23rd", "1st"
-	// In the end, we need a stream, not a string, for 
-	// ch::parse.
-	std::stringstream proced_str;
-	// use default en locale.
-	proced_str.imbue(std::locale());
+	std::string proced_str;
 	std::regex_replace(
-		std::ostreambuf_iterator<char>(proced_str),
+		std::back_inserter(proced_str),
 		space_trimmed_str.begin(), space_trimmed_str.end(),
 		ord_regex, "$1"
 	);
 	
 	for (const auto& fmt : formats) {
-		ch::year_month_day date;
-		proced_str >> ch::parse(fmt, date);
-		if (!proced_str.fail()) {
+		std::istringstream ss(proced_str);
+		// use default en locale.
+		ss.imbue(std::locale("en_US.utf8"));
+		std::tm t{};
+		ss >> std::get_time(&t, fmt.c_str());
+		if (!ss.fail()) {
 			// this one matches.
-			return date;
+			return ch::year_month_day(
+				ch::year(t.tm_year + 1900),
+				ch::month(t.tm_mon + 1),
+				ch::day(t.tm_mday)
+			);
 		}
-
-		// reset the stream to the beginning to be able to feed again.
-		proced_str.clear(); proced_str.seekg(0);
 	}
 	
 	// Could not parse in any way listed in formats.
@@ -224,15 +224,20 @@ html::try_parse_header_date() const
 	// use default en locale.
 	is.imbue(std::locale());
 	
-	ch::year_month_day date;
+	std::tm t{};
 	// don't waste time to parse the time after the year.
-	is >> ch::parse(
-		"%a, %d %b %Y", date
+	is >> std::get_time(
+		&t, "%a, %d %b %Y"
 	);
 
-	return is.fail() ?
-		std::nullopt : 
-		std::optional<ch::year_month_day>(date);
+	if (is.fail()) return std::nullopt;
+
+	return ch::year_month_day(
+		ch::year(t.tm_year + 1900),
+		ch::month(t.tm_mon + 1),
+		ch::day(t.tm_mday)
+	);
+
 }
 
 parser::parser() :
@@ -429,7 +434,7 @@ html url2html::convert(
 	);
 
 	auto date_from_html = date_outof_html(
-		text, url
+		content, url
 	);
 	return html(
 		doc, 
@@ -445,7 +450,10 @@ url2html::date_outof_html(
 	const urls::url& u
 ) {
 	// h_content might be empty if the webpage is bad.
-	if (h_content.empty())
+	if (
+		h_content.empty() ||
+		u.empty()
+	)
 		return std::nullopt;
 
 	PyObject* prop_args = PyTuple_New(1);
@@ -458,6 +466,10 @@ url2html::date_outof_html(
 	PyDict_SetItemString(
 		kw_args,
 		"url", PyUnicode_FromString(u.c_str())
+	);
+	PyDict_SetItemString(
+		kw_args,
+		"original_date", Py_True
 	);
 	
 	// calls htmldate.find_date(
@@ -494,15 +506,23 @@ url2html::date_outof_html(
 	    // throw std::runtime_error("Call to find_date failed");
 	}
 
-	ch::year_month_day ret;
 	std::istringstream ss(date_result);
+	std::tm t{};
 	// Default output format is this.
-	ss >> ch::parse(
-		"%Y-%m-%d", ret
+	ss >> std::get_time(
+		&t, "%Y-%m-%d"
 	);
-	return ss.fail() ? 
-		std::nullopt :
-		std::optional<ch::year_month_day>(ret);
+	if (ss.fail())
+	{
+		return std::nullopt;
+	}
+
+	return ch::year_month_day(
+		ch::year(t.tm_year + 1900),
+		ch::month(t.tm_mon + 1),
+		ch::day(t.tm_mday)
+	);
+
 }
 
 void url2html::global_init()
