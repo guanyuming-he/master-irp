@@ -27,6 +27,10 @@ std::string index::url2hashid(const urls::url& u)
 		std::string(u.encoded_authority()) + 
 		std::string(u.encoded_path())
 	};
+	// remove the trailing '/'
+	if (essential.back() == '/')
+		essential.pop_back();
+
 	uint8_t sha256[32];
 	calc_sha_256(sha256, essential.c_str(), essential.size());
 
@@ -158,7 +162,7 @@ void index::rm_if(doc_rm_func_t* func)
 	// Don't rm too much without commiting,
 	// otherwise the database would be corrupt.
 	static unsigned rmed_since_last_commit = 0;
-	static constexpr unsigned rm_commit_thresh = 2000;
+	static constexpr unsigned rm_commit_thresh = 4000;
 
 	// The doc says passing "" to it will yield an iter 
 	// over all documents.
@@ -179,6 +183,28 @@ void index::rm_if(doc_rm_func_t* func)
 			db.commit();
 			rmed_since_last_commit = 0;
 		}
+	}
+}
+
+void index::shrink(
+	unsigned max_num, shrink_policy policy
+) {
+	if (num_documents() <= max_num)
+		return;
+
+	auto num_to_rm = num_documents() - max_num;
+
+    xp::Enquire enquire(db);
+	enquire.set_query(xp::Query::MatchAll);
+    enquire.set_sort_by_value(DATE_SLOT,
+		// false: ascending; true: descending
+		policy != shrink_policy::OLDEST
+	);
+	xp::MSet res = enquire.get_mset(0, num_to_rm);
+
+	for (auto i = res.begin(); i != res.end(); ++i)
+	{
+		db.delete_document(*i);
 	}
 }
 

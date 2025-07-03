@@ -89,16 +89,16 @@ void indexer::start_indexing()
 		auto url{std::move(q.front())};
 		q.pop();
 
-		// If already indexed, then do nothing.
-		// Advantage: much faster.
-		// Disadvantage: cannot update an already indexed page.
-		if (db.get_document(url).has_value())
-			continue;
-
 		// Not indexed.
 		webpage pg(url, convertor);
-		// Only index if this filter returns true.
-		if (wp_index_filter(pg))
+		// Only index if this filter returns true
+		// and the document not indexed previously.
+		// Advantage: much faster.
+		// Disadvantage: cannot update an already indexed page.
+		if (
+			wp_index_filter(pg) && 
+			!db.get_document(url).has_value()
+		)
 		{
 			db.add_document(pg);
 			// log the webpage indexed:

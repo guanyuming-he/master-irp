@@ -15,13 +15,9 @@
  */
 
 #include <filesystem>
-#include <memory>
 #include <optional>
 #include <string>
-#include <type_traits>
-#include <unordered_map>
 
-#include <utility>
 #include <xapian.h>
 
 namespace fs = std::filesystem;
@@ -51,19 +47,15 @@ public:
 	// @returns true iff doc should be rmed.
 	using doc_rm_func_t = doc_upd_func_t;
 
-	///**
-	// * As Xapian::Database does not store urls to documents,
-	// * it is my responsibility to map each url to a docid.
-	// *
-	// * @param key returned by url::get_essential().
-	// * @param value returned by xp::WritableDatabase::add_document().
-	// */
-	//using idmap_t = std::unordered_map<std::string, xp::docid>;
-	//
-
 	enum value_slots : xp::valueno
 	{
 		DATE_SLOT = 1,
+	};
+
+	enum class shrink_policy : unsigned 
+	{
+		OLDEST,	// oldest is removed.
+		LATEST,	// latest is removed.
 	};
 
 public:
@@ -129,6 +121,17 @@ public:
 	void upd_all(doc_upd_func_t* upd_func);
 
 	/**
+	 * Shrinks the database to max_num.
+	 * No effect if num_documents() <= max_num.
+	 *
+	 * @param max_num num_documents() will be <= after the call.
+	 * @param policy decides which documents to remove 
+	 * if num_documents() > max_num
+	 * before the call.
+	 */
+	void shrink(unsigned max_num, shrink_policy policy);
+
+	/**
 	 * Updates disk content with in memory content.
 	 * Does nothing if dirty = false or paths is invalid.
 	 * dirty will be set to false after it.
@@ -153,8 +156,23 @@ private:
 	// documents.
 	xp::TermGenerator tg{};
 
-	//// commented out for now as I plan to use SHA256(url) as unique
-	///identifier.
+private:
+	// @returns "Q" + SHA256(url.get_essential()).
+	static std::string url2hashid(const urls::url& url);
+
+	void setup_tg();
+
+private:
+	//// commented out for now as I plan to use SHA256(url) as unique id.
+	///**
+	// * As Xapian::Database does not store urls to documents,
+	// * it is my responsibility to map each url to a docid.
+	// *
+	// * @param key returned by url::get_essential().
+	// * @param value returned by xp::WritableDatabase::add_document().
+	// */
+	//using idmap_t = std::unordered_map<std::string, xp::docid>;
+	//
 	///**
 	// * idmap format:
 	//	  <64bit unsigned number of elements>.
@@ -172,15 +190,6 @@ private:
 	//// I record the difference here.
 	//// Since for now I only allow appending, only the new entries are recorded.
 	//idmap_t url2id_diff{};
-
-private:
-	// @returns "Q" + SHA256(url.get_essential()).
-	static std::string url2hashid(const urls::url& url);
-
-	void setup_tg();
-
-private:
-	//// commented out for now as I plan to use SHA256(url) as unique
 	///** 
 	// * Loads url2id map pointed to by path.
 	// * If the file's not present, an empty idmap is returned.

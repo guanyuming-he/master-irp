@@ -35,6 +35,11 @@ add_executable(searcher
 )
 target_link_libraries(searcher PRIVATE search_eng)
 
+add_executable(updater
+	search/updater_main.cpp
+)
+target_link_libraries(updater PRIVATE search_eng)
+
 add_executable(rm_doc
 	search/rm_doc.cpp
 )

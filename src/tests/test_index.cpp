@@ -9,7 +9,6 @@
  * Instead, most are written by myself.
  *
  */
-#include <boost/test/tools/old/interface.hpp>
 #define BOOST_TEST_MODULE IndexTests
 
 #include <boost/test/unit_test.hpp>
@@ -17,7 +16,6 @@
 #include <xapian.h>
 #include <filesystem>
 #include <optional>
-#include <fstream>
 
 #include "../search/index.h"
 #include "../search/webpage.h"
@@ -70,7 +68,9 @@ public:
 			</html>)";
     }
 
-    static html create_html_object(const std::string& title, const std::string& body_text) {
+    static html create_html_object(
+		const std::string& title, const std::string& body_text
+	) {
         std::string html_content = create_html_string(title, body_text);
 
         // Create a mock parser to parse the HTML
@@ -91,6 +91,11 @@ public:
     }
 };
 
+/**
+ * Creates a mock webpage with mock html content.
+ * Compare with webpage's ctor that takes url, title, and date,
+ * this gives it a non-empty html_tree.
+ */
 webpage create_mock_webpage(
 		const std::string& url_str, const std::string&
 		title, const std::string& content = ""
@@ -305,6 +310,155 @@ BOOST_AUTO_TEST_CASE(add_multiple)
 	auto data2 = doc2->get_data();
 	BOOST_TEST(data2.contains(url_str2));
 	BOOST_TEST(data2.contains(title_str2));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/**
+ * I wrote this suite completely myself,
+ * as Claude messed up in mock creation.
+ */
+BOOST_FIXTURE_TEST_SUITE(ShrinkIndexSuite, DiskIndexFixture)
+
+BOOST_AUTO_TEST_CASE(shrink_already_small_enough)
+{
+	class index i(db_path);
+	webpage p1(
+		"https://abc.org/", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{5}, ch::day{1})
+	);
+	i.add_document(p1);
+
+	i.shrink(2, index::shrink_policy::LATEST);
+	BOOST_CHECK_EQUAL(1, i.num_documents());
+	i.shrink(2, index::shrink_policy::OLDEST);
+	BOOST_CHECK_EQUAL(1, i.num_documents());
+}
+
+BOOST_AUTO_TEST_CASE(shrink_latest)
+{
+	class index i(db_path);
+	webpage p1(
+		"https://abc.org/one", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{1}, ch::day{1})
+	);
+	webpage p2(
+		"https://abc.org/two", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{2}, ch::day{1})
+	);
+	webpage p3(
+		"https://abc.org/three", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{3}, ch::day{1})
+	);
+	i.add_document(p1);
+	i.add_document(p2);
+	i.add_document(p3);
+
+	i.shrink(2, index::shrink_policy::LATEST);
+	BOOST_CHECK_EQUAL(2, i.num_documents());
+	// should no longer have the latest.
+	BOOST_CHECK(!i.get_document(p3));
+
+	i.shrink(1, index::shrink_policy::LATEST);
+	BOOST_CHECK_EQUAL(1, i.num_documents());
+	// should no longer have the latest.
+	BOOST_CHECK(!i.get_document(p2));
+
+	// Should still have this one.
+	BOOST_CHECK(i.get_document(p1));
+}
+
+BOOST_AUTO_TEST_CASE(shrink_oldest)
+{
+	class index i(db_path);
+	webpage p1(
+		"https://abc.org/one", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{1}, ch::day{1})
+	);
+	webpage p2(
+		"https://abc.org/two", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{2}, ch::day{1})
+	);
+	webpage p3(
+		"https://abc.org/three", "title", 
+		ch::year_month_day(ch::year{2025}, ch::month{3}, ch::day{1})
+	);
+	i.add_document(p1);
+	i.add_document(p2);
+	i.add_document(p3);
+
+	i.shrink(2, index::shrink_policy::OLDEST);
+	BOOST_CHECK_EQUAL(2, i.num_documents());
+	// should no longer have the oldest.
+	BOOST_CHECK(!i.get_document(p1));
+
+	i.shrink(1, index::shrink_policy::OLDEST);
+	BOOST_CHECK_EQUAL(1, i.num_documents());
+	// should no longer have the oldest.
+	BOOST_CHECK(!i.get_document(p2));
+
+	// Should still have this one.
+	BOOST_CHECK(i.get_document(p3));
+}
+
+BOOST_AUTO_TEST_CASE(shrink_latest_multiple)
+{
+	class index i(db_path);
+	for (unsigned j = 0; j < 16; ++j)
+	{
+		i.add_document(webpage(
+			std::string("https://abc.org/") + std::to_string(j),
+			std::string("title ") + std::to_string(j),
+			ch::year_month_day(
+				ch::year{2025}, ch::month{1}, ch::day{j+1}
+			)
+		));
+	}
+
+	i.shrink(8, index::shrink_policy::LATEST);
+	BOOST_CHECK_EQUAL(8, i.num_documents());
+	// should no longer have the latest.
+	for (int j = 8; j < 16; ++j)
+		BOOST_CHECK(!i.get_document(urls::url(
+			std::string("https://abc.org/") + std::to_string(j)
+		)));
+
+	// Should still have the others
+	// should no longer have the latest.
+	for (int j = 0; j < 8; ++j)
+		BOOST_CHECK(i.get_document(urls::url(
+			std::string("https://abc.org/") + std::to_string(j)
+		)));
+}
+
+BOOST_AUTO_TEST_CASE(shrink_oldest_multiple)
+{
+	class index i(db_path);
+	for (unsigned j = 0; j < 16; ++j)
+	{
+		i.add_document(webpage(
+			std::string("https://abc.org/") + std::to_string(j),
+			std::string("title ") + std::to_string(j),
+			ch::year_month_day(
+				ch::year{2025}, ch::month{1}, ch::day{j+1}
+			)
+		));
+	}
+
+	i.shrink(8, index::shrink_policy::OLDEST);
+	BOOST_CHECK_EQUAL(8, i.num_documents());
+	// should no longer have the oldest.
+	for (int j = 0; j < 8; ++j)
+		BOOST_CHECK(!i.get_document(urls::url(
+			std::string("https://abc.org/") + std::to_string(j)
+		)));
+
+	// Should still have the others
+	// should no longer have the latest.
+	for (int j = 8; j < 16; ++j)
+		BOOST_CHECK(i.get_document(urls::url(
+			std::string("https://abc.org/") + std::to_string(j)
+		)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
