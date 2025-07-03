@@ -22,7 +22,17 @@
 #include <string_view>
 #include <unordered_map>
 
-using path_filter_func_t = bool(const std::string_view);
+/**
+ * In general, the condition of recursing is more loose than that of indexing.
+ * If a document is indexed, then naturally we would want to also recurse it 
+ * to find related ones.
+ *
+ * @returns (b1, b2).
+ * Recurse iff b1; index iff b2.
+ */
+using path_filter_func_t = 
+std::pair<bool, bool>
+(const std::string_view);
 
 // At least three words in a 
 // word-word-word-... pattern
@@ -37,32 +47,54 @@ bool has_words_separated_by_dash(const std::string_view p)
 	);
 }
 /**
- * For my indexer, my filter rule is:
- * 1. If the host is one of the keys, recurse.
- * 2. If (1) and also the path can be filtered by the value.
+ * For my indexer, my url filter rule is:
+ * for the host, executes a function which
+ * returns (b_recurse, b_index), given input path of the url.
  */
 const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 	{std::string("www.theguardian.com"), 
-		[](const std::string_view p) { return p.starts_with("/business"); }},
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b = p.starts_with("/business"); 
+			return {b, b};
+	}},
 	{std::string("www.theatlantic.com"), 
-		[](const std::string_view p) { return p.starts_with("/economy"); }},
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b = p.starts_with("/economy"); 
+			return {b, b};
+	}},
 	{std::string("www.bloomberg.com"), 
-		[](const std::string_view p) { 
-			return p.starts_with("/economics") || p.starts_with("news/articles");
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/economics");
+			bool b2 = p.starts_with("news/articles");
+			return {b1||b2, b2};
 	}},
 	{std::string("www.ibtimes.com"), 
-		[](const std::string_view p) { 
-			return p.starts_with("/economy-markets") || 
-			has_words_separated_by_dash(p);
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/economy-markets");
+			bool b2 = has_words_separated_by_dash(p);
+			return {b1||b2, b2};
 	}},
 	{std::string("www.forbes.com"), 
-		[](const std::string_view p) { 
-			return p.starts_with("/sites") ||
-				p.starts_with("/business");
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/business");
+			bool b2 = p.starts_with("/sites");
+			return {b1||b2, b2};
+	}},
+	{std::string("fortune.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.starts_with("/the-latest") ||
+				p.starts_with("/section");
+			bool b2 = 
+				p.starts_with("/article") ||
+				has_words_separated_by_dash(p);
+			return {b1||b2, b2};
 	}},
 	{std::string("www.businessinsider.com"), 
-		[](const std::string_view p) { 
-			return p.starts_with("/business") || has_words_separated_by_dash(p);
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = p.starts_with("/business");
+			bool b2 = has_words_separated_by_dash(p);
+			return {b1||b2, b2};
 	}},
 };
 
@@ -73,17 +105,17 @@ bool index_filter(urls::url& u)
 		return false;
 
 	auto val {filtermap.at(key)};
-	return val(u.encoded_path());
+	return val(u.encoded_path()).second;
 }
 
 bool recurse_filter(urls::url& u)
 {
-	// Let's use the strict version for now and see what happens.
-	return index_filter(u);
+	std::string key{u.encoded_host()};
+	if (!filtermap.contains(key))
+		return false;
 
-	//return filtermap.contains(
-	//	std::string(u.encoded_host())
-	//);
+	auto val {filtermap.at(key)};
+	return val(u.encoded_path()).first;
 }
 
 bool wp_index_filter(webpage& pg)
@@ -116,7 +148,13 @@ void segfault_handler(int sig) {
 	fprintf(stderr, "Error: signal %d:\n", sig);
 	backtrace_symbols_fd(array, size, STDERR_FILENO);
 
-	_exit(-1); // Exit immediately (don't call destructors)
+	// Before exiting, commit to database lest it corrupt.
+	// Resetting i will call indexer's dtor, which in turn calls 
+	// index's, which writes to the database.
+	if (i.get())
+		i.reset(nullptr);
+
+	std::exit(-1);
 }
 
 int main(int argc, char* argv[])
@@ -164,12 +202,13 @@ int main(int argc, char* argv[])
 	else // use start_queue.
 	{
 		auto urls = {
-			urls::url{"https://www.theguardian.com/business"},
-			urls::url{"https://www.theatlantic.com/economy"},
-			urls::url{"https://www.bloomberg.com/economics"},
-			urls::url{"https://www.ibtimes.com/economy-markets"},
-			urls::url{"https://www.forbes.com/business"},
-			urls::url{"https://www.businessinsider.com/business"}
+			urls::url{"https://fortune.com/the-latest"},
+			//urls::url{"https://www.theguardian.com/business"},
+			//urls::url{"https://www.theatlantic.com/economy"},
+			//urls::url{"https://www.bloomberg.com/economics"},
+			//urls::url{"https://www.ibtimes.com/economy-markets"},
+			//urls::url{"https://www.forbes.com/business"},
+			//urls::url{"https://www.businessinsider.com/business"}
 		};
 		for (auto&& u : urls)
 		{

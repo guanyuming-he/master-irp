@@ -8,6 +8,7 @@
  * @author Guanyuming He
  */
 
+#include <boost/url/url.hpp>
 #include <iostream>
 #include <random>
 #include <unordered_map>
@@ -62,19 +63,34 @@ bool rm_func(xp::Document& doc)
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
 		std::cerr 
 			<< "Usage:\n"
-			<< argv[0] << " db_path" << std::endl;
+			<< argv[0] << " <db_path> purge\n"
+			<< argv[0] << " <db_path> <url_to_rm>\n";
 		return -1;
 	}
 
 	class index db(argv[1]);
 
-	// Clear the database, remove those that are 
-	// imbalancely present in the database.
-	db.rm_if(rm_func);
+	if (std::string("purge") == argv[2])
+	{
+		// Purge the database based on rm_func.
+		std::cout << "Purging...\n";
+		db.rm_if(rm_func);
+		return 0;
+	}
+
+	// Don't purge. remove a specific url.
+	urls::url u(argv[2]);
+	if (!db.get_document(u).has_value())
+	{
+		std::cerr << argv[2] << " not found.\n";
+		return -1;
+	}
+	std::cout << "rm " << argv[2] << '\n';
+	db.rm_document(u);
 
 	return 0;
 }

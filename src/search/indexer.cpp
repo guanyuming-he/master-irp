@@ -90,6 +90,8 @@ void indexer::start_indexing()
 		q.pop();
 
 		// If already indexed, then do nothing.
+		// Advantage: much faster.
+		// Disadvantage: cannot update an already indexed page.
 		if (db.get_document(url).has_value())
 			continue;
 
@@ -114,7 +116,9 @@ void indexer::start_indexing()
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
 			{
-				// if url is already indexed, don't put it into queue at all.
+				// If url is already indexed, don't put it into queue at all.
+				// Advantage: much faster.
+				// Disadvantage: cannot update an already indexed page.
 				if(db.get_document(u).has_value())
 					continue;
 

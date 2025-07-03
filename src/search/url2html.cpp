@@ -456,73 +456,82 @@ url2html::date_outof_html(
 	)
 		return std::nullopt;
 
-	PyObject* prop_args = PyTuple_New(1);
-	PyTuple_SetItem(
-		prop_args, 
-		0, PyUnicode_FromString(h_content.c_str())
-	);  
+	PyObject* prop_args = nullptr;
+	PyObject* kw_args = nullptr;
+	
+	// The two bools are here because Py*_SetItem steals the ownership.
+	// Each will be set to false if the corresponding str is stolen.
+	PyObject* h_pystr = nullptr; bool deref_h = true;
+	PyObject* u_pystr = nullptr; bool deref_u = true;
 
-	PyObject* kw_args = PyDict_New();
-	PyDict_SetItemString(
+	PyObject* call_res = nullptr;
+	const char* date_result = nullptr;
+	std::istringstream ss;
+	std::tm t{};
+
+	prop_args = PyTuple_New(1);
+	if (!prop_args) goto fail;
+	h_pystr = PyUnicode_FromString(h_content.c_str());
+	if (!h_pystr) goto fail;
+	if(0 != PyTuple_SetItem(
+		prop_args, 
+		0, h_pystr
+	)) goto fail;
+	deref_h = false;
+
+	kw_args = PyDict_New();
+	if (!kw_args) goto fail;
+	u_pystr = PyUnicode_FromString(u.c_str());
+	if (!u_pystr) goto fail;
+	if(0 != PyDict_SetItemString(
 		kw_args,
-		"url", PyUnicode_FromString(u.c_str())
-	);
-	PyDict_SetItemString(
+		"url", u_pystr
+	)) goto fail;
+	deref_u = false;
+	if (0 != PyDict_SetItemString(
 		kw_args,
 		"original_date", Py_True
-	);
+	)) goto fail;
 	
 	// calls htmldate.find_date(
 	// 	h_content.c_str(), url=u.c_str()
 	// )
-	PyObject* call_res = PyObject_Call(
+	call_res = PyObject_Call(
 		find_date_func, prop_args, kw_args
 	);
-	Py_DECREF(prop_args);
-	Py_DECREF(kw_args);
 	
-	const char* date_result;
-	if (call_res) 
-	{
-		if (PyUnicode_Check(call_res)) 
-		{
-		    date_result = PyUnicode_AsUTF8(call_res);
-		} 
-		else 
-		{
-		    Py_DECREF(call_res);
-			// Do not fail ungracefully.
-			return std::nullopt;
-		    //throw std::runtime_error(
-			//	"Unexpected return type from find_date"
-			//);
-		}
-		Py_DECREF(call_res);
-	} 
-	else 
-	{
-		// Do not fail ungracefully.
-		return std::nullopt;
-	    // throw std::runtime_error("Call to find_date failed");
-	}
+	if (!call_res) goto fail;
+	if (!PyUnicode_Check(call_res)) goto fail;
 
-	std::istringstream ss(date_result);
-	std::tm t{};
+	date_result = PyUnicode_AsUTF8(call_res);
+	if (!date_result) goto fail;
+
+	ss.str(date_result);
 	// Default output format is this.
 	ss >> std::get_time(
 		&t, "%Y-%m-%d"
 	);
-	if (ss.fail())
-	{
-		return std::nullopt;
-	}
+	if (ss.fail()) goto fail;
 
+success:
+	Py_XDECREF(prop_args);
+	Py_XDECREF(kw_args);
+	if (deref_h) Py_XDECREF(h_pystr);
+	if (deref_u) Py_XDECREF(u_pystr);
+	Py_XDECREF(call_res);
 	return ch::year_month_day(
 		ch::year(t.tm_year + 1900),
 		ch::month(t.tm_mon + 1),
 		ch::day(t.tm_mday)
 	);
 
+fail:
+	Py_XDECREF(prop_args);
+	Py_XDECREF(kw_args);
+	if (deref_h) Py_XDECREF(h_pystr);
+	if (deref_u) Py_XDECREF(u_pystr);
+	Py_XDECREF(call_res);
+	return std::nullopt;
 }
 
 void url2html::global_init()
