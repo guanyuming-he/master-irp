@@ -47,3 +47,41 @@ turn text into search engine prompts.
 ### Work plan before next meeting:
 I will improve that part and also continue working on a custom search
 component.
+
+## Meeting (20 June 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+Sean let me know he could not attend the meeting, so I sent him a text message
+containing my progress that week: building the scraping and parsing part of my
+search engine.
+
+I also sent a copy of it to Rhodri.
+
+### Feedback received:
+N/A
+
+### Work plan before next meeting:
+I will finish the search engine next week.
+
+## Meeting (27 June 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+I basically finishes the main functions of the search engine, and presented it
+the Sean. For queries regarding objects, e.g. Donald Trump, tariffs, it worked
+well. However, it didn't work well when given questions or indirect sentences.
+The LLM also didin't work well to transfer them into good seach engine prompts.
+
+Another problem is that the database was highly imbalanced towards business
+insider.
+
+### Feedback received:
+Sean said he would give me a few topics to feed into my tool, and asked me to
+sent him the results, about which he would give feedbacks on. He also said he
+would send them to Rhodri to request his comments on how to tune the LLM better
+for that.
+
+### Work plan before next meeting:
+I will wait for his feed back on that, while try to balance the database of my
+search engine.
