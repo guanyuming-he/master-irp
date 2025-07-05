@@ -22,7 +22,7 @@ webpage::webpage(
 ):
 	html_tree(std::nullopt),
 	url(
-		boost::urls::url(url).remove_fragment().remove_query()
+		boost::urls::url(url)
 	), 
 	title(title), date(date)
 {}

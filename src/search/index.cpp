@@ -8,6 +8,7 @@
  */
 
 #include "index.h"
+#include "url2html.h"
 #include "webpage.h"
 
 #include <chrono>
@@ -21,16 +22,9 @@ extern "C" {
 #include "../sha-2/sha-256.h"
 }
 
-std::string index::url2hashid(const urls::url& u)
+std::string index::url2hashid(urls::url_view u)
 {
-	// essential = authority + path
-	std::string essential{ 
-		std::string(u.encoded_authority()) + 
-		std::string(u.encoded_path())
-	};
-	// remove the trailing '/'
-	if (essential.back() == '/')
-		essential.pop_back();
+	auto essential = url_get_essential(u);
 
 	uint8_t sha256[32];
 	calc_sha_256(sha256, essential.c_str(), essential.size());

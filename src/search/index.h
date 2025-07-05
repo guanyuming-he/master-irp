@@ -18,17 +18,13 @@
 #include <optional>
 #include <string>
 
+#include <boost/url.hpp>
 #include <xapian.h>
 
 namespace fs = std::filesystem;
+namespace urls = boost::urls;
 namespace xp = Xapian;
 
-namespace boost {
-	namespace urls {
-		class url;
-	}
-}
-namespace urls = boost::urls;
 class webpage;
 
 /**
@@ -157,8 +153,8 @@ private:
 	xp::TermGenerator tg{};
 
 private:
-	// @returns "Q" + SHA256(url.get_essential()).
-	static std::string url2hashid(const urls::url& url);
+	// @returns "Q" + SHA256(url_get_essential(u)).
+	static std::string url2hashid(urls::url_view u);
 
 	void setup_tg();
 

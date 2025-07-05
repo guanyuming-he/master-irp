@@ -11,9 +11,7 @@
 
 #include "index.h"
 
-#include <chrono>
 #include <xapian.h>
-namespace ch = std::chrono;
 
 /**
  * A searcher seaches a database using text queries.
@@ -48,7 +46,7 @@ public:
 		const fs::path& dbpath, const query_params& par = {}
 	);
 	explicit searcher(
-		index& inddb, const query_params& par = {}
+		class index& inddb, const query_params& par = {}
 	);
 	~searcher() = default;
 

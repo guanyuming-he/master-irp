@@ -9,8 +9,6 @@
 #include "searcher.h"
 #include <xapian.h>
 
-#include <iostream>
-
 searcher::searcher(
 	const fs::path& dbpath, const query_params& par
 ):
@@ -22,7 +20,7 @@ searcher::searcher(
 }
 
 searcher::searcher(
-	index& inddb, const query_params& par
+	class index& inddb, const query_params& par
 ):
 	db(inddb.db), g_pars(par),
 	daterp(index::DATE_SLOT)

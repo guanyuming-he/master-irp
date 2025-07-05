@@ -82,6 +82,17 @@ bool has_dates(const std::string_view p)
  * returns (b_recurse, b_index), given input path of the url.
  */
 const std::unordered_map<std::string, path_filter_func_t*> filtermap {
+	{std::string("www.cnbc.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.starts_with("/business") ||
+				p.starts_with("/investing") ||
+				p.starts_with("/markets");
+			bool b2 = 
+				has_dates(p) &&
+				has_words_separated_by_dash(p);
+			return {b1||b2, b2};
+	}},
 	{std::string("www.ft.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> {
 			bool b1 = 
@@ -99,8 +110,8 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 				p.empty() ||
 				p.starts_with("/business");
 			bool b2 = 
-				has_words_separated_by_dash(p) &&
 				has_dates(p) && 
+				has_words_separated_by_dash(p) &&
 				p.contains("/business/");
 			return {b1||b2, b2};
 	}},
@@ -110,8 +121,8 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 				p.empty() ||
 				p.starts_with("/topics");
 			bool b2 = 
-				has_words_separated_by_dash(p) &&
-				has_dates(p);
+				has_dates(p) &&
+				has_words_separated_by_dash(p);
 			return {b1||b2, b2};
 	}},
 	{std::string("fortune.com"), 
@@ -134,12 +145,6 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 			bool b = p.starts_with("/economy"); 
 			return {b, b};
 	}},
-	{std::string("www.bloomberg.com"), 
-		[](const std::string_view p) -> std::pair<bool,bool> { 
-			bool b1 = p.starts_with("/economics");
-			bool b2 = p.starts_with("news/articles");
-			return {b1||b2, b2};
-	}},
 	{std::string("www.ibtimes.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> { 
 			bool b1 = p.starts_with("/economy-markets");
@@ -152,6 +157,30 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 			bool b2 = p.starts_with("/sites");
 			return {b1||b2, b2};
 	}},
+	// Bloomberg blocked me
+	//{std::string("www.bloomberg.com"), 
+	//	[](const std::string_view p) -> std::pair<bool,bool> { 
+	//		bool b1 = 
+	//			p.empty() ||
+	//			p.starts_with("/uk") ||
+	//			p.starts_with("/economics") ||
+	//			p.starts_with("/markets") || 
+	//			p.starts_with("/deals");
+	//		bool b2 = p.starts_with("news/articles");
+	//		return {b1||b2, b2};
+	//}},
+	// wsj blocks me if I don't enable JS and cookies.
+	//{std::string("www.wsj.com"), 
+	//	[](const std::string_view p) -> std::pair<bool,bool> {
+	//		bool b1 = 
+	//			p.empty() ||
+	//			p.starts_with("/business") ||
+	//			p.starts_with("/economy");
+	//		bool b2 = 
+	//			has_words_separated_by_dash(p);
+	//		// here I don't use b1||b2 for the first because b2 is too general.
+	//		return {b1||b2, b2};
+	//}},
 	// Don't index this website, according to Sean.
 	//{std::string("www.businessinsider.com"), 
 	//	[](const std::string_view p) -> std::pair<bool,bool> {
@@ -265,16 +294,21 @@ int main(int argc, char* argv[])
 	else // use start_queue.
 	{
 		auto urls = {
-			urls::url{"https://www.ft.com"},
+			urls::url{"https://www.cnbc.com/business"},
+			//urls::url{"https://www.ft.com"},
 			//urls::url{"https://edition.cnn.com/business"},
 			//urls::url{"https://www.economist.com"},
 			//urls::url{"https://fortune.com/the-latest"},
 			//urls::url{"https://www.theguardian.com/business"},
 			//urls::url{"https://www.theatlantic.com/economy"},
-			//urls::url{"https://www.bloomberg.com/economics"},
 			//urls::url{"https://www.ibtimes.com/economy-markets"},
 			//urls::url{"https://www.forbes.com/business"},
+			// wsj blocks me if I don't enable JS and cookies.
+			//urls::url{"https://www.wsj.com"},
+			//Sean said this is unreliable. Do not use.
 			//urls::url{"https://www.businessinsider.com/business"}
+			//bloomberg blocked me
+			//urls::url{"https://www.bloomberg.com/economics"},
 		};
 		for (auto&& u : urls)
 		{
