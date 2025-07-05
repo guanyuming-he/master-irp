@@ -36,3 +36,6 @@ bin/
 # Search engine indexing database and queue.
 db/
 que
+
+# prototype output 
+src/ollama_output.txt

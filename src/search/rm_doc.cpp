@@ -23,7 +23,7 @@ std::mt19937 pseudorand(devrand());
 std::uniform_real_distribution<float> prob(0.f, 1.f);
 
 std::unordered_map<std::string, float> domain_rm_prob{
-	{"fortune.com", 1.f},
+	{"www.businessinsider.com", .95f},
 };
 
 bool rm_func(xp::Document& doc)
@@ -39,23 +39,21 @@ bool rm_func(xp::Document& doc)
 	urls::url u(u_str);
 
 	std::string key{u.encoded_host()};
-	if (key.contains("fortune.com"))
-		return true;
-	//if (!domain_rm_prob.contains(key))
-	//	return false;
+	if (!domain_rm_prob.contains(key))
+		return false;
 
-	//auto val{domain_rm_prob.at(key)};
-	//if (prob(pseudorand) < val)
-	//{
-	//	++num_rmed;
-	//	if (num_rmed % 1000 == 1)
-	//	{
-	//		std::cout
-	//			<< std::to_string(num_rmed) 
-	//			<< "th removed.\n";
-	//	}
-	//	return true;
-	//}
+	auto val{domain_rm_prob.at(key)};
+	if (prob(pseudorand) < val)
+	{
+		++num_rmed;
+		if (num_rmed % 500 == 1)
+		{
+			std::cout
+				<< std::to_string(num_rmed) 
+				<< "th removed.\n";
+		}
+		return true;
+	}
 
 	return false;
 }

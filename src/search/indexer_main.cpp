@@ -47,11 +47,83 @@ bool has_words_separated_by_dash(const std::string_view p)
 	);
 }
 /**
+ * @returns true iff the path has date encoded in it.
+ * 
+ * The test cases for this function are done in regex testing websites
+ * like regex101.com.
+ * Test cases (must accept):
+ * 2025-02-01
+ * 2025-29-07
+ * 08-12-2025
+ * 12-09-2025
+ * 2025/11/03
+ * 2025/03/15
+ * 11/20/2025
+ * 30/01/2025
+ * (must not accept)
+ * -1/-2/2025
+ * 1/1/1
+ * 2021/2022/2023
+ */
+static const std::string date_in_path_pattern(
+	R"((^|\/)\d{4}[-/]\d{1,2}[-/]\d{1,2}($|\/)|(^|\/)\d{1,2}[-/]\d{1,2}[-/]\d{4}($|\/))"
+);
+static const std::regex date_in_path_regex(date_in_path_pattern);
+bool has_dates(const std::string_view p)
+{
+	return std::regex_search(
+		p.begin(), p.end(),
+		date_in_path_regex
+	);
+}
+/**
  * For my indexer, my url filter rule is:
  * for the host, executes a function which
  * returns (b_recurse, b_index), given input path of the url.
  */
 const std::unordered_map<std::string, path_filter_func_t*> filtermap {
+	{std::string("www.ft.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.empty() ||
+				p.starts_with("/companies") ||
+				p.starts_with("/markets");
+			bool b2 = 
+				p.starts_with("/content");
+			// here I don't use b1||b2 for the first because b2 is too general.
+			return {b1, b2};
+	}},
+	{std::string("edition.cnn.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.empty() ||
+				p.starts_with("/business");
+			bool b2 = 
+				has_words_separated_by_dash(p) &&
+				has_dates(p) && 
+				p.contains("/business/");
+			return {b1||b2, b2};
+	}},
+	{std::string("www.economist.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.empty() ||
+				p.starts_with("/topics");
+			bool b2 = 
+				has_words_separated_by_dash(p) &&
+				has_dates(p);
+			return {b1||b2, b2};
+	}},
+	{std::string("fortune.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.starts_with("/the-latest") ||
+				p.starts_with("/section");
+			bool b2 = 
+				p.starts_with("/article") ||
+				has_words_separated_by_dash(p);
+			return {b1||b2, b2};
+	}},
 	{std::string("www.theguardian.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> { 
 			bool b = p.starts_with("/business"); 
@@ -80,22 +152,13 @@ const std::unordered_map<std::string, path_filter_func_t*> filtermap {
 			bool b2 = p.starts_with("/sites");
 			return {b1||b2, b2};
 	}},
-	{std::string("fortune.com"), 
-		[](const std::string_view p) -> std::pair<bool,bool> {
-			bool b1 = 
-				p.starts_with("/the-latest") ||
-				p.starts_with("/section");
-			bool b2 = 
-				p.starts_with("/article") ||
-				has_words_separated_by_dash(p);
-			return {b1||b2, b2};
-	}},
-	{std::string("www.businessinsider.com"), 
-		[](const std::string_view p) -> std::pair<bool,bool> {
-			bool b1 = p.starts_with("/business");
-			bool b2 = has_words_separated_by_dash(p);
-			return {b1||b2, b2};
-	}},
+	// Don't index this website, according to Sean.
+	//{std::string("www.businessinsider.com"), 
+	//	[](const std::string_view p) -> std::pair<bool,bool> {
+	//		bool b1 = p.starts_with("/business");
+	//		bool b2 = has_words_separated_by_dash(p);
+	//		return {b1||b2, b2};
+	//}},
 };
 
 bool index_filter(urls::url& u)
@@ -202,7 +265,10 @@ int main(int argc, char* argv[])
 	else // use start_queue.
 	{
 		auto urls = {
-			urls::url{"https://fortune.com/the-latest"},
+			urls::url{"https://www.ft.com"},
+			//urls::url{"https://edition.cnn.com/business"},
+			//urls::url{"https://www.economist.com"},
+			//urls::url{"https://fortune.com/the-latest"},
 			//urls::url{"https://www.theguardian.com/business"},
 			//urls::url{"https://www.theatlantic.com/economy"},
 			//urls::url{"https://www.bloomberg.com/economics"},

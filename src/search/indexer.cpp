@@ -8,11 +8,13 @@
  */
 
 #include "indexer.h"
+#include "url2html.h"
 #include "utility.h"
 #include "webpage.h"
 
 #include <cstdint>
 #include <fstream>
+#include <unordered_set>
 #include <stdexcept>
 #include <string>
 
@@ -81,6 +83,18 @@ void indexer::save_url_q()
 
 void indexer::start_indexing()
 {
+	// After a while of indexing, I realized that it's helpful to have a set of
+	// already recursed items so that I won't recurse them again.
+	// A question is whether to persist the set between indexings or
+	// to make it local to each indexing.
+	// Advantage of persisting: maximize speed.
+	// Disadvantage of persisting: the page could have been updated to included
+	// new urls.
+	//
+	// I chose to make the set local to each indexing.
+	
+	std::unordered_set<std::string> recursed;
+
 	while (
 		!q.empty() && 
 		!interrupted && 
@@ -96,7 +110,7 @@ void indexer::start_indexing()
 		// Advantage: much faster.
 		// Disadvantage: cannot update an already indexed page.
 		if (
-			wp_index_filter(pg) && 
+			index_filter(url) && wp_index_filter(pg) && 
 			!db.get_document(url).has_value()
 		)
 		{
@@ -110,9 +124,13 @@ void indexer::start_indexing()
 		}
 
 
-		// Only recurse when this filter returns true.
-		if (wp_recurse_filter(pg))
+		// Only recurse when not recursed and the filters return true.
+		if (
+			!recursed.contains(url_get_essential(url)) &&
+			recurse_filter(url) && wp_recurse_filter(pg))
 		{
+			recursed.emplace(url_get_essential(url));
+
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
 			{

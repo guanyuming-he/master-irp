@@ -564,3 +564,15 @@ void url2html::global_uninit()
 
 	Py_Finalize();
 }
+
+
+std::string url_get_essential(urls::url_view u)
+{
+	auto essential = 
+		std::string(u.encoded_authority()) + 
+		std::string(u.encoded_path());
+	if (essential.back() == '/')
+		essential.pop_back();
+
+	return essential;
+}	

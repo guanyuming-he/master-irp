@@ -10,10 +10,11 @@
 #include "index.h"
 #include "webpage.h"
 
-#include <bits/chrono.h>
 #include <chrono>
 #include <cstdio>
 #include <optional>
+#include <vector>
+
 #include <xapian.h>
 
 extern "C" {
@@ -159,10 +160,11 @@ void index::rm_document(const urls::url& u)
 	
 void index::rm_if(doc_rm_func_t* func)
 {
-	// Don't rm too much without commiting,
-	// otherwise the database would be corrupt.
-	static unsigned rmed_since_last_commit = 0;
-	static constexpr unsigned rm_commit_thresh = 4000;
+	// Do not delete while iterating. The documentation didn't
+	// say anything about this, but I will not do it to be safe.
+	std::vector<xp::docid> to_delete;
+	// to get over the start phase where reallocation is often.
+	to_delete.reserve(1024);
 
 	// The doc says passing "" to it will yield an iter 
 	// over all documents.
@@ -174,16 +176,12 @@ void index::rm_if(doc_rm_func_t* func)
 		// rm if func returns true.
 		if(func(doc))
 		{
-			++rmed_since_last_commit;
-			db.delete_document(*i);
-		}
-
-		if (rmed_since_last_commit >= rm_commit_thresh)
-		{
-			db.commit();
-			rmed_since_last_commit = 0;
+			to_delete.push_back(*i);
 		}
 	}
+
+	for (const auto id : to_delete)
+		db.delete_document(id);
 }
 
 void index::shrink(

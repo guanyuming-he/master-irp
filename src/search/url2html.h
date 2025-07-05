@@ -14,6 +14,7 @@
  * @author Guanyuming He
  */
 
+#include <boost/url/url_view.hpp>
 #include <type_traits>
 extern "C" {
 #include <curl/curl.h>
@@ -313,3 +314,5 @@ private:
 	static PyObject* htmldate_module;
 	static PyObject* find_date_func;
 };
+
+std::string url_get_essential(urls::url_view u);
