@@ -25,30 +25,30 @@ add_library(search_eng
 	sha-2/sha-256.c
 )
 
+################## Tools ########################
 add_executable(indexer
-	search/indexer_main.cpp
+	search/tools/indexer_main.cpp
 )
 target_link_libraries(indexer PRIVATE search_eng)
-
-add_executable(searcher
-	search/searcher_main.cpp
-)
-target_link_libraries(searcher PRIVATE search_eng)
-
 add_executable(updater
-	search/updater_main.cpp
+	search/tools/updater_main.cpp
 )
 target_link_libraries(updater PRIVATE search_eng)
 
+add_executable(searcher
+	search/tools/searcher_main.cpp
+)
+target_link_libraries(searcher PRIVATE search_eng)
+
 add_executable(rm_doc
-	search/rm_doc.cpp
+	search/tools/rm_doc.cpp
 )
 target_link_libraries(rm_doc PRIVATE search_eng)
 
-add_executable(tmp
-	search/tmp_replace_date.cpp
+add_executable(upd_doc
+	search/tools/upd_doc.cpp
 )
-target_link_libraries(tmp PRIVATE search_eng)
+target_link_libraries(rm_doc PRIVATE search_eng)
 ############## External libs ###############
 
 # Python 3 C API
