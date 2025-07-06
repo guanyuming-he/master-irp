@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "index.h"
+#include "../index.h"
 
 // This is used if cmd arg does not have max_doc.
 static constexpr unsigned DEF_MAX_DOC = 100000;

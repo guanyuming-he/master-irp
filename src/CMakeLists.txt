@@ -48,7 +48,7 @@ target_link_libraries(rm_doc PRIVATE search_eng)
 add_executable(upd_doc
 	search/tools/upd_doc.cpp
 )
-target_link_libraries(rm_doc PRIVATE search_eng)
+target_link_libraries(upd_doc PRIVATE search_eng)
 ############## External libs ###############
 
 # Python 3 C API
@@ -131,7 +131,8 @@ set(testsList
 	# test_url 
 	test_onewebpage 
 	test_index
-	test_date_parsing
+	# deprecated
+	# test_date_parsing
 )
 foreach (test IN LISTS testsList)
 	add_executable(${test} tests/${test}.cpp)

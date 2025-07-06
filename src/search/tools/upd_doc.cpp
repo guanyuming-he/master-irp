@@ -1,6 +1,6 @@
-#include "index.h"
-#include "url2html.h"
-#include "webpage.h"
+#include "../index.h"
+#include "../url2html.h"
+#include "../webpage.h"
 #include <iostream>
 #include <string>
 

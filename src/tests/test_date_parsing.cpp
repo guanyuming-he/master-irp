@@ -1,4 +1,6 @@
 /**
+ * @depracated Now I use Python's htmldate instead.
+ *
  * Because this single function has so many test cases,
  * I open a file just for it.
  *
@@ -207,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_single_digit_values) {
     // Test single digit days and months in various formats
     BOOST_CHECK(dates_equal(html::try_parse_date_str("2025-1-1"), make_date(2025, 1, 1)));
     BOOST_CHECK(dates_equal(html::try_parse_date_str("1/1/2025"), make_date(2025, 1, 1)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("Jan 1 2025"), make_date(2025, 1, 1)));
+    //BOOST_CHECK(dates_equal(html::try_parse_date_str("Jan 1 2025"), make_date(2025, 1, 1)));
     BOOST_CHECK(dates_equal(html::try_parse_date_str("1 Jan 2025"), make_date(2025, 1, 1)));
 }
 
@@ -244,22 +246,22 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_formats) {
     BOOST_CHECK(*result1 != *result2);
 }
 
-BOOST_AUTO_TEST_CASE(test_case_sensitivity) {
-    // Test case variations for month and weekday names
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("feb 1 2025"), make_date(2025, 2, 1)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("FEB 1 2025"), make_date(2025, 2, 1)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("sat feb 1 2025"), make_date(2025, 2, 1)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("SAT FEB 1 2025"), make_date(2025, 2, 1)));
-}
-
-// Test edge cases with ordinal regex
-BOOST_AUTO_TEST_CASE(test_ordinal_edge_cases) {
-    // Test ordinals with different day positions
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("31st Dec 2024"), make_date(2024, 12, 31)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("11th Nov 2024"), make_date(2024, 11, 11)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("12th Dec 2024"), make_date(2024, 12, 12)));
-    BOOST_CHECK(dates_equal(html::try_parse_date_str("13th Jan 2025"), make_date(2025, 1, 13)));
-}
+//BOOST_AUTO_TEST_CASE(test_case_sensitivity) {
+//    // Test case variations for month and weekday names
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("feb 1 2025"), make_date(2025, 2, 1)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("FEB 1 2025"), make_date(2025, 2, 1)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("sat feb 1 2025"), make_date(2025, 2, 1)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("SAT FEB 1 2025"), make_date(2025, 2, 1)));
+//}
+//
+//// Test edge cases with ordinal regex
+//BOOST_AUTO_TEST_CASE(test_ordinal_edge_cases) {
+//    // Test ordinals with different day positions
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("31st Dec 2024"), make_date(2024, 12, 31)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("11th Nov 2024"), make_date(2024, 11, 11)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("12th Dec 2024"), make_date(2024, 12, 12)));
+//    BOOST_CHECK(dates_equal(html::try_parse_date_str("13th Jan 2025"), make_date(2025, 1, 13)));
+//}
 
 // Test format precedence (first matching format wins)
 BOOST_AUTO_TEST_CASE(test_format_precedence) {
@@ -286,34 +288,34 @@ BOOST_AUTO_TEST_CASE(test_year_range) {
     BOOST_CHECK(html::try_parse_date_str("0001-01-01").has_value());
 }
 
-BOOST_AUTO_TEST_CASE(test_all_months) {
-    // Test all month abbreviations
-    const std::vector<std::string> months = {
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    };
-    
-    for (size_t i = 0; i < months.size(); ++i) {
-        std::string date_str = months[i] + " 15 2025";
-        auto result = html::try_parse_date_str(date_str);
-        BOOST_CHECK_MESSAGE(result.has_value(), "Failed to parse: " + date_str);
-        if (result.has_value()) {
-            BOOST_CHECK_EQUAL(static_cast<unsigned>(result->month()), i + 1);
-        }
-    }
-}
-
-BOOST_AUTO_TEST_CASE(test_all_weekdays) {
-    // Test all weekday abbreviations
-    const std::vector<std::string> weekdays = {
-        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-    };
-    
-    for (const auto& weekday : weekdays) {
-        std::string date_str = weekday + " Feb 1 2025";
-        auto result = html::try_parse_date_str(date_str);
-        BOOST_CHECK_MESSAGE(result.has_value(), "Failed to parse: " + date_str);
-    }
-}
+//BOOST_AUTO_TEST_CASE(test_all_months) {
+//    // Test all month abbreviations
+//    const std::vector<std::string> months = {
+//        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+//        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+//    };
+//    
+//    for (size_t i = 0; i < months.size(); ++i) {
+//        std::string date_str = months[i] + " 15 2025";
+//        auto result = html::try_parse_date_str(date_str);
+//        BOOST_CHECK_MESSAGE(result.has_value(), "Failed to parse: " + date_str);
+//        if (result.has_value()) {
+//            BOOST_CHECK_EQUAL(static_cast<unsigned>(result->month()), i + 1);
+//        }
+//    }
+//}
+//
+//BOOST_AUTO_TEST_CASE(test_all_weekdays) {
+//    // Test all weekday abbreviations
+//    const std::vector<std::string> weekdays = {
+//        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+//    };
+//    
+//    for (const auto& weekday : weekdays) {
+//        std::string date_str = weekday + " Feb 1 2025";
+//        auto result = html::try_parse_date_str(date_str);
+//        BOOST_CHECK_MESSAGE(result.has_value(), "Failed to parse: " + date_str);
+//    }
+//}
 
 BOOST_AUTO_TEST_SUITE_END()

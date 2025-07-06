@@ -10,8 +10,8 @@
  * @author Guanyuming He
  */
 
-#include "searcher.h"
-#include "utility.h"
+#include "../searcher.h"
+#include "../utility.h"
 
 #include <iostream>
 #include <stdexcept>

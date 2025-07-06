@@ -16,7 +16,7 @@
 #include <boost/url.hpp>
 #include <xapian.h>
 
-#include "index.h"
+#include "../index.h"
 
 std::random_device devrand;
 std::mt19937 pseudorand(devrand());
