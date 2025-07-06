@@ -1,0 +1,45 @@
+# Third-Party Licenses
+This project uses third-party free or open-source software:
+
+## libcurl
+Libcurl is licensed under the curl license. See ./3rd-party-licenses/curl.
+### Source
+https://curl.se/docs/copyright.html
+
+## Lexbor
+The lexbor project and https://lexbor.com are licensed under the Apache
+License, version 2.0. See ./3rd-party-licenses/lexbor.
+### Source
+https://lexbor.com/license/
+
+## Xapian 
+Xapian is released under the GPL v2+. See ./3rd-party-licenses/xapian.
+### Source
+https://xapian.org/
+
+## Boost
+The Boost Software License specifies the terms and conditions of use for all
+Boost libraries and tools. See ./3rd-party-licenses/boost.
+### Source
+https://live.boost.org/users/license.html
+
+## CPython
+Python software and documentation are licensed under the Python Software
+Foundation License Version 2. See ./3rd-party-licenses/python.
+### Source
+https://docs.python.org/3/license.html#terms-and-conditions-for-accessing-or-otherwise-using-python
+
+## amosnier/sha-2
+Except as otherwise noted (below and/or in individual files), this project is
+licensed under the Unlicense (https://opensource.org/licenses/unlicense) or the
+Zero Clause BSD license (https://opensource.org/licenses/0bsd), at your option.
+See ./3rd-party-licenses/sha-2 
+### Source
+https://github.com/amosnier/sha-2
+
+
+## pugixml
+The pugixml library is distributed under the MIT license. See
+./3rd-party-licenses/pugixml.
+### Source
+https://pugixml.org/docs/quickstart.html#license

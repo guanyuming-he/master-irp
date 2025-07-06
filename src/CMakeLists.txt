@@ -62,8 +62,7 @@ set(Python3_LIBRARIES
 	"${CONDA_PREFIX}/lib/libpython3.so"
 	"${CONDA_PREFIX}/lib/libpython3.13.so.1.0"
 ) 
-# Do not use this stupid FindPython3, which works like shit 
-# with Anaconda.
+# Do not use this FindPython3, which isn't compatible with Anaconda
 #set(Python3_FIND_STRATEGY LOCATION)
 #set(Python3_FIND_VIRTUALENV ONLY)
 #find_package(
