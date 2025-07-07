@@ -82,7 +82,10 @@ int main(int argc, char* argv[])
 	else // use start_queue.
 	{
 		auto urls = {
-			urls::url{"https://www.cnbc.com/business"},
+			urls::url{"https://hbr.org/topic/subject/strategy"},
+			urls::url{"https://hbr.org/topic/subject/marketing"},
+			urls::url{"https://hbr.org/topic/subject/economics"},
+			//urls::url{"https://www.cnbc.com/business"},
 			//urls::url{"https://www.ft.com"},
 			//urls::url{"https://edition.cnn.com/business"},
 			//urls::url{"https://www.economist.com"},
@@ -91,6 +94,8 @@ int main(int argc, char* argv[])
 			//urls::url{"https://www.theatlantic.com/economy"},
 			//urls::url{"https://www.ibtimes.com/economy-markets"},
 			//urls::url{"https://www.forbes.com/business"},
+			// reuters needs me to enable JS.
+			//urls::url{"https://www.reuters.com/business"},
 			// wsj blocks me if I don't enable JS and cookies.
 			//urls::url{"https://www.wsj.com"},
 			//Sean said this is unreliable. Do not use.
@@ -100,7 +105,7 @@ int main(int argc, char* argv[])
 		};
 		for (auto&& u : urls)
 		{
-			start_queue.emplace(u);
+			start_queue.emplace_back(u);
 		}
 
 		i = std::make_unique<indexer>(

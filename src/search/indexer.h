@@ -9,12 +9,10 @@
  * @author Guanyuming He
  */
 
+#include <deque>
 #include <filesystem>
 #include <limits>
-#include <queue>
-#include <string>
 #include <type_traits>
-#include <unordered_set>
 
 #include "url2html.h"
 #include "index.h"
@@ -57,8 +55,11 @@ public:
 	// certains marks that observer as const).
 	using filter_func_t = bool (urls::url&);
 	using wp_filter_func_t = bool (webpage&);
+
 	// Type of the queue of urls.
-	using uque_t = std::queue<urls::url>;
+	// I use deque instead of a queue so that 
+	// I could iterate over it.
+	using uque_t = std::deque<urls::url>;
 
 public:
 	indexer() = delete;

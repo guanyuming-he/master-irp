@@ -43,7 +43,7 @@ indexer::uque_t indexer::load_url_q(
 		std::string u_str(num_chars, '\0');
         ifs.read(reinterpret_cast<char*>(u_str.data()), num_chars);
 
-		ret.emplace(u_str);
+		ret.emplace_back(u_str);
     }
 
     return ret;
@@ -68,7 +68,7 @@ void indexer::save_url_q()
 	while (!q.empty())
 	{
 		auto url{std::move(q.front())};
-		q.pop();
+		q.pop_front();
 
 		// Write size and char string.
 		auto full{url.c_str()};
@@ -84,7 +84,7 @@ void indexer::save_url_q()
 void indexer::start_indexing()
 {
 	// After a while of indexing, I realized that it's helpful to have a set of
-	// already recursed items so that I won't recurse them again.
+	// already enqueued items so that I won't process them again.
 	// A question is whether to persist the set between indexings or
 	// to make it local to each indexing.
 	// Advantage of persisting: maximize speed.
@@ -93,7 +93,12 @@ void indexer::start_indexing()
 	//
 	// I chose to make the set local to each indexing.
 	
-	std::unordered_set<std::string> recursed;
+	std::unordered_set<std::string> enqueued;
+	// register the initial queue.
+	for (const auto& u : q)
+	{
+		enqueued.emplace(url_get_essential(u));
+	}
 
 	while (
 		!q.empty() && 
@@ -101,7 +106,7 @@ void indexer::start_indexing()
 		num_indexed < index_limit
 	) {
 		auto url{std::move(q.front())};
-		q.pop();
+		q.pop_front();
 
 		// Not indexed.
 		webpage pg(url, convertor);
@@ -123,13 +128,10 @@ void indexer::start_indexing()
 			++num_indexed;
 		}
 
-
-		// Only recurse when not recursed and the filters return true.
+		// Only recurse when the filters return true.
 		if (
-			!recursed.contains(url_get_essential(url)) &&
 			recurse_filter(url) && wp_recurse_filter(pg))
 		{
-			recursed.emplace(url_get_essential(url));
 
 			auto urls{pg.get_urls()};
 			for (auto&& u : urls)
@@ -147,7 +149,12 @@ void indexer::start_indexing()
 				)
 					continue;
 
-				q.emplace(u);
+				auto essential = url_get_essential(u);
+				if (!enqueued.contains(essential))
+				{
+					q.emplace_back(u);
+					enqueued.emplace(essential);
+				}
 			}
 		}
 

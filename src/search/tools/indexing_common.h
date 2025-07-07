@@ -87,6 +87,20 @@ static bool has_dates(const std::string_view p)
  */
 static const std::unordered_map<std::string, path_filter_func_t*> 
 filtermap {
+	{std::string("hbr.org"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.starts_with("/topic") ||
+				p.starts_with("/the-latest");
+			bool b2 = 
+				// it has an odd structure of /yyyy/mm
+				p.size() > 8 &&
+				std::isdigit(p.at(1)) &&
+				std::isdigit(p.at(2)) &&
+				std::isdigit(p.at(6)) &&
+				has_words_separated_by_dash(p);
+			return {b1||b2, b2};
+	}},
 	{std::string("www.cnbc.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> {
 			bool b1 = 
@@ -162,6 +176,17 @@ filtermap {
 			bool b2 = p.starts_with("/sites");
 			return {b1||b2, b2};
 	}},
+	// It needs me to enable JS
+	//{std::string("www.reuters.com"), 
+	//	[](const std::string_view p) -> std::pair<bool,bool> {
+	//		bool b1 = 
+	//			p.starts_with("/business") ||
+	//			p.starts_with("/markets");
+	//		bool b2 = 
+	//			has_dates(p) &&
+	//			has_words_separated_by_dash(p);
+	//		return {b1||b2, b1&&b2};
+	//}},
 	// Bloomberg blocked me
 	//{std::string("www.bloomberg.com"), 
 	//	[](const std::string_view p) -> std::pair<bool,bool> { 
