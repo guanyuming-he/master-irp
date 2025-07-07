@@ -85,3 +85,25 @@ for that.
 ### Work plan before next meeting:
 I will wait for his feed back on that, while try to balance the database of my
 search engine.
+
+## Meeting (7 July 2025)
+*Present: Guanyuming He (GH, student), Rhodri Nelson (RN, second supervisor)*
+
+### Key points discussed:
+Sean wanted Rhodri to meet me so that we can discuss technical points. Because
+of his time slots, the meeting happened on next Monday, not the previous Friday
+when it was supposed to happen.
+
+I showed him how I improved my search engine and LLM tuning
+
+### Feedback received:
+He commented out that I should start working on using LLMs to synthesize my
+retrieved data from my search engine. Even if the results are not quite so
+satisfactory, I could still use a LLM to rerank the search results.
+Another reason for my building my own search engine is the commercial search
+engine's query quotas; it's already quite limiting for only searching text, not
+to mention with AI it can only be more expensive. I told him this problem, and
+he recommend another tool, Open WebUI to me, which I will investigate.
+
+### Work plan before next meeting:
+I will work on the two points Rhodri mentioned.
