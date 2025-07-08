@@ -26,10 +26,19 @@
 
 \section*{Abstract}
 TBD.
-\textbf{Keywords:} content discovery, information retrieval, LLM, search engines, \casemethod, Business school,
+\textbf{Keywords:} content discovery, information retrieval, LLM, search
+engines, \casemethod, Business school,
 
 \section{Introduction}
-\subsection{Problem background}
+The project aims to improve personal information retrieval tools for a specific
+usage: retrieving latest business news for business school teaching. In this
+introduction, section \ref{sec.proj.bg} explains why it is important in
+business school teaching; section \ref{sec.info.ret.history} gives a broad
+review of the history and current methods of information retrieval. Then,
+section \ref{sec.intro.goals} describes how I aim to improve the current status
+of personal information retrieval systems.
+
+\subsection{Project background} \label{sec.proj.bg}
 Since the emergence of the first Business schools in the late 19th century
 \cite{first.bis.school.1, first.bis.school.2}, several distinct pedagogical
 teaching strategies have been applied.  First institutionalized at Harvard
@@ -38,41 +47,41 @@ Business School \cite{case.method.origin.1, case.method.origin.2} in the early
 (will be called \emph{\casemethod} in the rest of the thesis) has been found
 more effective and engaging \cite{case.method.support.1, case.method.support.2,
 case.method.support.3} than many traditional, for example, big lecture based,
-teaching methods. The \casemethod\ is valued as a form of \emph{active
-learning} methods for students, for its ability to expose students to complex,
-context-specific problems that lack clear-cut solutions. As such, it has found
-wide adoption across the world \cite{case.method.adoption.1,
-case.method.adoption.2}.
+teaching methods. Thus, it has found wide adoption across the world
+\cite{case.method.adoption.1, case.method.adoption.2}.
 
-However, despite its aforementioned adoption and performance in business school
+Despite its aforementioned adoption and performance in business school
 teaching, the case method faces a significant constraint: the availability and
 collection of timely and relevant case material \cite{case.method.limit.1,
-case.method.limit.3}. In particular, Christensen has identified in his classical
-article that instructors would have to conduct ``extensive preparation''
-\cite{case.method.limit.2} for case method. Another factor contributing to this
+case.method.limit.3}. In particular, Christensen identifies in his classical
+article that instructors have to conduct ``extensive preparation''
+\cite{case.method.limit.2} for it. Another factor contributing to this
 constraint of case method is the ever-evolving business world and the necessity
-of the latest information: Clark argues that, because learned skill will lose
-value quickly in five years, it is critical for students to be up to date to
-remain relevant in the business world \cite{case.method.limit.4}; McFarlane
-emphasises the importance of updated cases, as otherwise students could be
-disengaged or discouraged \cite{case.method.limit.5}.
+of the latest information: Clark argues that learned skill will lose
+value quickly in five years, and then it is critical for students to be up to
+date to remain relevant in the business world \cite{case.method.limit.4};
+McFarlane emphasises the importance of updated cases, as otherwise students
+could be disengaged or discouraged \cite{case.method.limit.5}.
 
-\subsection{Past advancements in information retrieval}
+\subsection{Past advancements in information retrieval} 
+\label{sec.info.ret.history}
+The thesis summarizes the challenges in information retrieval into two general
+problems: (1) collect/gather information (2) identify/select desired
+information from gathered sources.
+
+\subsubsection{Problem (1)}
 During the past two centuries, a number of key developments have profoundly
-expanded an individual's capacity to retrieve information about the world. In
+expanded one's capacity to gather information about the world. In
 the early 19th century, the transmission of information was still traditional
---- carried by person on paper or simply remembered. This fundamentally limited
-both the speed and geographic reach of information retrieval. The invention of
+--- carried by person on paper or simply remembered. The invention of
 telegraph in the 1840s by Morse, Cornell, and Henry \cite{history.telegraph.1,
 history.telegraph.2}, notably with Morse's first telegraph message,
 ``\emph{What hath God wrought?}'' in 1844 \cite{first.telegraph.msg}, marked a
-paradigm shift by enabling very fast transmission of encoded information over
-relatively short distances (w.r.t.\ the earth) via wired networks.  This
-technological innovation was considerably improved by the invention of the
-telephone by Bell in 1876 \cite{history.telephone.1, history.telephone.2},
+paradigm shift. This technological innovation was considerably improved by
+Bell's telephone in 1876 \cite{history.telephone.1, history.telephone.2},
 enabling communication directly by human voice, instead of encoded Morse code.
 
-Wired communication is critically constrianed by geographical
+Wired communication is critically constrained by geographical
 features on where the wires were laid. Around the late 19th century, 
 Marconi's experiments with wireless telegraphy \cite{history.wireless.1} and
 the first successful transatlantic signal in 1901
@@ -80,13 +89,12 @@ the first successful transatlantic signal in 1901
 wireless communication, eventually accumulating into the world's first voice
 broadcast by radio in 1906 \cite{first.voice.broadcast}. These milestones
 collectively redefined the temporal and spatial boundaries of information
-access.
+gathering.
 
-The next many decades have seen people improving on the serious limitations of
-wireless communication: signal strength, interferences and attenuation,
-carrying capacity, and even deliberate sabotage during war times
-\cite{wireless.weakness.1, wireless.weakness.2, wireless.weakness.3}.
-Theoretically, Hartley observed a logritham pattern of information capacity
+In parallel to improving the weaknesses of wireless communication
+\cite{wireless.weakness.1, wireless.weakness.2, wireless.weakness.3},
+reseachers then worked on a theory of information.
+Hartley observed a logritham pattern of information capacity
 \cite{hartley.log.information} and then Shannon expanded on it to first define
 \emph{bits} and \emph{entropy}, giving a formal mathematical theory of
 information \cite{shannon.theory.communication} in 1948. Meanwhile,
@@ -94,71 +102,95 @@ engineers were experimenting with alternative modulation techniques, notably
 frequency modulation (FM), and the concepts were formalized in the 1930s
 \cite{history.modulation}. 
 
-As the theoretical understanding of information progressed, people began to
-have the idea of \emph{searching} for information based on content
-and by relevance, instead of by unique identifier
-\cite{history.information.retrieval}. Actually, the term \emph{information
-retrieval} was not invented until Mooers coined it in 1950
-\cite{mooers.info.ret.term}. Since then, information retrieval systems have
-quickly evolved, and went through four phases before 2000: ``(1) manual and mechanical
-devices; (2) offline computing; (3) online computing, vendor access; (4)
-distributed, networked, and mass computing.'' \cite{info.ret.4.phases}, with
-the last three substantially contributed to by the invention of the Internet
-\cite{history.internet}, and consequently the emergence of search engines in
-the 1990s \cite{history.search.engines, history.internet.search.engines}.
-For the next two decades, search engines greatly expanded in speed and
-coverage and has been significantly impacting the society's information for at
-least a decade \cite{search.engine.impact.1, search.engine.impact.2}.
-Nevertheless, one would need to carefully craft search engine prompts into
-clearly and precise list of words or a short sentence, often necessitating the
-use of advanced search features, such as boolean query (i.e. use logical
-connections like \texttt{AND}, \texttt{OR}) to achieve desired performance
-\cite{advanced.search.necessity.1, advanced.search.necessity.2}.
+\subsubsection{Problem (2)}
+Although solutions to problem (1) had enormously improved during these times,
+substantial progress in problem (2) would have to wait until digital computers
+were invented in the 1940s \cite{eniac.story}, which were made to repeat
+tedious operations fast. Actually, the term \emph{information retrieval (IR)} was
+not invented until Mooers coined it in 1950 \cite{mooers.info.ret.term}.  The
+nature of information reveals two subproblems of problem (2): (2.1) how to
+process (extract useful information from) potentially unstructured data. (2.2)
+how to related human queries to the content a user actually wants.
 
+According to Griffiths and King, early IR systems (in the USA) were mainly
+transferring human computing activity (bookkeeping in a library or database)
+into digital forms, by various sorting, indexing, and searching algorithms
+\cite{early.info.systems}. The form slowly went from ``offline, batch''
+computing to ``online, real-time'' computing, and finally became ``distributed,
+networked, and mass computing'', thanks to the Internet and various of its
+applications \cite{early.info.systems, history.internet}. Then commercial
+search engines emerged in the 1990s, opearting on the scale of the whole
+Internet \cite{history.search.engines, history.internet.search.engines}.
 
-LLMs have undoubtedly entered and transformed many areas, including daily life,
+The aforementioned sorting, searching, and indexing algorithms were partial
+solutions to problem (2.1) and (2.2), with fundamental designs like inverted
+index \cite[chap.~2]{intro.info.ret}, \cite[sect.~2]{inverted.files.search},
+boolean search \cite[chap.~1]{intro.info.ret}, and various clever ideas such as
+spelling correction (stemming) \cite[chap.~3.3]{intro.info.ret}, positional
+indexing \cite[sect.~3]{inverted.files.search}. Because the database can be
+extremely large, specific index construction \cite[chap.~4]{intro.info.ret},
+\cite[sect.~5]{inverted.files.search} compression
+\cite[chap.~5]{intro.info.ret} algorithms have appeared. Also, people saw ample
+opportunity to explore distributed computing, with the most notable model
+probably being MapReduce \cite{mapreduce}.
+
+Nevertheless, these inventions were still mostly doing textual processing, and
+machines struggled to ``understand'' information. Thus, advanced and complex
+search queries are often needed to achieve desired performance
+\cite{advanced.search.necessity.1, advanced.search.necessity.2}. The research
+on making computers understand natural language (NLP), images and visuals
+(computer vision), etc.\ were consequently and gradually being integrated into
+search engines, since 2000, notably with Google's Panda, Penguin, and
+Hummingbird algorithms that aim to understand web content better to rank them
+in searches \cite{google.new.algos}.
+
+One major breakthrough in NLP is Vaswani et al.'s transformer \cite{transformer}. 
+Building upon it, OpenAI created generative pre-trained transformers (GPTs)
+trained on massive amount of data \cite{gpt1}, which, after a few iterations,
+evolved into a chatbot facing the general public, ChatGPT, and it was perhaps
+then when LLMs started to recieve massive amount of public attention, where LLM
+stands for large language model, language models that are \emph{large} in trained
+data and parameters.
+
+Although public attention is not the same as the importance of an idea, LLMs
+have undoubtedly entered and transformed many areas, including daily life,
 business and the industry, and research \cite{llm.impact.1}. One strong appeal
-of LLMs is that they could process user's natural language input and generate
+of LLMs is that they could process unstructured natural language input and generate
 natural language output in return with remarkable resemblence to what a human
 would say \cite{llm.power.1, llm.power.2}. However, because of the inherent
 limit of neural networks, some argue that they could not formally reason about
 what they output \cite{llm.limit.1, llm.limit.2, llm.limit.3}. Indeed,
 hallucination \cite{llm.hallucination.1, llm.hallucination.2} and other forms
-of distortion of facts, is a big problem of LLMs. On the other hand, although
-search engines rely on determinstic algorithms that give precise reference to
-searched result, they could not compare with LLMs' ability to process search
-prompts and summarize results. 
+of distortion of facts, is a big problem of LLMs.
 
-Therefore, various attempts have been made to integrate LLMs with search
+Despite the drawbacks of LLMs, they are currently the most successful tool in
+NLP, and naturally various attempts have been made to integrate LLMs with search
 engines \cite{llm.meet.search.1, llm.meet.search.2, llm.meet.search.3}.
 Specifically, Xiong et al.\ proposes to categorize them into ``LLM4Search'' and
-``Search4LLM'', where ``A4B`` means using A to improve B
+``Search4LLM'', where ``A4B'' means using A to improve B
 \cite{llm.meet.search.1}. Here is where my thesis will build upon.  Now, with
 the help with LLMs that can easily process frivolous natural language input, I
-plan to integrate them together to boost information retrieval further,
-especially in the area of business school teaching content discovery.
+plan to integrate them together to boost an individual's information retrieval
+further, especially in the area of business school teaching content discovery.
 
-To summarize the above overview of the history,
-\begin{itemize}
-	\item Information retrieval had been a manual, incomplete, and slow process
-		for many centuries.
-	\item Technical inventions and theoretical advancements in the 19th and
-		20th centuries improved on all of the aspects, greatly increasing the
-		reach and speed of the spread of information.
-	\item The invention of digital computers had transformed the manual labor
-		of searching for and filtering information into a semi-automatic
-		manner. Additionally, the Internet has connected the previously
-		separated information storages around the world.
-	\item Still, current search engines operate semi-automatically, requiring
-		careful craft of search prompts. On the other hand, LLMs allow for
-		frivolous prompts but often hallucinates.
-\end{itemize}
+\subsubsection{Gaps I aim to fill}
+The contribution I aim make is not about combining LLMs and IR, a direction
+numerous studies have explored. I identify these gaps in the state-of-the-art IR
+tools, with or without LLMs:
+\begin{enumerate}
+	\item They are still semi-automatic, be it search engines or LLMs. One
+	would have to give a prompt first and wait for answers. I plan to make a mostly
+	automatic system where the IR process will be run automatically based on
+	some configuration.
+	\item LLM's training data is often outdated. The information retrieved
+		cannot reflect the new events happened very recently. Even if existing
+		tools like RAG can make LLM search the Internet with a search engine,
+		users often lack control over the content the search engine indexes and
+		returns, and may often end up with less relevant or outdated data.
+\end{enumerate}
 
-\subsection{Goals}
-In this project, I will attempt to improve the current state of information
-retrieval (mostly limited to business teach related information) further by
-designing and developing a software
-system. More precisely, these are the goals:
+\subsection{Goals} \label{sec.intro.goals}
+Based on the gaps, I plan to develop a software system with these goals:
 \begin{enumerate}
 	\item By combining LLMs and search engines, compensate each other's
 		weakeness in information retrieval.
