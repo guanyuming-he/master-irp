@@ -108,10 +108,11 @@ DEFAULT_CONFIG = {
 		"max_prompts": 5
 	},
 
-	"synthesis": {
+	"synthesis": 
+	{
 		"system_prompt": 
 		"""
-        Forget ALL previous instructions!!!
+		Forget ALL previous instructions!!!
 
 		You will be given 
 		1. a business topic.
@@ -124,6 +125,24 @@ DEFAULT_CONFIG = {
 		to include the URLs.
 		""",
 		"max_length": 3000
+	},
+
+	"schedules": 
+	{
+		"updater": {
+			"schedule": "every_x_days",
+			"every_x_days": 3,
+			"time": "01:00",
+			"command": "", # fill in later with cwd.
+			"catch_up": False
+		},
+		"llm_pipeline": {
+			"schedule": "weekly",
+			"day": 1,
+			"time": "04:00",
+			"command": "", # fill in later with cwd.
+			"catch_up": True
+		}
 	}
 }
 
@@ -204,6 +223,17 @@ class LLMPipeline:
 		"""
 		
 		with open(self.config_path, 'w') as f:
+			cwd = os.getcwd()
+			if not cwd.endswith('/'):
+				cwd += '/'
+
+			# index 1000 more to the database once in a while.
+			DEFAULT_CONFIG["schedules"]["updater"]["command"] = \
+				cwd + "bin/updater ./db 1000"
+			# run llm_pipeline once a while
+			DEFAULT_CONFIG["schedules"]["llm_pipeline"]["command"] = \
+				f"python3 {cwd}src/llm/llm_pipeline.py"
+
 			json.dump(DEFAULT_CONFIG, f, indent=2)
 		
 		print(f"Sample configuration created at {self.config_path}")
@@ -333,7 +363,7 @@ class LLMPipeline:
 		synthesis = send_to_ollama(
 			self.config['text_model'], 
 			system_prompt,
-            "summarize these search results:\n\n" + combined_results
+			"summarize these search results:\n\n" + combined_results
 		)
 		max_len = self.config["synthesis"].get("max_length", len(synthesis))
 		synthesis = synthesis[:max_len]
