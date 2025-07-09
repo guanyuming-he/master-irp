@@ -17,7 +17,8 @@ FILE_MODEL = "qwen2.5vl:7b"
 OUTPUT_FILE = "ollama_output.txt"
 
 BACKGROUND_INSTRUCTION = \
-"""You will receive abstract or concrete business-related concepts or documents
+"""
+You will receive abstract or concrete business-related concepts or documents
 (text, images, etc.). Your task is to generate search engine queries that would
 retrieve current or recent business news articles discussing these concepts in
 action.
@@ -72,7 +73,8 @@ You could use boolean opeartors like AND and OR, but be very careful with AND,
 as it may lead not too narrow matches.
 
 Only output search queries. Do not explain or instruct. And DO NOT enclose the
-entire queries in e.g. quotes or special symbols."""
+entire queries in e.g. quotes or special symbols.
+"""
 
 filepaths = []
 

@@ -39,3 +39,7 @@ que
 
 # prototype output 
 src/ollama_output.txt
+# llm pipeline outout
+pipeline_output/
+# llm pipeline config
+config.json
