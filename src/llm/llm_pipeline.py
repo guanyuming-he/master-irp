@@ -29,6 +29,8 @@ from pathlib import Path
 from typing import Dict, List, Any
 import logging
 from datetime import datetime
+import smtplib
+from email.message import EmailMessage
 
 from llm_interface import send_to_ollama
 
@@ -143,7 +145,10 @@ DEFAULT_CONFIG = {
 			"command": "", # fill in later with cwd.
 			"catch_up": True
 		}
-	}
+	}  
+	"email_addresses": ["example1@example.com", "example2@example.com"],
+	"sender_email": "youremail@gmail.com",
+	"sender_password": "yourapppassword"
 }
 
 class LLMPipeline:
@@ -436,9 +441,9 @@ class LLMPipeline:
 	
 	def create_summary_report(self, syntheses: Dict[str, str]):
 		"""Create a comprehensive summary report."""
-		report_file = self.output_dir / "final_report.md"
+		report_path = self.output_dir / "final_report.md"
 		
-		with open(report_file, 'w', encoding='utf-8') as f:
+		with open(report_path, 'w', encoding='utf-8') as f:
 			f.write("# Business Topic LLM Pipeline - Final Report\n\n")
 			f.write(f"**Generated:** "
 				f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
@@ -448,9 +453,43 @@ class LLMPipeline:
 				f.write(f"## {topic}\n\n")
 				f.write(f"{synthesis}\n\n")
 				f.write("---\n\n")
+
+			# Don't call it now. Not ready yet.
+			# send_report_by_email(f)
 		
-		if hasattr(self, 'logger'):
-			self.logger.info(f"Final report created: {report_file}")
+		self.logger.info(f"Final report created: {report_file}")
+
+
+	def send_report_by_email(self, report_file):
+		"""
+		Sends the final report file to each of the email addresses specified in 
+		config.json.
+		"""
+		email_list = self.config["email_addresses"]
+		sender_email = self.config["sender_email"]
+		sender_password = self.config["sender_password"]
+
+		# Load file content
+		with open("message.txt", "r") as f:
+			file_content = f.read()
+
+		# Set up SMTP connection
+		smtp_server = "smtp.gmail.com"
+		smtp_port = 587
+
+		with smtplib.SMTP(smtp_server, smtp_port) as server:
+			server.starttls()
+			server.login(sender_email, sender_password)
+
+			for recipient in email_list:
+				msg = EmailMessage()
+				msg["Subject"] = "Here is the report of the Business contents"
+				msg["From"] = sender_email
+				msg["To"] = recipient
+				msg.set_content(file_content)
+
+				server.send_message(msg)
+				self.logger.info(f"Final report sent to {recipient}")
 
 
 if __name__ == "__main__":
