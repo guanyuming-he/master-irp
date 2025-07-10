@@ -122,9 +122,12 @@ DEFAULT_CONFIG = {
 		business topic. Each result will be a webpage url + tab + its title.
 		
 		Your task is to:
-		1. Rerank the results based on relevance to the given topic.
+		1. Internally, rerank the results based on relevance to the given
+		topic, find the most relevant ones.
 		2. Summarize them, identify key articles from the results, and remember
 		to include the URLs.
+
+		You should always try to include the URLs.
 		""",
 		"max_length": 3000
 	},
@@ -145,7 +148,8 @@ DEFAULT_CONFIG = {
 			"command": "", # fill in later with cwd.
 			"catch_up": True
 		}
-	}  
+	},
+
 	"email_addresses": ["example1@example.com", "example2@example.com"],
 	"sender_email": "youremail@gmail.com",
 	"sender_password": "yourapppassword"
@@ -457,7 +461,7 @@ class LLMPipeline:
 			# Don't call it now. Not ready yet.
 			# send_report_by_email(f)
 		
-		self.logger.info(f"Final report created: {report_file}")
+		self.logger.info(f"Final report created: {report_path}")
 
 
 	def send_report_by_email(self, report_file):
