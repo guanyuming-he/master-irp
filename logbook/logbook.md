@@ -107,3 +107,20 @@ he recommend another tool, Open WebUI to me, which I will investigate.
 
 ### Work plan before next meeting:
 I will work on the two points Rhodri mentioned.
+
+## Meeting (11 July 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+Sean had another meeting at the same time, so he asked me to send him my
+progress.
+
+I showed him that I built a pipeline that at that time could automatically read
+input from config, generate search engine prompts with LLM, search, and
+summarize with LLM.
+
+### Feedback received:
+I am waiting for that.
+
+### Work plan before next meeting:
+I am waiting for Sean's feedback.
