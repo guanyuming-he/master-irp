@@ -136,7 +136,7 @@ DEFAULT_CONFIG = {
 	{
 		"updater": {
 			"schedule": "every_x_days",
-			"every_x_days": 3,
+			"day": 3,
 			"time": "01:00",
 			"command": "", # fill in later with cwd.
 			"catch_up": False
