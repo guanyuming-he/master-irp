@@ -53,7 +53,7 @@ target_link_libraries(upd_doc PRIVATE search_eng)
 
 # Python 3 C API
 # Use my anaconda's Python3.
-set(CONDA_PREFIX "/home/anony/anaconda3/envs/daily")
+set(CONDA_PREFIX "/home/anony/anaconda3/envs/irp")
 set(Python3_ROOT_DIR ${CONDA_PREFIX})
 set(Python3_EXECUTABLE "${CONDA_PREFIX}/bin/python3")
 set(Python3_INCLUDE_DIRS "${CONDA_PREFIX}/include/python3.13")

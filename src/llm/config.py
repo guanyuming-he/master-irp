@@ -115,7 +115,15 @@ class Schedule(ConfigSection):
 		"""
 		d = dataclasses.asdict(self)
 		d["time"] = self.time.isoformat()
-		return d
+
+	# Because Python allows any type to be passed in in ctor,
+	# I have to write this stupid __post_init__
+	# How I miss C++.
+	def __post_init__(self):
+		if isinstance(self.stype, str):
+			self.stype = ScheduleType(self.stype)
+		if isinstance(self.time, str):
+			self.time = datetime.time.fromisoformat(self.time)
 
 	@staticmethod
 	def relative_cmd_prefix() -> str:
@@ -307,6 +315,25 @@ class Config:
 	# auto delivery by email
 	email_info : EmailInfo
 
+	# Because Python allows any type to be passed in in ctor,
+	# I have to write this stupid __post_init__
+	# How I miss C++.
+	def __post_init__(self):
+		if (isinstance(self.search_conf, dict)):
+			self.search_conf = SearchConf(**self.search_conf)
+		if (isinstance(self.synthesis_conf, dict)):
+			self.synthesis_conf = SynthesisConf(**self.synthesis_conf)
+
+		converted_sch = [
+			Schedule(**s) if isinstance(s, dict)
+			else s
+			for s in self.schedules
+		]
+		self.schedules = converted_sch
+
+		if (isinstance(self.email_info, dict)):
+			self.email_info = EmailInfo(**self.email_info)
+
 	@staticmethod
 	def load_default() -> Self:
 		business_topics : list[str] = [
@@ -379,30 +406,16 @@ class Config:
 
 	@staticmethod
 	def from_dict(d : dict) -> Self:
-		ret : Config = None
 		try:
-			ret = Config(**d)
+			return Config(**d)
 		except json.JSONDecodeError as e:
 			raise RuntimeError(
 				"Invalid config JSON"
 			)
-		ret.search_conf = SearchConf(**ret.search_conf)
-		ret.synthesis_conf = SynthesisConf(**ret.synthesis_conf)
-
-		# Convert subtypes here.
-		converted_sch = [
-			Schedule(**s)
-			for s in ret.schedules
-		]
-		ret.schedules = converted_sch
-
-		ret.email_info = EmailInfo(**ret.email_info)
-
-		return ret
 
 	@staticmethod
 	def load_from(path : str) -> Self:
-		with open(path, 'w') as f:
+		with open(path, 'r') as f:
 			d : dict = json.load(f)
 			return Config.from_dict(d)
 
