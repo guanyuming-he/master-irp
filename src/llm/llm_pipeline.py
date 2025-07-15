@@ -32,128 +32,11 @@ from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 
+# My local files
 from llm_interface import send_to_ollama
+from config import Config
 
 DEFAULT_CONFIG_PATH = "./config.json"
-DEFAULT_CONFIG = {
-	"business_topics": [
-		"Vertical integration in business",
-		"Diversification strategies in business",
-		"Competitive advantage in business",
-		"Foreign direct investment in business"
-	],
-
-	"text_model": "llama3.1:8b",
-	"file_model": "qwen2.5vl:7b",
-
-	"verbose_level": 1,
-	"search_prompt_generation": {
-		"system_prompt": 
-		"""
-		You will receive abstract or concrete business-related concepts or
-		documents (text, images, etc.). Your task is to generate search engine
-		queries that would retrieve current or recent business news articles
-		discussing these concepts in action.
-
-		When the concept is abstract (e.g., "vertical integration", "global
-		value chain", "how to evaluation a company's value"), follow these
-		rules STRICTLY: 1. Identify concrete real-world examples, events,
-		company names, industries, or case studies that might illustrate the
-		concept. Use these to generate multiple keyword-based queries that
-		search engines can match easily. Always remind yourself that a search
-		engine can only do word match and cannot understand abstract ideas.  2.
-		The final search queries for an abstract concept, e.g., "vertical
-		integration" should include both the technical term, "vertical
-		integration", its synonyms, e.g. "vertical consolidation", and the
-		concrete phrases you think of. Connect the technical terms and concrete
-		terms with OR, not AND.  3. Both 1 and 2 must appear in a query
-		generated for an abstract input!  However, when the input itself is
-		concrete, then you don't have to deabstract it.
-
-		For example: (Abstract) Input: "Vertical integration" Output: 
-				"vertical integration" OR "vertical consolidation" OR (Amazon
-				warehouse logistics retail)
-
-				"vertical integration" OR "vertical consolidation" OR (Tesla
-				battery production) OR (vehicle manufacturing)
-
-				"vertical integration" OR "vertical consolidation" OR (Apple
-				chip design manufacturing)
-
-				"vertical integration" OR "vertical consolidation" OR
-				"Companies investing in end-to-end supply chains"
-
-			(Abstract) Input: "Competitive advantage" Output: 
-				"competitive advantage" OR "strategic edge" OR (Apple vs
-				Microsoft battle)
-
-				"competitive advantage" OR "strategic edge" OR (Microsoft's
-				global dominance advantage)
-
-			(Concrete) Input: "Trump tariff" Output: 
-				Trump latest tariff
-
-				Trump China tariff
-
-				Trump tariff news
-
-				Traiff Trump impacts.
-
-
-		You could use boolean opeartors like AND and OR, but be very careful
-		with AND, as it may lead not too narrow matches.
-
-		Only output search queries, separating them by newlines. Do not explain
-		or instruct. And DO NOT enclose the entire queries in e.g. quotes or
-		special symbols.
-				""",
-		"max_prompts": 5
-	},
-
-	"synthesis": 
-	{
-		"system_prompt": 
-		"""
-		Forget ALL previous instructions!!!
-
-		You will be given 
-		1. a business topic.
-		2. a list of results from search engine that are about the
-		business topic. Each result will be a webpage url + tab + its title.
-		
-		Your task is to:
-		1. Internally, rerank the results based on relevance to the given
-		topic, find the most relevant ones.
-		2. Summarize them, identify key articles from the results, and remember
-		to include the URLs.
-
-		You should always try to include the URLs.
-		""",
-		"max_length": 3000
-	},
-
-	"schedules": 
-	{
-		"updater": {
-			"schedule": "every_x_days",
-			"day": 3,
-			"time": "01:00",
-			"command": "", # fill in later with cwd.
-			"catch_up": False
-		},
-		"llm_pipeline": {
-			"schedule": "weekly",
-			"day": 1,
-			"time": "04:00",
-			"command": "", # fill in later with cwd.
-			"catch_up": True
-		}
-	},
-
-	"email_addresses": ["example1@example.com", "example2@example.com"],
-	"sender_email": "youremail@gmail.com",
-	"sender_password": "yourapppassword"
-}
 
 class LLMPipeline:
 	def __init__(self, config_path: str = DEFAULT_CONFIG_PATH):
@@ -161,17 +44,47 @@ class LLMPipeline:
 		Initialize the LLM pipeline with configuration.
 		"""
 		self.config_path = config_path
-		self.config = self.load_config()
-		self.results = {}
+		self.config : Config = self.load_config()
+
+		self.results : dict = {}
 		self.output_dir = Path("pipeline_output")
 		self.output_dir.mkdir(exist_ok=True)
+
 		self.setup_logging()
 		
+	def load_config(self) -> Config:
+		"""
+		Load configuration from JSON file.
+		"""
+		try:
+			with open(self.config_path, 'r') as f:
+				config:dict = json.load(f)
+			
+			# Validate required fields
+			required_fields = [
+				"business_topics", 
+				"text_model", 
+				"search_conf"
+			]
+			for field in required_fields:
+				if field not in config:
+					raise ValueError(f"Missing required field: {field}")
+			return Config.from_dict(config)
+			
+		except FileNotFoundError:
+			print(
+				f"Configuration file {self.config_path} not found. A default\
+				one will be created.\n"
+			)
+			ret = Config.load_default()
+			ret.save_to(self.config_path)
+			return ret
+	
 	def setup_logging(self):
 		"""
 		Configure logging based on verbose level from config.
 		"""
-		verbose_level = self.config.get('verbose_level', 1)
+		verbose_level = self.config.verbose_level
 		
 		if verbose_level == 0:
 			# No logging
@@ -193,62 +106,10 @@ class LLMPipeline:
 		
 		self.logger = logging.getLogger(__name__)
 		
-	def load_config(self) -> Dict[str, Any]:
-		"""
-		Load configuration from JSON file.
-		"""
-		try:
-			with open(self.config_path, 'r') as f:
-				config = json.load(f)
-			
-			# Validate required fields
-			required_fields = [
-				'business_topics', 
-				'text_model', 
-			'search_prompt_generation'
-			]
-			for field in required_fields:
-				if field not in config:
-					raise ValueError(f"Missing required field: {field}")
-			
-			return config
-			
-		except FileNotFoundError:
-			print(
-				f"Configuration file {self.config_path} not found. A default\
-				one will be created.\n"
-			)
-			self.create_default_config()
-			return DEFAULT_CONFIG
-
-		except json.JSONDecodeError as e:
-			raise RuntimeError(
-				f"Invalid JSON in configuration file: {e}"
-			)
-	
-	def create_default_config(self):
-		"""
-		Create a default configuration file if it's not already there.
-		"""
-		
-		with open(self.config_path, 'w') as f:
-			cwd = os.getcwd()
-			if not cwd.endswith('/'):
-				cwd += '/'
-
-			# index 1000 more to the database once in a while.
-			DEFAULT_CONFIG["schedules"]["updater"]["command"] = \
-				cwd + "bin/updater ./db 1000"
-			# run llm_pipeline once a while
-			DEFAULT_CONFIG["schedules"]["llm_pipeline"]["command"] = \
-				f"python3 {cwd}src/llm/llm_pipeline.py"
-
-			json.dump(DEFAULT_CONFIG, f, indent=2)
-		
-		print(f"Sample configuration created at {self.config_path}")
-	
 	def generate_search_prompts(self, business_topic: str) -> List[str]:
-		"""Generate search prompts for a business topic using Ollama."""
+		"""
+		Generate search prompts for a business topic using Ollama.
+		"""
 		if hasattr(self, 'logger'):
 			self.logger.info(
 				f"Generating search prompts for topic: " +
@@ -256,8 +117,8 @@ class LLMPipeline:
 			)
 		
 		response = send_to_ollama(
-			self.config['text_model'], 
-			self.config['search_prompt_generation']['system_prompt'],
+			self.config.text_model,
+			self.config.search_conf.system_prompt,
 			business_topic + "\n relatd search engine prompts"
 		)
 		
@@ -268,8 +129,10 @@ class LLMPipeline:
 				if line.strip()]
 		
 		# Limit the number of prompts if specified
-		max_prompts = self.config['search_prompt_generation'].get(
-			'max_prompts', len(prompts))
+		max_prompts = min(
+			self.config.search_conf.max_prompts,
+			len(prompts)
+		)
 		prompts = prompts[:max_prompts]
 		
 		if hasattr(self, 'logger'):
@@ -278,7 +141,11 @@ class LLMPipeline:
 		return prompts
 	
 	def execute_search(self, search_prompt: str) -> str:
-		"""Execute search using the local search engine."""
+		"""
+		Execute search using the local search engine.
+
+		Assume that the pipeline's cwd is the project root.
+		"""
 		if hasattr(self, 'logger'):
 			self.logger.info(f"Executing search: {search_prompt}")
 		
@@ -365,16 +232,17 @@ class LLMPipeline:
 		for prompt, result in self.results[topic].items():
 			combined_results += f"\n--- Search: {prompt} ---\n{result}\n"
 		
-		# Prepare synthesis prompt
-		system_prompt = self.config['synthesis']['system_prompt']
-		
 		# Get synthesis from Ollama
+		system_prompt = self.config.synthesis_conf.system_prompt
 		synthesis = send_to_ollama(
-			self.config['text_model'], 
+			self.config.text_model, 
 			system_prompt,
 			"summarize these search results:\n\n" + combined_results
 		)
-		max_len = self.config["synthesis"].get("max_length", len(synthesis))
+		max_len = min(
+			self.config.synthesis_conf.max_len,
+			len(synthesis)
+		)
 		synthesis = synthesis[:max_len]
 		
 		# Store synthesis
@@ -393,10 +261,12 @@ class LLMPipeline:
 		return synthesis
 	
 	def run_pipeline(self):
-		"""Execute the complete LLM pipeline."""
+		"""
+		Execute the complete LLM pipeline.
+		"""
 		self.logger.info("Starting business topic LLM pipeline")
 		
-		topics = self.config['business_topics']
+		topics = self.config.business_topics
 		self.logger.info(f"Processing {len(topics)} business topics")
 		
 		# Step 1-4: For each topic, generate prompts, search, and store results
@@ -469,16 +339,16 @@ class LLMPipeline:
 		Sends the final report file to each of the email addresses specified in 
 		config.json.
 		"""
-		email_list = self.config["email_addresses"]
-		sender_email = self.config["sender_email"]
-		sender_password = self.config["sender_password"]
+		email_list = self.config.email.dst_addresses
+		sender_email = self.config.email.src_address
+		sender_password = self.config.email.src_passwd
 
 		# Load file content
 		with open("message.txt", "r") as f:
 			file_content = f.read()
 
 		# Set up SMTP connection
-		smtp_server = "smtp.gmail.com"
+		smtp_server = self.config.email.src_provider
 		smtp_port = 587
 
 		with smtplib.SMTP(smtp_server, smtp_port) as server:
