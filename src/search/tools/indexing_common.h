@@ -156,13 +156,19 @@ filtermap {
 	}},
 	{std::string("www.theguardian.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> { 
-			bool b = p.starts_with("/business"); 
-			return {b, b};
+			bool b1 = 
+				p.starts_with("/business") ||
+				p.starts_with("/money") || 
+				p.starts_with("/uk/business") ||
+				p.starts_with("/uk/money");
+			bool b2 = has_dates(p);
+			return {b1||b2, b1&&b2};
 	}},
 	{std::string("www.theatlantic.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> { 
-			bool b = p.starts_with("/economy"); 
-			return {b, b};
+			bool b1 = p.starts_with("/economy"); 
+			bool b2 = has_dates(p);
+			return {b1, b1&&b2};
 	}},
 	{std::string("www.ibtimes.com"), 
 		[](const std::string_view p) -> std::pair<bool,bool> { 

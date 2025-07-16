@@ -59,7 +59,7 @@ class ConfigSection:
 		and then handle all fields that cannot be handled by json.dump()
 		automatically.
 		"""
-		raise NotImplemented("Abstract method")
+		raise NotImplementedError("Abstract method")
 
 
 class ScheduleType(str, Enum):
@@ -115,6 +115,8 @@ class Schedule(ConfigSection):
 		"""
 		d = dataclasses.asdict(self)
 		d["time"] = self.time.isoformat()
+
+		return d
 
 	# Because Python allows any type to be passed in in ctor,
 	# I have to write this stupid __post_init__
@@ -334,8 +336,8 @@ class Config:
 		if (isinstance(self.email_info, dict)):
 			self.email_info = EmailInfo(**self.email_info)
 
-	@staticmethod
-	def load_default() -> Self:
+	@classmethod
+	def load_default(cls : type[Self]) -> Self:
 		business_topics : list[str] = [
 			"Vertical integration in business",
 			"Diversification strategies in business",
@@ -381,14 +383,25 @@ class Config:
 			),
 		]
 		email_info = EmailInfo(
-			# TBD
-			dst_addresses = [],
-			src_address = "TBD",
-			src_passwd = "TBD",
-			src_provider = "TBD"
+			# Since the code will be published,
+			# the dst address will be my email address that can be known
+			# publicly from my GitHub anyway.
+			dst_addresses = [
+				# Use my least valuable email address: the Microsoft one I
+				# registered a long time ago and want to discard ever since.
+				# But sadly I cannot as many part of the world requires me to
+				# use Microsoft services in my daily life.
+				"guanyuminghe@outlook.com"
+			],
+			# the src email address is a pure burner account.
+			# It is used for nothing else except this.
+			src_address = "anonytempburner@gmail.com",
+			# Its password is a random base64 8 character string.
+			src_passwd = "xfvJaGS8JpA=",
+			src_provider = "smtp.gmail.com"
 		)
 
-		return Config(
+		return cls(
 			# global options
 			business_topics,
 			text_model,
@@ -404,20 +417,20 @@ class Config:
 		)
 
 
-	@staticmethod
-	def from_dict(d : dict) -> Self:
+	@classmethod
+	def from_dict(cls : type[Self], d : dict) -> Self:
 		try:
-			return Config(**d)
+			return cls(**d)
 		except json.JSONDecodeError as e:
 			raise RuntimeError(
 				"Invalid config JSON"
 			)
 
-	@staticmethod
-	def load_from(path : str) -> Self:
+	@classmethod
+	def load_from(cls : type[Self], path : str) -> Self:
 		with open(path, 'r') as f:
 			d : dict = json.load(f)
-			return Config.from_dict(d)
+			return cls.from_dict(d)
 
 	def save_to(self, path : str) -> None:
 		"""

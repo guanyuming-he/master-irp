@@ -12,8 +12,6 @@ make the program
 1. Correct today and in the unknown future:
 	Each configuration section is isolated in GUI. One mistake won't mess up
 	the others, and one change only requires modification in one place.
-	In the unknown future, it is easily extensible, thus reducing error
-	possibilities.
 2. Easy to understand:
 	Abstracting related config entries into one section makes the program easy
 	to understand.
@@ -33,52 +31,21 @@ import base64
 import threading
 from typing import Any, Dict, List, Optional
 
+# local imports
 from config import (
-	Config, ConfigSection, Schedule, ScheduleType, EmailInfo,
+	Config, ConfigSection, 
+	Schedule, ScheduleType, 
+	EmailInfo,
 	SearchConf, SynthesisConf
 )
 from llm_interface import send_to_ollama
 # Use the pipeline's default path
 from llm_pipeline import DEFAULT_CONFIG_PATH
-
-
-# Global font settings
-# I put them here instead of inside ConfigGUI because 
-# for some elements I have to set their font individually; I cannot do that
-# centrally.
-DEFAULT_FONT_SIZE = 14
-FONT_FAMILY = "Segoe UI"
-DEFAULT_FONT = (FONT_FAMILY, DEFAULT_FONT_SIZE)
-
-
-class ConfigSectionFrame:
-	"""
-	Base class for all config section frames.
-	Each config section should inherit from this and implement
-	the abstract methods to create GUI elements and handle data.
-	"""
-	
-	def __init__(self, parent: tk.Widget, title: str):
-		self.parent = parent
-		self.title = title
-		self.frame = ttk.LabelFrame(parent, text=title, padding="10")
-		self.widgets = {}
-		
-	def create_widgets(self) -> None:
-		"""Create GUI widgets for this config section."""
-		raise NotImplementedError("Abstract method")
-		
-	def load_data(self, data: Any) -> None:
-		"""Load data into the widgets."""
-		raise NotImplementedError("Abstract method")
-		
-	def get_data(self) -> Any:
-		"""Extract data from widgets and return config object."""
-		raise NotImplementedError("Abstract method")
-		
-	def pack(self, **kwargs) -> None:
-		"""Pack the frame."""
-		self.frame.pack(**kwargs)
+from config_gui_base import (
+	DEFAULT_FONT,
+	ConfigDialog,
+	ConfigSectionFrame
+)
 
 
 class SearchConfFrame(ConfigSectionFrame):
@@ -160,7 +127,7 @@ class ScheduleFrame(ConfigSectionFrame):
 	
 	def __init__(self, parent: tk.Widget):
 		super().__init__(parent, "Schedules")
-		self.schedule_list = []
+		self.schedule_list : list[Schedule] = []
 		self.create_widgets()
 		
 	def create_widgets(self) -> None:
@@ -241,65 +208,64 @@ class ScheduleFrame(ConfigSectionFrame):
 		return self.schedule_list.copy()
 
 
-class ScheduleDialog:
+class ScheduleDialog(ConfigDialog):
 	"""Dialog for editing individual schedules."""
 	
-	def __init__(self, parent: tk.Widget, title: str, 
-				 schedule: Optional[Schedule] = None):
-		self.result = None
-		self.dialog = tk.Toplevel(parent)
-		self.dialog.title(title)
-		self.dialog.geometry("400x300")
-		self.dialog.resizable(False, False)
-		self.dialog.transient(parent)
-		self.dialog.grab_set()
-		
-		# Center the dialog
-		self.dialog.update_idletasks()
-		x = (self.dialog.winfo_screenwidth() // 2) - (400 // 2)
-		y = (self.dialog.winfo_screenheight() // 2) - (300 // 2)
-		self.dialog.geometry(f"400x300+{x}+{y}")
-		
-		self.create_widgets()
-		
+	def __init__(
+		self, 
+		parent: tk.Widget, title: str, 
+		schedule: Optional[Schedule] = None
+	):
+		self.result : Optional[Schedule] = None
+		self.name_var = tk.StringVar()
+		self.type_var = tk.StringVar()
+		self.day_var = tk.StringVar()
+		self.hour_var = tk.StringVar()
+		self.minute_var = tk.StringVar()
+		self.command_var = tk.StringVar()
+		self.catch_up_var = tk.StringVar()
 		if schedule:
 			self.load_schedule(schedule)
 			
-		self.dialog.wait_window()
+		super().__init__(
+			parent,
+			600, 800,
+			"Edit this scheduled task"
+		)
 		
-	def create_widgets(self) -> None:
-		main_frame = ttk.Frame(self.dialog, padding="10")
-		main_frame.pack(fill='both', expand=True)
-		
+	def create_custom_widgets(self) -> None:
 		# Name
-		ttk.Label(main_frame, text="Name:").grid(row=0, column=0, sticky='w', pady=5)
-		self.name_var = tk.StringVar()
-		ttk.Entry(main_frame, textvariable=self.name_var, width=30).grid(
+		ttk.Label(
+			self.inner_frame, text="Name:"
+		).grid(row=0, column=0, sticky='w', pady=5)
+		ttk.Entry(self.inner_frame, textvariable=self.name_var, width=30).grid(
 			row=0, column=1, sticky='ew', pady=5, padx=(10, 0)
 		)
 		
 		# Schedule type
-		ttk.Label(main_frame, text="Type:").grid(row=1, column=0, sticky='w', pady=5)
-		self.type_var = tk.StringVar()
-		type_combo = ttk.Combobox(main_frame, textvariable=self.type_var, width=27)
+		ttk.Label(
+			self.inner_frame, text="Type:"
+		).grid(row=1, column=0, sticky='w', pady=5)
+		type_combo = ttk.Combobox(
+			self.inner_frame, textvariable=self.type_var, width=27
+		)
 		type_combo['values'] = [e.value for e in ScheduleType]
 		type_combo.grid(row=1, column=1, sticky='ew', pady=5, padx=(10, 0))
 		
 		# Day
-		ttk.Label(main_frame, text="Day:").grid(row=2, column=0, sticky='w', pady=5)
-		self.day_var = tk.StringVar()
-		ttk.Spinbox(main_frame, textvariable=self.day_var, from_=1, to=31, 
+		ttk.Label(
+			self.inner_frame, text="Day:"
+		).grid(row=2, column=0, sticky='w', pady=5)
+		ttk.Spinbox(self.inner_frame, textvariable=self.day_var, from_=1, to=31, 
 				   width=30).grid(row=2, column=1, sticky='ew', pady=5, padx=(10, 0))
 		
 		# Time
-		ttk.Label(main_frame, text="Time (HH:MM):").grid(
+		ttk.Label(self.inner_frame, text="Time (HH:MM):").grid(
 			row=3, column=0, sticky='w', pady=5
 		)
-		time_frame = ttk.Frame(main_frame)
+		time_frame = ttk.Frame(self.inner_frame)
 		time_frame.grid(row=3, column=1, sticky='ew', pady=5, padx=(10, 0))
 		
-		self.hour_var = tk.StringVar(value="12")
-		self.minute_var = tk.StringVar(value="00")
 		
 		ttk.Spinbox(time_frame, textvariable=self.hour_var, from_=0, to=23, 
 				   width=5).pack(side='left')
@@ -308,21 +274,22 @@ class ScheduleDialog:
 				   width=5).pack(side='left')
 		
 		# Command
-		ttk.Label(main_frame, text="Command:").grid(row=4, column=0, sticky='w', pady=5)
-		self.command_var = tk.StringVar()
-		ttk.Entry(main_frame, textvariable=self.command_var, width=30).grid(
+		ttk.Label(
+			self.inner_frame, text="Command:"
+		).grid(row=4, column=0, sticky='w', pady=5)
+		ttk.Entry(self.inner_frame, textvariable=self.command_var, width=30).grid(
 			row=4, column=1, sticky='ew', pady=5, padx=(10, 0)
 		)
 		
 		# Catch up
 		self.catch_up_var = tk.BooleanVar()
-		ttk.Checkbutton(main_frame, text="Catch up", 
+		ttk.Checkbutton(self.inner_frame, text="Catch up", 
 						variable=self.catch_up_var).grid(
 			row=5, column=0, columnspan=2, sticky='w', pady=5
 		)
 		
 		# Buttons
-		btn_frame = ttk.Frame(main_frame)
+		btn_frame = ttk.Frame(self.inner_frame)
 		btn_frame.grid(row=6, column=0, columnspan=2, pady=20)
 		
 		ttk.Button(btn_frame, text="OK", command=self.ok_clicked).pack(
@@ -333,7 +300,7 @@ class ScheduleDialog:
 		)
 		
 		# Configure grid weights
-		main_frame.columnconfigure(1, weight=1)
+		self.inner_frame.columnconfigure(1, weight=1)
 		
 	def load_schedule(self, schedule: Schedule) -> None:
 		"""Load schedule data into widgets."""
@@ -346,7 +313,6 @@ class ScheduleDialog:
 		self.catch_up_var.set(schedule.catch_up)
 		
 	def ok_clicked(self) -> None:
-		"""Handle OK button click."""
 		try:
 			name = self.name_var.get().strip()
 			if not name:
@@ -381,7 +347,6 @@ class ScheduleDialog:
 			messagebox.showerror("Error", f"Invalid input: {str(e)}")
 			
 	def cancel_clicked(self) -> None:
-		"""Handle Cancel button click."""
 		self.dialog.destroy()
 
 
@@ -396,7 +361,8 @@ class EmailInfoFrame(ConfigSectionFrame):
 		# Destination addresses
 		ttk.Label(self.frame, text="Destination Addresses:").pack(anchor='w')
 		self.widgets['dst_addresses'] = scrolledtext.ScrolledText(
-			self.frame, height=4, width=80
+			self.frame, height=4, width=80,
+			font=DEFAULT_FONT
 		)
 		self.widgets['dst_addresses'].pack(fill='x', pady=5)
 		ttk.Label(self.frame, text="(One email per line)", 
@@ -470,8 +436,8 @@ class ConfigGUI:
 		]:
 			style.configure(cls, font=DEFAULT_FONT)
 
-		self.config : Config = None
-		self.current_file : str = config_path
+		self.config : Optional[Config] = None
+		self.current_file : Optional[str] = config_path
 		
 		self.create_widgets()
 		self.load_config(config_path)
@@ -617,8 +583,9 @@ class ConfigGUI:
 				 font=('TkDefaultFont', 8)).pack(anchor='w')
 		
 	def open_llm_generator(self) -> None:
-		"""Open the LLM topic generation dialog."""
-		LLMTopicGenerator(self.root, self.config, self.on_topics_generated)
+		LLMTopicGenerator(
+			self.root, self.config, self.on_topics_generated
+		)
 		
 	def on_topics_generated(self, topics: List[str]) -> None:
 		"""Handle generated topics from LLM."""
@@ -767,59 +734,33 @@ class ConfigGUI:
 		self.root.mainloop()
 
 
-class LLMTopicGenerator:
+class LLMTopicGenerator(ConfigDialog):
 	"""Dialog for generating business topics using LLM."""
 	
-	def __init__(self, parent: tk.Widget, config: Config, callback):
-		self.parent = parent
+	def __init__(
+		self, 
+		parent: tk.Widget, config: Config, callback
+	):
 		self.config = config
 		self.callback = callback
-		self.attached_files = []
-		self.result_topics = []
+		# List of dicts of structure
+		# {
+		# 	'path': filename,
+		# 	'name': os.path.basename(filename),
+		# 	'encoded': encoded_data,
+		# 	'size': len(file_data)
+		# }
+		self.attached_files : list[dict] = []
+		self.result_topics : list[str] = []
 
-		self.w = 800
-		self.h = 600
-		self.wxh_str = f"{self.w}x{self.h}"
+		super().__init__(
+			parent,
+			600, 800,
+			"Generate Business Topics with LLM"
+		)
 		
-		self.dialog = tk.Toplevel(parent)
-		self.dialog.title("Generate Business Topics with LLM")
-		self.dialog.geometry(self.wxh_str)
-		self.dialog.resizable(True, True)
-		self.dialog.transient(parent)
-		self.dialog.grab_set()
-
-		# Center the dialog
-		self.dialog.update_idletasks()
-		x = (self.dialog.winfo_screenwidth() // 2) - (self.w // 2)
-		y = (self.dialog.winfo_screenheight() // 2) - (self.h // 2)
-		self.dialog.geometry(f"{self.wxh_str}+{x}+{y}")
-		
-		self.create_widgets()
-		self.dialog.wait_window()
-		
-	def create_widgets(self) -> None:
+	def create_custom_widgets(self) -> None:
 		"""Create dialog widgets."""
-		# Make contents scrollable	
-		self.container = ttk.Frame(self.dialog)
-		self.container.pack(fill="both", expand=True)
-		self.canvas = tk.Canvas(self.container)
-		self.canvas.pack(side="left", fill="both", expand=True)
-		self.scrollbar = ttk.Scrollbar(
-			self.container, orient="vertical",
-			command=self.canvas.yview
-		)
-		self.scrollbar.pack(side="right", fill="y")
-		self.canvas.configure(yscrollcommand=self.scrollbar.set)
-		self.canvas.bind(
-			'<Configure>', 
-			lambda e: self.canvas.configure(
-				scrollregion=self.canvas.bbox("all")
-			)
-		)
-		self.inner_frame = ttk.Frame(self.canvas)
-		self.canvas.create_window(
-			(0, 0), window=self.inner_frame, anchor="nw"
-		)
 		
 		# Instructions
 		instruction_frame = ttk.LabelFrame(
@@ -837,7 +778,8 @@ class LLMTopicGenerator:
 		
 		ttk.Label(instruction_frame, text="User Prompt:").pack(anchor='w')
 		self.user_prompt_text = scrolledtext.ScrolledText(
-			instruction_frame, height=8, width=70, wrap=tk.WORD
+			instruction_frame, height=8, width=70, wrap=tk.WORD,
+			font=DEFAULT_FONT
 		)
 		self.user_prompt_text.pack(fill='both', expand=True, pady=5)
 		
@@ -893,7 +835,8 @@ class LLMTopicGenerator:
 		result_frame.pack(fill='both', expand=True, pady=(0, 10))
 		
 		self.result_text = scrolledtext.ScrolledText(
-			result_frame, height=8, width=70, wrap=tk.WORD
+			result_frame, height=8, width=70, wrap=tk.WORD,
+			font=DEFAULT_FONT
 		)
 		self.result_text.pack(fill='both', expand=True, pady=5)
 		

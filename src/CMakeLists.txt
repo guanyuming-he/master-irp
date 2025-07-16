@@ -56,11 +56,11 @@ target_link_libraries(upd_doc PRIVATE search_eng)
 set(CONDA_PREFIX "/home/anony/anaconda3/envs/irp")
 set(Python3_ROOT_DIR ${CONDA_PREFIX})
 set(Python3_EXECUTABLE "${CONDA_PREFIX}/bin/python3")
-set(Python3_INCLUDE_DIRS "${CONDA_PREFIX}/include/python3.13")
+set(Python3_INCLUDE_DIRS "${CONDA_PREFIX}/include/python3.11")
 set(Python3_LIBRARY_DIRS "${CONDA_PREFIX}/lib")
 set(Python3_LIBRARIES 
 	"${CONDA_PREFIX}/lib/libpython3.so"
-	"${CONDA_PREFIX}/lib/libpython3.13.so.1.0"
+	"${CONDA_PREFIX}/lib/libpython3.11.so.1.0"
 ) 
 # Do not use this FindPython3, which isn't compatible with Anaconda
 #set(Python3_FIND_STRATEGY LOCATION)
