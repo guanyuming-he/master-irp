@@ -771,10 +771,20 @@ class LLMTopicGenerator(ConfigDialog):
 		
 		ttk.Label(instruction_frame, text="System Prompt:").pack(anchor='w')
 		self.system_var = tk.StringVar()
-		system_entry = ttk.Entry(instruction_frame, textvariable=self.system_var, 
-							    width=70)
+		system_entry = ttk.Entry(
+			instruction_frame, textvariable=self.system_var, 
+			width=80,
+			font=DEFAULT_FONT
+		)
 		system_entry.pack(fill='x', pady=(5, 10))
-		self.system_var.set("Generate business topics based on the input provided.")
+		self.system_var.set(
+			"Generate business topics based on the input provided."
+			" Do NOT explain or instruct. "
+			" Put each topic in one line, and do not"
+			" enclose with quotes or parentheses."
+			" Do not generate too many."
+			" Generate a few representative topics."
+		)
 		
 		ttk.Label(instruction_frame, text="User Prompt:").pack(anchor='w')
 		self.user_prompt_text = scrolledtext.ScrolledText(
@@ -856,8 +866,9 @@ class LLMTopicGenerator(ConfigDialog):
 		"""Add files to the attachment list."""
 		filetypes = [
 			("Images", "*.jpg *.jpeg *.png *.gif *.bmp *.tiff *.webp"),
-			("Documents", "*.txt *.pdf *.doc *.docx *.rtf"),
-			("All files", "*.*")
+			# unsupported for now
+			# ("Documents", "*.txt *.pdf *.doc *.docx *.rtf"),
+			# ("All files", "*.*")
 		]
 		
 		filenames = filedialog.askopenfilenames(
@@ -944,7 +955,9 @@ class LLMTopicGenerator(ConfigDialog):
 			response = send_to_ollama(
 				model=self.model_var.get(),
 				system=self.system_var.get(),
-				prompt=user_prompt,
+				prompt=\
+					user_prompt + \
+					"\n Generate LESS THAN 10 TOPICS!!!",
 				images=images
 			)
 			
