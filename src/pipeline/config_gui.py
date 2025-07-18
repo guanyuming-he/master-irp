@@ -957,7 +957,7 @@ class LLMTopicGenerator(ConfigDialog):
 				system=self.system_var.get(),
 				prompt=\
 					user_prompt + \
-					"\n Generate LESS THAN 10 TOPICS!!!",
+					"\nGenerate LESS THAN 8 TOPICS!!!",
 				images=images
 			)
 			

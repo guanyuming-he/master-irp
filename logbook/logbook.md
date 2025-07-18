@@ -120,7 +120,26 @@ input from config, generate search engine prompts with LLM, search, and
 summarize with LLM.
 
 ### Feedback received:
-I am waiting for that.
+Sean planned to give me feedback together in the next meeting.
 
 ### Work plan before next meeting:
-I am waiting for Sean's feedback.
+I made a GUI to help configuring the pipeline while waiting for feedback.
+
+
+## Meeting (18 July 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+I showed Sean the pipeline and the GUI configuration tool. I also showed him
+the Open-WebUI Rhodri recommended to me with Google's Programmable Search
+Engine: its limitations and why I don't want to use it.
+
+### Feedback received:
+Sean commented that I made good progress, but the final result is still at some
+distance away from desired. Sean said he will send an email to both Rhodri and
+me, discussing the situation, seeking his professional knowledge on how to make
+LLMs better suited for our purpose.
+
+### Work plan before next meeting:
+I will tune the LLMs better, especially after I have Rhodri's reply to Sean's
+email.
