@@ -3,7 +3,9 @@
  * The file is licensed under the GNU GPL v3
  * Copyright (C) Guanyuming He 2025
  *
- * The file declares the routines that are used to turn a url into a HTML tree.
+ * The file declares the routines that are used to turn a url into a parsed
+ * HTML tree/object.
+ *
  * They are divided into two classes,
  * a parser and a scraper.
  * The scraper gets the HTML from the URL, handling network logic.
@@ -14,27 +16,24 @@
  * @author Guanyuming He
  */
 
-#include <boost/url/url_view.hpp>
-#include <type_traits>
+#include <stddef.h>
+
 extern "C" {
-#include <curl/curl.h>
 #include <lexbor/core/types.h>
 #include <lexbor/html/parser.h>
 #include <lexbor/html/interface.h>
 }
 
-#include <string>
-#include <vector>
-#include <optional>
-#include <map>
 #include <chrono>
+#include <optional>
+#include <type_traits>
+#include <vector>
 namespace ch = std::chrono;
 
-#include <boost/url.hpp>
-namespace urls = boost::urls;
+#include "scraper.h"
 
 /**
- * The struct contains the HTML tree of a webpage.
+ * Encapsulates a parsed HTML tree/object of a webpage.
  */
 struct html final 
 {
@@ -168,7 +167,7 @@ public:
 	lxb_html_document_t* parse(
 		const lxb_char_t* buf, size_t size,
 		std::string* all_text
-	);
+	) const;
 
 private:
 	lxb_html_parser_t * const handle;
@@ -192,74 +191,11 @@ private:
 	};
 	// store it throughout my life time
 	// so that its addr won't expire.
-	tkz_ctx my_ctx;
+	// Declared as mutable, as it does not affect the observable states.
+	mutable tkz_ctx my_ctx;
 };
 
 
-
-/**
- * Encapsulates a curl handle that does the scraping.
- *
- * According to libcurl doc:
- * https://everything.curl.dev/transfers/easyhandle.html#reuse
- * "Easy handles are meant and designed to be reused."
- * As such, a handle is created and reused for many url transfers
- * within a thread.
- */
-class scraper final 
-{
-public:
-	// Inits libcurl.
-	static void global_init();
-
-public:
-	scraper();
-	~scraper();
-
-public:
-	/**
-	 * Transfers the HTML document for url.
-	 * Clearly, since the content is returned, the function blocks.
-	 *
-	 * @param url the url of the website. I cannot use a url_view here,
-	 * for I need a c_str() to pass to libcurl.
-	 * @param headers every key in the header will be filled with the
-	 * corresponding value. For example, 
-	 * @returns the HTML content, in string, of the url. If the transfer fails,
-	 * then the content will be empty.
-	 */
-	std::string transfer(
-		const urls::url& url,
-		std::map<std::string, std::string>& headers
-	);
-
-private:
-	// the CURL write callback.
-	// My logic is: scraper maintains internel state
-	// to know which callback calls are for one url.
-	// These calls all accumulate data into one byte string.
-	// Its signature is the same as in
-	// https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
-	static inline size_t writeback(
-		char* ptr, size_t size, size_t nmemb, void* userdata
-	) {
-		return static_cast<scraper*>(userdata)->
-			int_writeback(ptr, size, nmemb);
-	}
-	// the internal callback that actually does the job.
-	size_t int_writeback(
-		char* ptr, size_t size, size_t nmemb
-	);
-
-private:
-	// This is the interal state I talked about.
-	// Before every url transfer, it's cleared. Once a url
-	// transfer finishes, it contains the accumulated data.
-	std::string buffer;
-
-	CURL* handle;
-
-};
 
 // Forward decl of PyObject.
 struct _object;
@@ -283,7 +219,7 @@ public:
 	 * @param url a syntatically valid url. I cannot use a url_view here
 	 * as I need its c_str().
 	 */
-	html convert(const urls::url& url);
+	html convert(const urls::url& url) const;
 
 private:
 	scraper s;

@@ -15,7 +15,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 add_library(search_eng
 	search/utility.cpp
 	search/webpage.cpp
+	search/scraper.cpp
 	search/url2html.cpp
+	search/url2rss.cpp
 	# deprecated.
 	# search/url.cpp
 	search/index.cpp

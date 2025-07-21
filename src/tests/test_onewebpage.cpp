@@ -113,8 +113,8 @@ BOOST_AUTO_TEST_CASE(test_webpage_construction_from_url)
     // Test webpage properties
     BOOST_TEST(std::string(page.url.c_str()) == test_url_str);
     
-    BOOST_TEST(!page.title.empty());
-    BOOST_TEST_MESSAGE("Webpage title: " << page.title);
+    BOOST_TEST(!page.get_title().empty());
+    BOOST_TEST_MESSAGE("Webpage title: " << page.get_title());
     
     // Test text extraction
     std::string page_text = page.get_text();
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_content_validation)
     webpage page(std::move(test_url), converter);
     
     std::string page_text = page.get_text();
-    std::string page_title = page.title;
+    std::string page_title = page.get_title();
     
     // Test for expected content patterns (replace with actual values)
     // These are placeholder tests - replace with actual expected content

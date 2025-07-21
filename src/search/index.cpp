@@ -98,7 +98,7 @@ std::optional<xp::Document> index::get_document(const xp::docid id) const
 void index::add_document(const webpage& w)
 { 
 	// do not index an empty document.
-	if (w.title.empty() && w.get_text().empty())
+	if (w.get_title().empty() && w.get_text().empty())
 		return;
 
 	xp::Document doc;
@@ -109,11 +109,11 @@ void index::add_document(const webpage& w)
 	// /latest/practical_example/indexing/writing_the_code.html,
 	// which claims that they are the conventional prefixes of the 
 	// omega search engine.
-	tg.index_text(w.title, 1, "S");
+	tg.index_text(w.get_title(), 1, "S");
 	tg.index_text(w.get_text(), 1, "XD");
 
 	// Index them without prefixes for free search 
-	tg.index_text(w.title);
+	tg.index_text(w.get_title());
 	tg.increase_termpos();
 	tg.index_text(w.get_text());
 
@@ -126,15 +126,15 @@ void index::add_document(const webpage& w)
 		date_str.data(),
 		date_str.size()+1,
 		"%4d%02d%02d", 
-		(int)w.date.year(), 
-		(unsigned)w.date.month(), 
-		(unsigned)w.date.day()
+		(int)w.get_date().year(), 
+		(unsigned)w.get_date().month(), 
+		(unsigned)w.get_date().day()
 	);
 	doc.add_value(DATE_SLOT, date_str);
 
 	// Store the full URL + title for display purposes
 	doc.set_data(
-		std::string(w.url.c_str()) + "\t" + w.title
+		std::string(w.url.c_str()) + "\t" + w.get_title()
 	);
 
 	// This will be the unique identifier of the doc;

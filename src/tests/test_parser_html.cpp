@@ -487,8 +487,8 @@ BOOST_AUTO_TEST_CASE(webpage_constructor_metadata) {
     webpage wp(url, title, date);
     
     //BOOST_CHECK_EQUAL(wp.url, url);
-    BOOST_CHECK_EQUAL(wp.title, title);
-	BOOST_CHECK(wp.date == date);
+    BOOST_CHECK_EQUAL(wp.get_title(), title);
+	BOOST_CHECK(wp.get_date() == date);
     
     // Should not have HTML content
     BOOST_CHECK_EQUAL(wp.get_text(), "");

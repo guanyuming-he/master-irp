@@ -32,7 +32,7 @@ extern "C" {
 class webpage final 
 {
 public:
-	// 1. loads from file, which only has metadata. 
+	// Load only the metadata without the HTML.
 	// The url must be (syntactically) valid.
 	// Otherwise an exception is thrown.
 	webpage(
@@ -41,7 +41,7 @@ public:
 		const ch::year_month_day& date
 	);
 
-	// 2. (3) uses this which directly accepts a html.
+	// Accepts a parsed HTML and its URL.
 	// The url must be (syntactically) valid.
 	// Otherwise an exception is thrown.
 	template <typename H, typename U>
@@ -66,6 +66,9 @@ public:
 	{}
 
 public:
+	inline auto get_date() const { return date; }
+	inline auto get_title() const { return title; }
+
 	// @returns the text in lowercase or "" if not loaded.
 	inline std::string get_text() const 
 	{ return html_tree ? html_tree->text : ""; }
@@ -79,15 +82,25 @@ public:
 	// this->get_urls().size() <= html_tree->get_urls();
 	std::vector<urls::url> get_urls() const;
 
+	/**
+	 * Loads the html from the URL only if it is not loaded.
+	 *
+	 * @returns true iff it was not loaded and now loaded.
+	 */
+	bool load_html(const url2html& convertor);
+
 private: // declare this first as it needs to be inited first.
-	// for now, I don't know if it should be const.
-	// I leave it as not to open the possibility of parsing
-	// the HTML later.
+	/**
+	 * Use std::optional to allow delayed loading.
+	 * It is useful, e.g., when coming from a RSS feed where
+	 * only a title and a short desc is provided.
+	 * One can decide to load the html or not.
+	 */
 	std::optional<html> html_tree;
+	std::string title;
+	ch::year_month_day date;
 
 public: // since they are immutable, no need to go private.
 	const urls::url url;
-	const std::string title;
-	const ch::year_month_day date;
 
 };

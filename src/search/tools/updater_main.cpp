@@ -15,8 +15,19 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 #include "../index.h"
+
+std::unordered_set<std::string> rss_urls {
+	"https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
+	"https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+	"http://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+	"http://www.economist.com/feeds/print-sections/77/business.xml",
+	"http://www.business-standard.com/rss/latest.rss",
+	"http://feeds.harvardbusiness.org/harvardbusiness?format=xml",
+	"https://economictimes.indiatimes.com/rssfeedsdefault.cms",
+};
 
 // This is used if cmd arg does not have max_doc.
 static constexpr unsigned DEF_MAX_DOC = 100000;
@@ -36,7 +47,12 @@ static constexpr unsigned DEF_NUM_ADD = 1000;
 /**
  * It does function 2:
  * Adds latest document from some internally specified source (typically RSS
- * feed); add at most num_add number of them.
+ * feed).
+ *
+ * The basic idea is like this:
+ * 1. I have a list of RSS feed URLs.
+ * 2. I form a queue of start URLs by scraping the RSS.
+ * 3. Then I call indexer::start_indexing()
  */
 void update_database(
 	const char* path, unsigned num_add

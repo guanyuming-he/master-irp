@@ -251,7 +251,7 @@ static bool wp_index_filter(webpage& pg)
 	// for now just return true if the year
 	// is within last 2 years and the text is not empty.
 	return 
-		(int)pg.date.year() >= 2024 &&
+		(int)pg.get_date().year() >= 2024 &&
 		!pg.get_text().empty();
 }
 
@@ -260,7 +260,7 @@ static bool wp_recurse_filter(webpage& pg)
 	// recurse only if either its title or its text is not empty.
 	return 
 		!pg.get_text().empty() &&
-		!pg.title.empty();
+		!pg.get_title().empty();
 }
 
 // Whether use this or load from file depends on the cmd args.

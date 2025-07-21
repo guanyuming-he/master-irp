@@ -65,3 +65,17 @@ std::vector<urls::url> webpage::get_urls() const
 
 	return ret;
 }
+
+bool webpage::load_html(const url2html& convertor)
+{
+	if (html_tree) return false;
+
+	html_tree.emplace(convertor.convert(url));
+	// Only set title when it is empty;
+	// (Because a website may return a empty or "Are you a robot" page,
+	// which is worse than the title from RSS feeds).
+	if (title.empty())
+		title = html_tree->get_title();
+
+	return true;
+}
