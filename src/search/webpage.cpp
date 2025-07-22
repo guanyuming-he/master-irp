@@ -12,20 +12,7 @@
 #include "url2html.h"
 
 #include <algorithm>
-#include <boost/system/result.hpp>
 #include <cctype>
-
-webpage::webpage(
-	const std::string_view url,
-	const std::string& title,
-	const ch::year_month_day& date
-):
-	html_tree(std::nullopt),
-	url(
-		boost::urls::url(url)
-	), 
-	title(title), date(date)
-{}
 
 std::vector<urls::url> webpage::get_urls() const
 {
@@ -47,14 +34,16 @@ std::vector<urls::url> webpage::get_urls() const
 
 		urls::url dest(this->url);
 		boost::system::result<void> res;
-		try {
+		try 
+		{
 			res = dest.resolve(
 				urls::url_view{boost::core::string_view{
 					std::string_view(raw.begin(), normalized_end)		
 				}}
 			);
 		}
-		catch (...) {
+		catch (...) 
+		{
 			// Just skip this one if cannot resolve.
 			continue;
 		}

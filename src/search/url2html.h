@@ -120,16 +120,6 @@ public: // no need to be private since they are immutable.
 	// In lowercase.
 	const std::string text;
 
-	/**
-	 * No harm in making it public; advantage in doing so:
-	 * easy to test.
-	 * 
-	 * Try to parse a str that may indicate a valid date.
-	 * @returns a valid year_month_day iff parsing is succesful
-	 */
-	static std::optional<ch::year_month_day> try_parse_date_str(
-		std::string_view str
-	);
 
 	/**
 	 * No harm in making it public; advantage in doing so:

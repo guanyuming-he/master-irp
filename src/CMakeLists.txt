@@ -14,6 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
 add_library(search_eng
 	search/utility.cpp
+	search/date_util.cpp
 	search/webpage.cpp
 	search/scraper.cpp
 	search/url2html.cpp
@@ -133,8 +134,7 @@ set(testsList
 	# test_url 
 	test_onewebpage 
 	test_index
-	# deprecated
-	# test_date_parsing
+	test_date_parsing
 )
 foreach (test IN LISTS testsList)
 	add_executable(${test} tests/${test}.cpp)

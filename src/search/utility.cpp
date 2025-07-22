@@ -8,11 +8,13 @@
 
 #include "utility.h"
 #include "url2html.h"
+#include "date_util.h"
 
 void global_init()
 {
 	scraper::	global_init();
 	url2html::	global_init();
+	date_global_init();
 }
 
 void global_uninit()

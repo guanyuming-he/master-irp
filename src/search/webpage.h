@@ -35,11 +35,17 @@ public:
 	// Load only the metadata without the HTML.
 	// The url must be (syntactically) valid.
 	// Otherwise an exception is thrown.
+	template <typename U>
 	webpage(
-		const std::string_view url,
+		U&& url,
 		const std::string& title,
 		const ch::year_month_day& date
-	);
+	):
+		html_tree(std::nullopt),
+		url(std::forward<U>(url)), 
+		title(title), date(date)
+	{}
+;
 
 	// Accepts a parsed HTML and its URL.
 	// The url must be (syntactically) valid.
