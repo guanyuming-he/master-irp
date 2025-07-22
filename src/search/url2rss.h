@@ -33,7 +33,7 @@
 struct rss final
 {
 public:
-	~rss();
+	~rss() = default;
 
 	/**
 	 * Parses rss from memory.
@@ -62,7 +62,8 @@ public:
 	rss(const rss&) = delete;
 	rss(rss&&) noexcept;
 	rss& operator=(const rss&) = delete;
-	rss& operator=(rss&&) noexcept;
+	// Not possible, since url is const.
+	rss& operator=(rss&&) = delete;
 
 public:
 	/**

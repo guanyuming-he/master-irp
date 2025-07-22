@@ -17,10 +17,16 @@
 #include <stdexcept>
 #include <chrono>
 
-#include "url2rss.h"
-#include "webpage.h"
+#include "../search/url2rss.h"
+#include "../search/webpage.h"
 
 namespace ch = std::chrono;
+
+// Because all the urls are absolute here,
+// we just give a dummy URL here.
+rss create_rss_feed(std::string_view content) {
+	return rss("https://abc.org", content);
+}
 
 // Test fixture for common RSS test data
 struct rss_test_fixture {
@@ -110,10 +116,6 @@ struct rss_test_fixture {
       <link>https://example.com/valid</link>
     </item>
     <item>
-      <title>Invalid URL Post</title>
-      <link>not-a-valid-url</link>
-    </item>
-    <item>
       <title>Empty URL Post</title>
       <link></link>
     </item>
@@ -148,35 +150,35 @@ BOOST_FIXTURE_TEST_SUITE(rss_parsing_tests, rss_test_fixture)
 // Test successful parsing of valid RSS 2.0
 BOOST_AUTO_TEST_CASE(parse_valid_rss_2_0) {
     BOOST_CHECK_NO_THROW({
-        rss feed(valid_rss_2_0);
+        auto feed = create_rss_feed(valid_rss_2_0);
     });
 }
 
 // Test successful parsing of valid Atom feed
 BOOST_AUTO_TEST_CASE(parse_valid_atom) {
     BOOST_CHECK_NO_THROW({
-        rss feed(valid_atom);
+        auto feed = create_rss_feed(valid_atom);
     });
 }
 
 // Test parsing minimal RSS
 BOOST_AUTO_TEST_CASE(parse_minimal_rss) {
     BOOST_CHECK_NO_THROW({
-        rss feed(minimal_rss);
+        auto feed = create_rss_feed(minimal_rss);
     });
 }
 
 // Test parsing empty RSS (no items)
 BOOST_AUTO_TEST_CASE(parse_empty_rss) {
     BOOST_CHECK_NO_THROW({
-        rss feed(empty_rss);
+        auto feed = create_rss_feed(empty_rss);
     });
 }
 
 // Test parsing invalid XML
 BOOST_AUTO_TEST_CASE(parse_invalid_xml) {
     const std::string invalid_xml = "this is not xml";
-    BOOST_CHECK_THROW(rss feed(invalid_xml), std::runtime_error);
+    BOOST_CHECK_THROW(auto feed = create_rss_feed(invalid_xml), std::runtime_error);
 }
 
 // Test parsing malformed XML
@@ -192,14 +194,14 @@ BOOST_AUTO_TEST_CASE(parse_malformed_xml) {
     // Note: depending on parser implementation, this might or might not throw
     // Most parsers are tolerant, but we should test both cases
     BOOST_CHECK_NO_THROW({
-        rss feed(malformed_xml);
+        auto feed = create_rss_feed(malformed_xml);
     });
 }
 
 // Test parsing empty string
 BOOST_AUTO_TEST_CASE(parse_empty_string) {
     const std::string empty_content = "";
-    BOOST_CHECK_THROW(rss feed(empty_content), std::runtime_error);
+    BOOST_CHECK_THROW(auto feed = create_rss_feed(empty_content), std::runtime_error);
 }
 
 // Test parsing non-RSS XML
@@ -212,7 +214,7 @@ BOOST_AUTO_TEST_CASE(parse_non_rss_xml) {
     
     // Should not throw, but read_webpages should return empty vector
     BOOST_CHECK_NO_THROW({
-        rss feed(non_rss);
+        auto feed = create_rss_feed(non_rss);
     });
 }
 
@@ -222,7 +224,7 @@ BOOST_FIXTURE_TEST_SUITE(rss_webpage_reading_tests, rss_test_fixture)
 
 // Test reading webpages from RSS 2.0 feed
 BOOST_AUTO_TEST_CASE(read_webpages_rss_2_0) {
-    rss feed(valid_rss_2_0);
+    auto feed = create_rss_feed(valid_rss_2_0);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_EQUAL(webpages.size(), 3);
@@ -260,7 +262,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_rss_2_0) {
 
 // Test reading webpages from Atom feed
 BOOST_AUTO_TEST_CASE(read_webpages_atom) {
-    rss feed(valid_atom);
+    auto feed = create_rss_feed(valid_atom);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_EQUAL(webpages.size(), 2);
@@ -276,7 +278,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_atom) {
 
 // Test reading from minimal RSS
 BOOST_AUTO_TEST_CASE(read_webpages_minimal) {
-    rss feed(minimal_rss);
+    auto feed = create_rss_feed(minimal_rss);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_EQUAL(webpages.size(), 1);
@@ -286,7 +288,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_minimal) {
 
 // Test reading from empty RSS (no items)
 BOOST_AUTO_TEST_CASE(read_webpages_empty) {
-    rss feed(empty_rss);
+    auto feed = create_rss_feed(empty_rss);
     auto webpages = feed.read_webpages();
     
     BOOST_CHECK_EQUAL(webpages.size(), 0);
@@ -294,7 +296,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_empty) {
 
 // Test reading with invalid URLs (should skip invalid ones)
 BOOST_AUTO_TEST_CASE(read_webpages_invalid_urls) {
-    rss feed(invalid_urls_rss);
+    auto feed = create_rss_feed(invalid_urls_rss);
     auto webpages = feed.read_webpages();
     
     // Should only include the item with valid URL
@@ -305,7 +307,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_invalid_urls) {
 
 // Test reading with special characters
 BOOST_AUTO_TEST_CASE(read_webpages_special_chars) {
-    rss feed(special_chars_rss);
+    auto feed = create_rss_feed(special_chars_rss);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_EQUAL(webpages.size(), 2);
@@ -327,7 +329,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_non_rss) {
   <body>This is HTML, not RSS</body>
 </html>)";
     
-    rss feed(non_rss);
+    auto feed = create_rss_feed(non_rss);
     auto webpages = feed.read_webpages();
     
     BOOST_CHECK_EQUAL(webpages.size(), 0);
@@ -335,7 +337,7 @@ BOOST_AUTO_TEST_CASE(read_webpages_non_rss) {
 
 // Test that HTML content is not loaded for webpages
 BOOST_AUTO_TEST_CASE(webpages_html_not_loaded) {
-    rss feed(valid_rss_2_0);
+    auto feed = create_rss_feed(valid_rss_2_0);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_GT(webpages.size(), 0);
@@ -352,7 +354,7 @@ BOOST_FIXTURE_TEST_SUITE(rss_move_semantics_tests, rss_test_fixture)
 
 // Test move constructor
 BOOST_AUTO_TEST_CASE(move_constructor) {
-    rss original(valid_rss_2_0);
+    auto original = create_rss_feed(valid_rss_2_0);
     auto original_webpages = original.read_webpages();
     
     rss moved(std::move(original));
@@ -363,24 +365,6 @@ BOOST_AUTO_TEST_CASE(move_constructor) {
         BOOST_CHECK_EQUAL(moved_webpages[i].get_title(), 
                           original_webpages[i].get_title());
         BOOST_CHECK_EQUAL(moved_webpages[i].url.c_str(), 
-                          original_webpages[i].url.c_str());
-    }
-}
-
-// Test move assignment
-BOOST_AUTO_TEST_CASE(move_assignment) {
-    rss original(valid_rss_2_0);
-    auto original_webpages = original.read_webpages();
-    
-    rss target(minimal_rss);
-    target = std::move(original);
-    
-    auto target_webpages = target.read_webpages();
-    BOOST_CHECK_EQUAL(target_webpages.size(), original_webpages.size());
-    for (size_t i = 0; i < target_webpages.size(); ++i) {
-        BOOST_CHECK_EQUAL(target_webpages[i].get_title(), 
-                          original_webpages[i].get_title());
-        BOOST_CHECK_EQUAL(target_webpages[i].url.c_str(), 
                           original_webpages[i].url.c_str());
     }
 }
@@ -406,7 +390,7 @@ BOOST_AUTO_TEST_CASE(long_content) {
 </rss>)";
     
     BOOST_CHECK_NO_THROW({
-        rss feed(long_rss);
+        auto feed = create_rss_feed(long_rss);
         auto webpages = feed.read_webpages();
         BOOST_REQUIRE_EQUAL(webpages.size(), 1);
         BOOST_CHECK_EQUAL(webpages[0].get_title(), long_title);
@@ -433,7 +417,7 @@ BOOST_AUTO_TEST_CASE(namespaces) {
 </rss>)";
     
     BOOST_CHECK_NO_THROW({
-        rss feed(namespaced_rss);
+        auto feed = create_rss_feed(namespaced_rss);
         auto webpages = feed.read_webpages();
         BOOST_REQUIRE_EQUAL(webpages.size(), 1);
         BOOST_CHECK_EQUAL(webpages[0].get_title(), "Namespaced Post");
@@ -456,7 +440,7 @@ BOOST_AUTO_TEST_CASE(cdata_content) {
   </channel>
 </rss>)";
     
-    rss feed(cdata_rss);
+    auto feed = create_rss_feed(cdata_rss);
     auto webpages = feed.read_webpages();
     
     BOOST_REQUIRE_EQUAL(webpages.size(), 1);

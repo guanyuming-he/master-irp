@@ -110,11 +110,14 @@ target_link_libraries(
 find_package(xapian REQUIRED)
 target_include_directories(search_eng PRIVATE ${XAPIAN_INCLUDE_DIRS})
 target_link_libraries(search_eng PRIVATE ${XAPIAN_LIBRARIES})
+target_include_directories(searcher PRIVATE ${XAPIAN_INCLUDE_DIRS})
+target_link_libraries(searcher PRIVATE ${XAPIAN_LIBRARIES})
 
 # lexbor doesn't support find_project either.
 # Just make sure I installed it.
 target_link_libraries(search_eng PRIVATE lexbor)
 
+# Boost
 find_package(Boost 
 	1.81 
 	REQUIRED
@@ -122,8 +125,8 @@ find_package(Boost
 )
 target_link_libraries(search_eng PUBLIC Boost::url)
 
-target_include_directories(searcher PRIVATE ${XAPIAN_INCLUDE_DIRS})
-target_link_libraries(searcher PRIVATE ${XAPIAN_LIBRARIES})
+# pugixml
+target_link_libraries(search_eng PRIVATE pugixml)
 
 ############### TESTS ####################
 
@@ -135,6 +138,7 @@ set(testsList
 	test_onewebpage 
 	test_index
 	test_date_parsing
+	test_rss
 )
 foreach (test IN LISTS testsList)
 	add_executable(${test} tests/${test}.cpp)

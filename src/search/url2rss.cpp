@@ -81,6 +81,12 @@ rss::webpage_from_atom_item(const pugi::xml_node& item) const
 std::optional<urls::url> 
 rss::process_link(std::string_view link) const
 {
+	// Although an empty string is a valid RFC 3986 URI.
+	// it doesn't fit here, as that would count as a relative URI pointing to
+	// the RSS feed URI itself, which makes no sense.
+	if (link.empty())
+		return std::nullopt;
+
 	std::optional<urls::url> dst;
 
 	try 
@@ -105,17 +111,9 @@ rss::process_link(std::string_view link) const
 }
 
 rss::rss(rss&& other) noexcept : 
-	doc(std::move(other.doc)) {}
-
-rss& rss::operator=(rss&& other) noexcept 
-{
-	if (this == &other)
-		return *this;
-
-	doc = std::move(other.doc);
-	return *this;
-}
-
+	doc(std::move(other.doc)),
+	url(other.url) // To maintain its immutability, I simply copy it.
+{}
 
 std::vector<webpage> rss::read_webpages() const 
 {
@@ -143,7 +141,13 @@ std::vector<webpage> rss::read_webpages() const
 	{
 		// Check if it's Atom namespace
 		auto xmlns = feed_root.attribute("xmlns");
-		if (xmlns && std::string(xmlns.as_string()).contains("atom")) 
+		if (
+			xmlns && 
+			( 
+			 	std::string(xmlns.as_string()).contains("atom") ||
+			 	std::string(xmlns.as_string()).contains("Atom")
+			) 
+		)
 		{
 			for (auto entry : feed_root.children("entry")) 
 			{
