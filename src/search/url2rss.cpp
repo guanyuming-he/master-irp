@@ -164,3 +164,26 @@ std::vector<webpage> rss::read_webpages() const
 	// If none of them is present, then an empty vector is returned.
 	return webpages;	
 }
+
+
+rss url2rss::convert(const std::string& u_str) const
+{
+	urls::url u(u_str);
+	std::map<std::string, std::string> headers;
+	auto content = s.transfer(u, headers);
+
+	return rss(
+		// we don't need u anymore.
+		std::move(u), 
+		content
+	);
+}
+
+rss url2rss::convert(const urls::url& u) const
+{
+	std::map<std::string, std::string> headers;
+	return rss(
+		u, 
+		s.transfer(u, headers)
+	);
+}

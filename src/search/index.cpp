@@ -22,6 +22,8 @@ extern "C" {
 #include "../sha-2/sha-256.h"
 }
 
+#include "utility.h"
+
 std::string index::url2hashid(urls::url_view u)
 {
 	auto essential = url_get_essential(u);
@@ -181,10 +183,19 @@ void index::rm_if(doc_rm_func_t* func)
 void index::shrink(
 	unsigned max_num, shrink_policy policy
 ) {
-	if (num_documents() <= max_num)
+	const auto cur_size = num_documents();
+
+	util_log(
+		"Current number of documents = " +
+		std::to_string(cur_size) +
+		". Will shrink to " + 
+		std::to_string(max_num) + ".\n"
+	);
+
+	if (cur_size <= max_num)
 		return;
 
-	auto num_to_rm = num_documents() - max_num;
+	auto num_to_rm = cur_size - max_num;
 
     xp::Enquire enquire(db);
 	enquire.set_query(xp::Query::MatchAll);

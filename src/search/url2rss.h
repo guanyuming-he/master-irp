@@ -103,3 +103,32 @@ private:
 
 
 };
+
+
+/**
+ * The convertor that converts from urls::url to rss.
+ */
+class url2rss
+{
+public:
+	url2rss() : s() {}
+	~url2rss() = default;
+
+public:
+	/**
+	 * In case a str is available directly, call this.
+	 * This can also enable moving of the url.
+	 *
+	 * @throws std::system_error if the string cannot be parsed as a valid url.
+	 */
+	rss convert(const std::string& u_str) const;
+
+	/**
+	 * No use using a url_view or string_view, as CURL
+	 * needs c_str() from u.
+	 */
+	rss convert(const urls::url& u) const;
+
+private:
+	scraper s;
+};

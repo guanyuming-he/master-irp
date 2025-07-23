@@ -68,19 +68,26 @@ public:
 	/**
 	 * Starts indexing with an initial queue.
 	 *
-	 * @param db_path Path to the database that is updated by the indexer.
+	 * @param db_par One single parameter to construct an index. It could be a
+	 * path or a rvalue ref to an existing index.
 	 * @param q_path Should the indexing be interrupted, the queue then will be
 	 * stored to this path.
 	 * @param q_init The initial queue.
 	 * @param index_filter only those urls satisfying this will be indexed.
 	 * @param recurse_filter only those urls satisfying this will be recursed.
+	 * @param wp_index_filter only those webpages satisfying this will be
+	 * indexed.
+	 * @param wp_recurse_filter only those webpages satisfying this will be
+	 * recursed.
+	 * @param index_limit the max num of docs to index.
 	 */
-	template <typename P, typename Q>
+	template <typename D, typename P, typename Q>
 	requires
-		std::is_same_v<fs::path, std::remove_cvref_t<P>> &&
+		std::constructible_from<class index, D> &&
+		std::constructible_from<fs::path, P> &&
 		std::is_same_v<uque_t, std::remove_cvref_t<Q>> 
 	indexer(
-		P&& db_path, P&& q_path,
+		D&& db_par, P&& q_path,
 		Q&& q_init,
 		filter_func_t* index_filter,
 		filter_func_t* recurse_filter,
@@ -88,7 +95,7 @@ public:
 		wp_filter_func_t* wp_recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
-		db(std::forward<P>(db_path)),
+		db(std::forward<D>(db_par)),
 		q_path(std::forward<P>(q_path)),
 		q(std::forward<Q>(q_init)),
 		index_filter(index_filter), recurse_filter(recurse_filter),
@@ -98,24 +105,31 @@ public:
 	/**
 	 * Resumes indexing with a stored queue on disk
 	 *
+	 * @param db_par One single parameter to construct an index. It could be a
+	 * path or a rvalue ref to an existing index.
 	 * @param q_path Path to a queue that saved the progress of a previously
 	 * interrupted indexing.
-	 * @param db_path Path to the database that is updated by the indexer.
 	 * @param index_filter only those urls satisfying this will be indexed.
 	 * @param recurse_filter only those urls satisfying this will be recursed.
+	 * @param wp_index_filter only those webpages satisfying this will be
+	 * indexed.
+	 * @param wp_recurse_filter only those webpages satisfying this will be
+	 * recursed.
+	 * @param index_limit the max num of docs to index.
 	 */
-	template <typename P>
+	template <typename D, typename P>
 	requires
-		std::is_same_v<fs::path, std::remove_cvref_t<P>>
+		std::constructible_from<class index, D> &&
+		std::constructible_from<fs::path, P>
 	indexer(
-		P&& db_path, P&& q_path,
+		D&& db_par, P&& q_path,
 		filter_func_t* index_filter,
 		filter_func_t* recurse_filter,
 		wp_filter_func_t* wp_index_filter,
 		wp_filter_func_t* wp_recurse_filter,
 		size_t index_limit = std::numeric_limits<size_t>::max()
 	):
-		db(std::forward<P>(db_path)),
+		db(std::forward<D>(db_par)),
 		q_path(std::forward<P>(q_path)),
 		q(load_url_q(this->q_path)), 
 		index_filter(index_filter), recurse_filter(recurse_filter),

@@ -182,41 +182,68 @@ filtermap {
 			bool b2 = p.starts_with("/sites");
 			return {b1||b2, b2};
 	}},
+	{std::string("www.nytimes.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/section");
+			bool b2 = has_dates(p);
+			bool b3 = 
+				p.contains("business")
+				|| p.contains("market");
+			return {(b1||b2) && b3, b2&&b3};
+	}},
+	{std::string("www.inc.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/section");
+			bool b2 = has_words_separated_by_dash(p);
+		return {b1||b2, b2};
+	}},
+	{std::string("www.entrepreneur.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = p.starts_with("/business-news");
+			bool b2 = has_words_separated_by_dash(p);
+		return {b1||b2, b2};
+	}},
+	{std::string("www.foxbusiness.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = true;
+			bool b2 = has_words_separated_by_dash(p);
+		return {b1||b2, b2};
+	}},
 	// It needs me to enable JS
-	//{std::string("www.reuters.com"), 
-	//	[](const std::string_view p) -> std::pair<bool,bool> {
-	//		bool b1 = 
-	//			p.starts_with("/business") ||
-	//			p.starts_with("/markets");
-	//		bool b2 = 
-	//			has_dates(p) &&
-	//			has_words_separated_by_dash(p);
-	//		return {b1||b2, b1&&b2};
-	//}},
+	{std::string("www.reuters.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.starts_with("/business") ||
+				p.starts_with("/markets");
+			bool b2 = 
+				has_dates(p) &&
+				has_words_separated_by_dash(p);
+			return {b1||b2, b1&&b2};
+	}},
 	// Bloomberg blocked me
-	//{std::string("www.bloomberg.com"), 
-	//	[](const std::string_view p) -> std::pair<bool,bool> { 
-	//		bool b1 = 
-	//			p.empty() ||
-	//			p.starts_with("/uk") ||
-	//			p.starts_with("/economics") ||
-	//			p.starts_with("/markets") || 
-	//			p.starts_with("/deals");
-	//		bool b2 = p.starts_with("news/articles");
-	//		return {b1||b2, b2};
-	//}},
+	{std::string("www.bloomberg.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> { 
+			bool b1 = 
+				p.empty() ||
+				p.starts_with("/uk") ||
+				p.starts_with("/economics") ||
+				p.starts_with("/markets") || 
+				p.starts_with("/deals");
+			bool b2 = p.starts_with("news/articles");
+			return {b1||b2, b2};
+	}},
 	// wsj blocks me if I don't enable JS and cookies.
-	//{std::string("www.wsj.com"), 
-	//	[](const std::string_view p) -> std::pair<bool,bool> {
-	//		bool b1 = 
-	//			p.empty() ||
-	//			p.starts_with("/business") ||
-	//			p.starts_with("/economy");
-	//		bool b2 = 
-	//			has_words_separated_by_dash(p);
-	//		// here I don't use b1||b2 for the first because b2 is too general.
-	//		return {b1||b2, b2};
-	//}},
+	{std::string("www.wsj.com"), 
+		[](const std::string_view p) -> std::pair<bool,bool> {
+			bool b1 = 
+				p.empty() ||
+				p.starts_with("/business") ||
+				p.starts_with("/economy");
+			bool b2 = 
+				has_words_separated_by_dash(p);
+			// here I don't use b1||b2 for the first because b2 is too general.
+			return {b1||b2, b2};
+	}},
 	// Don't index this website, according to Sean.
 	//{std::string("www.businessinsider.com"), 
 	//	[](const std::string_view p) -> std::pair<bool,bool> {
