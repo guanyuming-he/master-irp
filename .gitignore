@@ -38,6 +38,9 @@ db/
 que
 updater_que
 
+# local logs
+logs/
+
 # prototype output 
 src/ollama_output.txt
 # llm pipeline outout

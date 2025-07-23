@@ -223,7 +223,7 @@ class ScheduleDialog(ConfigDialog):
 		self.hour_var = tk.StringVar()
 		self.minute_var = tk.StringVar()
 		self.command_var = tk.StringVar()
-		self.catch_up_var = tk.StringVar()
+		self.catch_up_var = tk.BooleanVar()
 		if schedule:
 			self.load_schedule(schedule)
 			
@@ -282,7 +282,6 @@ class ScheduleDialog(ConfigDialog):
 		)
 		
 		# Catch up
-		self.catch_up_var = tk.BooleanVar()
 		ttk.Checkbutton(self.inner_frame, text="Catch up", 
 						variable=self.catch_up_var).grid(
 			row=5, column=0, columnspan=2, sticky='w', pady=5

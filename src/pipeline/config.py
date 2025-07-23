@@ -75,7 +75,7 @@ class ScheduleType(str, Enum):
 # dataclass fucks up the boundary between static and instance fields in a
 # class. As such, I have to define a variable outside Schedule to act as its
 # static field.
-Schedule_relative_cmd_prefix : str = ""
+Schedule_project_root : str = ""
 @dataclass
 class Schedule(ConfigSection):
 	"""
@@ -128,21 +128,39 @@ class Schedule(ConfigSection):
 			self.time = datetime.time.fromisoformat(self.time)
 
 	@staticmethod
+	def project_root_path() -> str:
+		"""
+		@returns path to the root of the project. That is, where we have ./src
+		and ./bin.
+		"""
+		global Schedule_project_root
+		# Assumes the script can ever be run in project root.
+		if (Schedule_project_root == ""):
+			cwd = os.getcwd()
+			if not cwd.endswith('/'):
+				cwd += '/'
+			Schedule_project_root = cwd
+
+		return Schedule_project_root
+
+	@staticmethod
+	def user_home_path() -> str:
+		"""
+		@returns path to the user home dir.
+		"""
+		home = os.path.expanduser("~")
+		if not home.endswith('/'):
+			home += '/'
+		return home
+
+	@staticmethod
 	def relative_cmd_prefix() -> str:
 		"""
 		Calculates the relative cmd prefix and caches it into
 		Schedule_relative_cmd_prefix, since it won't change in one runtime
 		session.
 		"""
-		global Schedule_relative_cmd_prefix
-		if (Schedule_relative_cmd_prefix == ""):
-			cwd = os.getcwd()
-			if not cwd.endswith('/'):
-				cwd += '/'
-
-			Schedule_relative_cmd_prefix =cwd + "bin/"
-
-		return Schedule_relative_cmd_prefix
+		return Schedule.project_root_path() + "bin/"
 
 
 	def relative_cmd_bin(self, relcmd: str) -> None:
@@ -365,8 +383,13 @@ class Config:
 				stype = ScheduleType.EVERY_X_DAYS,
 				day = 3,
 				time = datetime.time(12,0),
-				command = Schedule.relative_cmd_prefix() +
-					"updater ./db update",
+				command = 
+					"/bin/bash " + 
+					Schedule.project_root_path() + 
+					"run_updater.sh " + 
+					Schedule.project_root_path() +
+					' ' +
+					Schedule.user_home_path(),
 				catch_up = True
 			),
 			Schedule(
@@ -377,8 +400,13 @@ class Config:
 				# May need to activate a few environments
 				# before running the Python pipeline. Thus, I put the work
 				# into one sh.
-				command = Schedule.relative_cmd_prefix() +
-					"run_pipeline.sh",
+				command = 
+					"/bin/bash " + 
+					Schedule.project_root_path() +
+					"run_pipeline.sh " +
+					Schedule.project_root_path() +
+					' ' +
+					Schedule.user_home_path(),
 				catch_up = True
 			),
 		]
