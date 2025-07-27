@@ -425,7 +425,9 @@ class Config:
 			# It is used for nothing else except this.
 			src_address = "anonytempburner@gmail.com",
 			# Its password is a random base64 8 character string.
-			src_passwd = "xfvJaGS8JpA=",
+			# However, since 2022, Google requires an app password 
+			# for it, and this is it.
+			src_passwd = "qvyf awve kqgf phwf ",
 			src_provider = "smtp.gmail.com"
 		)
 

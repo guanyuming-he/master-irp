@@ -29,7 +29,8 @@ from pathlib import Path
 from typing import Dict, List, Any
 import logging
 from datetime import datetime
-import smtplib
+# for securely sending emails
+import smtplib, ssl
 from email.message import EmailMessage
 
 # My local files
@@ -317,7 +318,7 @@ class LLMPipeline:
 		"""Create a comprehensive summary report."""
 		report_path = self.output_dir / "final_report.md"
 		
-		with open(report_path, 'w', encoding='utf-8') as f:
+		with open(report_path, "w+", encoding="utf-8") as f:
 			f.write("# Business Topic LLM Pipeline - Final Report\n\n")
 			f.write(f"**Generated:** "
 				f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
@@ -328,8 +329,7 @@ class LLMPipeline:
 				f.write(f"{synthesis}\n\n")
 				f.write("---\n\n")
 
-			# Don't call it now. Not ready yet.
-			# send_report_by_email(f)
+			self.send_report_by_email(f)
 		
 		self.logger.info(f"Final report created: {report_path}")
 
@@ -339,20 +339,31 @@ class LLMPipeline:
 		Sends the final report file to each of the email addresses specified in 
 		config.json.
 		"""
-		email_list = self.config.email.dst_addresses
-		sender_email = self.config.email.src_address
-		sender_password = self.config.email.src_passwd
+		email_list = self.config.email_info.dst_addresses
+		sender_email = self.config.email_info.src_address
+		sender_password = self.config.email_info.src_passwd
 
 		# Load file content
-		with open("message.txt", "r") as f:
-			file_content = f.read()
+		report_file.seek(0)
+		file_content = report_file.read()
 
 		# Set up SMTP connection
-		smtp_server = self.config.email.src_provider
+		smtp_server = self.config.email_info.src_provider
 		smtp_port = 587
 
+		# This will use the system's settings, in particular, the
+		# ca-certificates.
+		context = ssl.create_default_context()
 		with smtplib.SMTP(smtp_server, smtp_port) as server:
-			server.starttls()
+			# According to the SMTP protocol, I need to identify myself to the
+			# server with this. It also needs to be done again, after TLS
+			# setup.
+			# But the two calls are optional, since send_mail automatically
+			# calls it if not already called. I favor explicitness, so I call
+			# them.
+			server.ehlo()
+			server.starttls(context=context)
+			server.ehlo()
 			server.login(sender_email, sender_password)
 
 			for recipient in email_list:
