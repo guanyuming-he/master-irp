@@ -143,3 +143,7 @@ LLMs better suited for our purpose.
 ### Work plan before next meeting:
 I will tune the LLMs better, especially after I have Rhodri's reply to Sean's
 email.
+
+
+## Meeting (25 July 2025)
+Delayed to 29 July to include Rhodri.
