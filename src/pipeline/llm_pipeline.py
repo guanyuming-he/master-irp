@@ -36,6 +36,7 @@ from email.message import EmailMessage
 # My local files
 from llm_interface import send_to_ollama
 from config import Config
+from search_combined import search_filter_combine
 
 DEFAULT_CONFIG_PATH = "./config.json"
 
@@ -150,35 +151,20 @@ class LLMPipeline:
 		if hasattr(self, 'logger'):
 			self.logger.info(f"Executing search: {search_prompt}")
 		
+		ret : str = ""
 		try:
-			cmd = ["./bin/searcher", "./db", search_prompt]
-			result = subprocess.run(
-				cmd,
-				capture_output=True,
-				text=True,
-				timeout=3  # 3 seconds
+			end_date = datetime.date.today()
+			# by default, search for recent 8 months
+			start_date = end_date - datetime.timedelta(days=240)
+			ret = search_filter_combine(
+				self.config.search_conf,
+				search_prompt,
+				start_date, end_date
 			)
-			
-			if result.returncode != 0:
-				warning_msg = (f"Search command failed for '{search_prompt}': "
-							f"{result.stderr}")
-				if hasattr(self, 'logger'):
-					self.logger.warning(warning_msg)
-				return f"Search failed: {result.stderr}"
-			
-			if hasattr(self, 'logger'):
-				self.logger.info(f"Search completed successfully for: "
-							f"{search_prompt}")
-			return result.stdout
-			
-		except subprocess.TimeoutExpired:
-			if hasattr(self, 'logger'):
-				self.logger.error(f"Search timeout for prompt: {search_prompt}")
-			return "Search timed out"
 		except Exception as e:
-			if hasattr(self, 'logger'):
-				self.logger.error(f"Search error for '{search_prompt}': {e}")
 			return f"Search error: {str(e)}"
+
+		return ret
 	
 	def store_results(self, topic: str, prompt: str, result: str):
 		"""

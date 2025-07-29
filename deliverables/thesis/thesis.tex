@@ -291,8 +291,8 @@ another big module of the system is a minimal web search engine that can index
 business news websites for latest news. The purpose of this self-made search
 engine is to provide explicit control of the indexed contents and to avoid
 commerical limitations on the usage. See section \ref{sec.custom.search.engine}
-for the complete discussion. Still, third-party search engines could also
-participate in the process.
+for the complete discussion. Still, third-party search engines are combined
+with the custom engine.
 
 Surrounding the pipeline and the search engine are the supporting programs
 which handle automation (schedulling), output delivery (by email),
@@ -305,7 +305,7 @@ functionality.
 \begin{tabular}{|p{4cm}|p{10cm}|}
 	\hline
 	\verb!indexer!, \verb!searcher!, \verb!updater! &
-	Build a search enginedatabase from scratch, search a database, and update a
+	Build a search engine database from scratch, search a database, and update a
 	database by adding new entries from RSS and removing old ones,
 	respectively. 
 	\\ \hline
@@ -316,6 +316,9 @@ functionality.
 	\verb!llm_pipeline.py! & The main pipeline program. 
 	\\ \hline
 	\verb!config_gui.py! & A user friendly GUI program to configure the system.
+	\\ \hline
+	\verb!search_combined.py! & Obtains the search result from my custom
+	search engine as well as Google, filters them, and combines them.
 	\\ \hline
 	\verb!setup_schedules.py! & Schedule automatic executions for various
 	programs in the system to make the system automatic.

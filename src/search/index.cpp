@@ -135,6 +135,8 @@ void index::add_document(const webpage& w)
 	doc.add_value(DATE_SLOT, date_str);
 
 	// Store the full URL + title for display purposes
+	// I don't want to store the full text, as that makes the database too
+	// large.
 	doc.set_data(
 		std::string(w.url.c_str()) + "\t" + w.get_title()
 	);

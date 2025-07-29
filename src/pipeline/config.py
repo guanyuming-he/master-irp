@@ -206,6 +206,9 @@ class EmailInfo(ConfigSection):
 class SearchConf(ConfigSection):
 	system_prompt : str
 	max_prompts : int
+	# third-party search engine integration
+	google_engine_id : str
+	google_api_key : str
 
 	#@override
 	def to_dict(self) -> dict:
@@ -213,7 +216,6 @@ class SearchConf(ConfigSection):
 		Nothing more to do here.
 		"""
 		return dataclasses.asdict(self)
-
 
 @dataclass
 class SynthesisConf(ConfigSection):
@@ -294,7 +296,8 @@ Forget ALL previous instructions!!!
 You will be given 
 1. a business topic.
 2. a list of results from search engine that are about the
-business topic. Each result will be a webpage url + tab + its title.
+business topic. Each result will be a webpage url + tab + its title + \n +
+its snippet or keywords.
 
 Your task is to:
 1. Internally, rerank the results based on relevance to the given
@@ -302,7 +305,7 @@ topic, find the most relevant ones.
 2. Summarize them, identify key articles from the results, and remember
 to include the URLs.
 
-You should always try to include the URLs.
+You should always try to include the URLs, that is, the start of each result.
 """
 @dataclass
 class Config:
@@ -369,7 +372,10 @@ class Config:
 		search_conf = SearchConf(
 			system_prompt = \
 				CONFIG_DEF_SEARCH_GEN_RPOMPT,
-			max_prompts = 5
+			max_prompts = 5,
+			# from the burner account
+			google_engine_id = "d0735e44d0a2b43f0",
+			google_api_key = " AIzaSyBJoHRornbbIRNGXSrCr9ScTeioWTTOnN8 "
 		)
 		synthesis_conf = SynthesisConf(
 			system_prompt = \
@@ -415,11 +421,9 @@ class Config:
 			# the dst address will be my email address that can be known
 			# publicly from my GitHub anyway.
 			dst_addresses = [
-				# Use my least valuable email address: the Microsoft one I
-				# registered a long time ago and want to discard ever since.
-				# But sadly I cannot as many part of the world requires me to
-				# use Microsoft services in my daily life.
-				"guanyuminghe@outlook.com"
+				# Use my public email address:
+				# which everyone knows from my GitHub page anyway.
+				"guanyuming.he24@imperial.ac.uk"
 			],
 			# the src email address is a pure burner account.
 			# It is used for nothing else except this.
