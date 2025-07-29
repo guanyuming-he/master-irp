@@ -380,10 +380,33 @@ other supporting programs, and the red box with the dashed lines are optional.
 \label{fig.arch.flow}
 \end{figure} 	
 
+\subsubsection{Search engines} \label{sec.custom.search.engine}
+The easiest way to integrate a web search engine is to use a commerical search
+API, building upon the large database the commerical company provides.
+However, the commercial search engines suffer from a few serious problems.
+\begin{enumerate}
+	\item 
+	The free-tier APIs often have various ungenerous limits, e.g., number of
+	queries, number of results returned, and filtering of search results.  For
+	example, see Google's \cite{search.api.limit.1} and 
+	\item
+	The algorithm of the search engines are proprietory; I cannot control what
+	they give. This is a big problem, because my goal is not about retrieving
+	general information but specific information of business teaching value.
+\end{enumerate}
+
+Therefore, I plan to use commerical search APIs alongside my custom minimal
+search engine. The custom search engine will address the two problems with
+unlimited usage and specific information retrieval. To achieve the latter, I
+configure the search engine to ONLY index business news websites. Clearly, I
+will not have the resource to index most of the Internet and store them, and
+this coverage weakness will be compensated by the use of commercial search
+APIs.
+
 
 \subsection{Implementation detail}
-Different from in project plan, here the details of the implementation, instead
-of the directions and plans, are provided.
+Following the design philosophy and architecture, here are the details of the
+implementation.
 
 \subsubsection{Configuration format} 
 Most of the configuration is structured, e.g.,
@@ -397,85 +420,65 @@ Here, LLMs will be used to extract them from unstructured data, including
 both user natural language input and file input (e.g.\ business school lecture
 notes).
 
-\subsubsection{Custom search engine} \label{sec.custom.search.engine}
-One problem of search engine APIs is that they have ungenerous search limits
-\cite{search.api.limit.1}, allowing about 1000 queries per month, which is not
-enough for frequent testing and prototyping.
+For all the configuration entries, see \texttt{config.py}.
 
-As a result, I develop a custom search engine that is much less powerful but
-much more specific, crawling only a limited subset of website domains, instead
-of the whole Internet.
+\subsubsection{LLM invocation}
+Considering the heavy use of LLMs and the strict limitation of commercial LLM
+APIs \cite{openai.api.limit, anthropic.api.limit}, the project will use local
+LLMs powered by Ollama \cite{ollama}.
 
-The search engine is implemented in C++ with
+Ollama provides two main modes to communicate with LLM, \texttt{generate} via
+HTTP POST to \texttt{/api/generate} and \texttt{chat} via HTTP POST to
+\texttt{/api/chat}; both access the Ollama local server at
+\url{localhost:11434}. Because the system is not interactive, only the generate
+method is used.
+
+Both the search prompt generation and the results sythesis are invoked this
+way. For each, a different system prompt will be used, carefully
+crafted by my own interaction with Ollama. They are included in the default
+configuration (see \texttt{config.py}).
+
+The LLM models are selected prioritizing usability on personal computers. Thus,
+the maximum number of parameters should be about 10 billion. Among all the
+models Ollama offers \cite{ollama.models}, I chose \texttt{llama3.1:8b} for its
+competitive ability on text generation and summarization, proven by several
+academic studies and benchmarks
+\cite{llama3.1.bench.1, llama3.1.bench.2, llama3.1.bench.3}. Unfortunately,
+llama3.1:8b is text-only. When the user uses files to generate business topics,
+as mentioned earlier, another model fine-tuned with llama3 instructs,
+\texttt{llava-llama3}, is used.
+
+\subsubsection{Search engines}
+My custom search engine is implemented in C++ with
 \href{https://curl.se/libcurl/}{\ttfamily libcurl} for url handling,
 \href{https://lexbor.com/}{\ttfamily lexbor} for HTML parsing, and
-\href{https://xapian.org/docs/}{\ttfamily xapian} for search indexing.
+\href{https://xapian.org/docs/}{\ttfamily xapian} for database building and
+searching. Also, \href{https://pugixml.org/}{\ttfamily pugixml},
+\href{https://www.boost.org/}{\ttfamily boost.url, boost.test}, and
+\href{https://github.com/amosnier/sha-2}{\ttfamily amosnier/sha2} are used as
+support libraries. Finally, Python is linked to call Python functions inside
+C++.
 
-The search engine's algorithm is similar to the mainstream ones: Starting from
-initial urls, scrap each. And for every url found in each, scrap them too.
-However, one difference is that my engine will select a set of domains as
-first-class domains. Only those urls that match the domains will contribute to
-new scrap urls. That is, if a url does not match the domains, all urls found
-within it will not be processed.
+The custom search engine's algorithm is similar to the mainstream ones:
+Starting from initial urls, scrap each. And for every url found in each, scrap
+them too.  More precisely, the indexing of a webpage and the expansion of its
+urls included are controlled by four predicate filters. Two are on URLs and two
+are on the webpages. A webpage is indexed if both URL \& webpage index
+predicates return true; each of its url is considered further if both URL \&
+webpage recurse predicates return true. I separate the URL \& webpage
+predicates because I can then delay scraping of a webpage only after its URL
+passes the conditions.
 
+When search prompts generated by LLMs are given, they will be fed to both my
+custom search engine and Google's programmable search engine, with their
+results combined and filtered.
 
-\subsubsection{Content Processing and Filtering} Search results will be
-gathered and processed through a multi-stage filtering system. This involves
-content deduplication, relevance scoring, source credibility assessment, and
-quality filtering. The processing pipeline will need to handle various content
-formats including articles, reports, videos, and social media posts.
-
-The filtering system will combine rule-based approaches (such as keyword
-matching and source whitelisting) with machine learning techniques for
-relevance scoring and content classification. Natural language processing
-techniques will be employed to extract key information and assess content
-quality. The system will also need to handle different languages and cultural
-contexts in business information.
-
-\subsubsection{LLM-Based Summarization} Processed results will be summarized
-using LLMs with business-focused prompting strategies. The summarization
-component must balance comprehensiveness with conciseness, ensuring that key
-business insights are preserved while making information digestible for
-educators. This involves developing prompting strategies that can identify the
-most relevant information for case method teaching and present it in a
-structured format.
-
-The summarization process may involve extractive techniques (selecting key
-sentences from original content) and abstractive techniques (generating new
-summaries). Different summarization styles may be needed for different types of
-content and user preferences.
-
-\subsubsection{Delivery and User Interface} Results shall be sent to users via
-configured methods, which may include email summaries, web dashboards, or
-integration with existing educational platforms. The delivery component shall
-handle different user preferences and ensure information is presented in a
-format suitable for educational use.
-
-\subsubsection{Feedback and Adaptation System} The system shall collect user
-feedback on result quality and relevance, using this information to improve
-future searches. This involves designing feedback mechanisms that capture both
-explicit user ratings and implicit behavioral signals. Possible algorithms
-include recommendation algorithms and other machine learning models.
-
-\subsection{Technical Considerations} 
-The system will be a high-level program, which calls for simply programming
-languages like Python. On the other hand, the system may have specific
-performance requirements, especially for LLMs and other machine learning
-algorithms. The likely result is a combination of different programming
-languages and technical frameworks.
-
-\subsection{Evaluation and Validation} System effectiveness will be evaluated
-through multiple metrics including information retrieval precision and recall,
-user satisfaction surveys, time savings measurements, and comparison with
-manual search processes. Evaluation will involve collaboration with business
-educators to assess the practical utility of discovered content for case method
-teaching.
-
-The system will be tested with different types of business information requests
-and across different time periods to ensure robust performance. A/B testing may
-be employed to compare different algorithmic approaches and user interface
-designs.
-
+\subsubsection{Results delivery} 
+The results are send to the users automatically via email. Because the code is
+visible in the repository along with the login credentials, I registered a
+burner Google account for email delivery. The configuration records a list of
+destination email addresses, to each of which the final results of running the
+pipeline will be sent from the burner account.
 
 \section{Results}
 

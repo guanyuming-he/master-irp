@@ -363,7 +363,7 @@ class Config:
 			"Foreign direct investment in business"
 		];
 		text_model : str = "llama3.1:8b"
-		file_model : str = "qwen2.5vl:7b"
+		file_model : str = "llava-llama3:latest"
 		verbose_level : int = 1
 
 		search_conf = SearchConf(
