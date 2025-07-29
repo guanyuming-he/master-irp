@@ -72,16 +72,41 @@ class SearchConfFrame(ConfigSectionFrame):
 			prompt_frame, from_=1, to=50, width=10
 		)
 		self.widgets['max_prompts'].pack(side='left', padx=(10, 0))
+
+		# Google Search engine ID
+		src_frame = ttk.Frame(self.frame)
+		src_frame.pack(fill='x', pady=5)
+		ttk.Label(src_frame, text="Google engine ID:").pack(side='left')
+		self.widgets['google_id'] = ttk.Entry(src_frame, width=40)
+		self.widgets['google_id'].pack(
+			side='left', padx=(10, 0), fill='x', expand=True
+		)
+
+		# Google API key
+		src_frame = ttk.Frame(self.frame)
+		src_frame.pack(fill='x', pady=5)
+		ttk.Label(src_frame, text="Google API key:").pack(side='left')
+		self.widgets['google_api'] = ttk.Entry(src_frame, width=40)
+		self.widgets['google_api'].pack(
+			side='left', padx=(10, 0), fill='x', expand=True
+		)
+
 		
 	def load_data(self, data: SearchConf) -> None:
 		self.widgets['system_prompt'].delete('1.0', tk.END)
 		self.widgets['system_prompt'].insert('1.0', data.system_prompt)
 		self.widgets['max_prompts'].set(str(data.max_prompts))
+		self.widgets['google_id'].delete(0, tk.END)
+		self.widgets['google_id'].insert(0, data.google_engine_id)
+		self.widgets['google_api'].delete(0, tk.END)
+		self.widgets['google_api'].insert(0, data.google_api_key)
 		
 	def get_data(self) -> SearchConf:
 		return SearchConf(
 			system_prompt=self.widgets['system_prompt'].get('1.0', tk.END).strip(),
-			max_prompts=int(self.widgets['max_prompts'].get())
+			max_prompts=int(self.widgets['max_prompts'].get()),
+			google_engine_id=self.widgets['google_id'].get(0, tk.END),
+			google_api_key=self.widgets['google_api'].get(0, tk.END),
 		)
 
 
