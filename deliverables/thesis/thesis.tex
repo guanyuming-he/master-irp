@@ -184,24 +184,7 @@ the help with LLMs that can easily process frivolous natural language input, I
 plan to integrate them together to boost an individual's information retrieval
 further, especially in the area of business school teaching content discovery.
 
-\subsubsection{Gaps I aim to fill}
-The contribution I aim make is not about combining LLMs and IR, a direction
-numerous studies have explored. I identify these gaps in the state-of-the-art IR
-tools, with or without LLMs:
-\begin{enumerate}
-	\item They are still semi-automatic, be it search engines or LLMs. One
-	would have to give a prompt first and wait for answers. I plan to make a mostly
-	automatic system where the IR process will be run automatically based on
-	some configuration.
-	\item LLM's training data is often outdated. The information retrieved
-		cannot reflect the new events happened very recently. Even if existing
-		tools like RAG can make LLM search the Internet with a search engine,
-		users often lack control over the content the search engine indexes and
-		returns, and may often end up with less relevant or outdated data.
-\end{enumerate}
-
 \subsection{Goals} \label{sec.intro.goals}
-Based on the gaps, I plan to develop a software system with these goals:
 \begin{enumerate}
 	\item By combining LLMs and search engines, compensate each other's
 		weakeness in information retrieval.
@@ -237,6 +220,39 @@ On the other hand, these are beyond the scope of my project:
 		This project will use trained LLMs.
 \end{enumerate}
 
+\subsection{Related work} \label{sec.related.work}
+
+\subsubsection{Retrieval augmented generation}
+During training, LLMs turn training data into their parameters (also
+parametric-memory). Its immutability after training is a
+weakness for information/knowledge based tasks, as information
+cannot be easily added without retraining. RAG is a general approach to
+fine-tune a trained model with non-parametric memory \cite{rag}. 
+
+RAG was designed to enrich a trained LLM with a pre-trained retriever.
+Addressing hallucination is its major concern. Because the retriever also
+needs to be pre-trained, it cannot inherently solve the outdated training data
+problem. In fact, their work used a retriever trained on a 2018 Wikipedia dump
+\cite[Section 3]{rag}. Additionally, the retriever is also a neural network.
+These are the major differences from my work.
+
+\subsubsection{Other hybrid methods}
+Beside RAG, numerous studies were conducted to augment pre-trained LLMs with
+external knowledge \cite{hybrid.method.1, hybrid.method.2, hybrid.method.3,
+hybrid.method.4, webgpt}.
+Some worked on the retriever, some on how information is integrated into the
+LLM, and some on both. Compared with my work, they focus on question-answering
+tasks, and none of them had getting the latest information as a requirement.
+
+Among them, Nakano et al.'s WebGPT is perhaps the closest to my work: their
+retriever is a text-based web-browser \cite{webgpt}. Nevertheless, WebGPT was
+designed to answer long-form questions, trained primarily to answer questions
+from a specific dataset. Moreover, it used human feedback to improve quality.
+These are the differences from my work.
+
+\subsubsection{TODO: Other works focused on search engine}
+TODO: TBD.
+
 \section{Methods} 
 \subsection{Design philosophy}
 The core of this project is a big software system designed to achieve the
@@ -250,11 +266,11 @@ philosophy \cite{unix.philosophy}.
 
 \begin{enumerate}
 	\item 
-	\emph{Correct today and in the unknown future}: By reasoning of the
+	\emph{Correct today and in the unknown future}: By developing the
 	system using design concepts like abstract datatypes \cite{adt},
 	immutability, and software testing, its current correctness is defended;
-	by defensive programming, its correctness is defended from my future
-	mistakes and stupidity.
+	by defensive programming (type safety, robust checks, etc.), its
+	correctness is defended from my future mistakes and stupidity.
 	\item 
 	\emph{Easy to understand}: Via thorough documentation, static type hints,
 	and again immutability, the code can communicate well with the future me
@@ -441,6 +457,23 @@ way. For each, a different system prompt will be used, carefully
 crafted by my own interaction with Ollama. They are included in the default
 configuration (see \texttt{config.py}).
 
+Apparently, the system prompts are essential to our tasks. There is
+generally no fixed algorithm to arrive at the best prompts given to LLMs, as
+the results not only depend on a lot of aspects including how the input is
+given, but also probably are not deterministic, given that probalisitic
+processes are widely used in deep neural networks and complex machine learning
+models. Thus, the only way to obtain desirable prompts is to manually craft the
+prompts and test them.
+
+The manual tests are done in two ways. The straight-forward way is to directly
+change the prompts in my system, which is easy, thanks to the fact that I
+put them in configuration. Still, this requires running a large part of the
+system and is inefficient. Another approach involves OpenWebUI
+\cite{open.webui}, a GUI tool that allows me to interact directly with the LLM
+models via a web UI. Note that the models are in \texttt{chat} mode instead of
+\texttt{generate} mode. Nevertheless, practice proved that prompts good in chat
+mode is still relevant in the generate mode.
+
 The LLM models are selected prioritizing usability on personal computers. Thus,
 the maximum number of parameters should be about 10 billion. Among all the
 models Ollama offers \cite{ollama.models}, I chose \texttt{llama3.1:8b} for its
@@ -477,15 +510,33 @@ custom search engine and Google's programmable search engine, with their
 results combined and filtered.
 
 \subsubsection{Results delivery} 
-The results are send to the users automatically via email. Because the code is
+The results are sent to the users automatically via email. Because the code is
 visible in the repository along with the login credentials, I registered a
 burner Google account for email delivery. The configuration records a list of
 destination email addresses, to each of which the final results of running the
 pipeline will be sent from the burner account.
 
+The protocol is SMTP + TLS to ensure that the email content is confidential.
+
+
 \section{Results}
+This section demonstrates what a user can achieve using my tool. Next, using
+the same inputs, information retrieved by my tool and other mainstream LLMs \&
+search engines are compared.
+
 
 \section{Discussion}
+This section discusses the results. I present the most significant challenges
+that I encountered and how I addressed them; I discuss what methods achieved
+desired results and what have not; I analyze 
+Finally, I envisage how this tool can be further improved beyond this
+three-month project.
+
+\subsection{Challenges}
+
+\subsection{Analysis of results}
+
+\subsection{Future plans}
 
 \section{Conclusion}
 

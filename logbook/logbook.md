@@ -146,4 +146,5 @@ email.
 
 
 ## Meeting (25 July 2025)
-Delayed to 29 July to include Rhodri.
+Delayed to a later date when Rhodri would be available.
+
