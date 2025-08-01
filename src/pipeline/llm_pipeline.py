@@ -28,7 +28,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Any
 import logging
-from datetime import datetime
+import datetime
 # for securely sending emails
 import smtplib, ssl
 from email.message import EmailMessage
@@ -49,6 +49,7 @@ class LLMPipeline:
 		self.config : Config = self.load_config()
 
 		self.results : dict = {}
+		os.system("rm -rf ./pipeline_output")
 		self.output_dir = Path("pipeline_output")
 		self.output_dir.mkdir(exist_ok=True)
 
@@ -181,7 +182,7 @@ class LLMPipeline:
 		# Store the result
 		with open(result_file, 'w', encoding='utf-8') as f:
 			f.write(f"Search Prompt: {prompt}\n")
-			f.write(f"Timestamp: {datetime.now().isoformat()}\n")
+			f.write(f"Timestamp: {datetime.datetime.now().isoformat()}\n")
 			f.write("="*50 + "\n")
 			f.write(result)
 		
@@ -237,7 +238,7 @@ class LLMPipeline:
 						"synthesis.txt")
 		with open(synthesis_file, 'w', encoding='utf-8') as f:
 			f.write(f"Topic: {topic}\n")
-			f.write(f"Synthesis completed: {datetime.now().isoformat()}\n")
+			f.write(f"Synthesis completed: {datetime.datetime.now().isoformat()}\n")
 			f.write("="*50 + "\n")
 			f.write(synthesis)
 		
@@ -307,7 +308,7 @@ class LLMPipeline:
 		with open(report_path, "w+", encoding="utf-8") as f:
 			f.write("# Business Topic LLM Pipeline - Final Report\n\n")
 			f.write(f"**Generated:** "
-				f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+				f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 			f.write(f"**Topics Processed:** {len(syntheses)}\n\n")
 			
 			for topic, synthesis in syntheses.items():

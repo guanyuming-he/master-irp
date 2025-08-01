@@ -148,3 +148,24 @@ email.
 ## Meeting (25 July 2025)
 Delayed to a later date when Rhodri would be available.
 
+## Meeting (1 August 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor)*
+
+### Key points discussed:
+I showed Sean my progress:
+1. Fixed various bugs in the pipeline; made email delivery and schedulling
+   working in all situations (I hope)
+2. I integrated Google search into my pipeline as well.
+3. I have been working to write my methods in my thesis.
+
+### Feedback received:
+Sean was pleased that the bugs were fixed that the whole automatic pipeline is
+working. Sean said it was good that I also work on my writing in the meantime.
+Sean said he will arrange a meeting with Rhodri on how to make the LLM more
+stable.
+
+### Work plan before next meeting:
+I will continue polishing my thesis and then wait for the meeting with Rhodri
+to tune the LLM to become more stable.
+
+
