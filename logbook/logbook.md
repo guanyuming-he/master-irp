@@ -169,3 +169,22 @@ I will continue polishing my thesis and then wait for the meeting with Rhodri
 to tune the LLM to become more stable.
 
 
+## Meeting (5 August 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor),
+Rhodri Nelson (RN, second supervisor)*
+
+### Key points discussed:
+Sean and me presented the remaining problem: how to tune LLM better for our
+tasks to Rhodri in the hope of getting his expert comments. I showed them how I
+used the tool recommend by Rhodri, Open-WebUI, to tune the LLM, but to no
+avail.
+
+### Feedback received:
+Rhodri commented that, since tuning the system prompt failed despite my
+efforts, it probably follows that the current one-shot LLM application won't
+work greatly. He suggested me to make it multi-stage instead of one-shot.
+
+### Work plan before next meeting:
+I will apply Rhodri's suggestion to my system.
+
+
