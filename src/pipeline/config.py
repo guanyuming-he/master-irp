@@ -204,8 +204,16 @@ class EmailInfo(ConfigSection):
 
 @dataclass
 class SearchConf(ConfigSection):
-	system_prompt : str
-	max_prompts : int
+	
+	# Stage 1 : Identify subtopics or key aspects of the input. 
+	# Rephrase input if it's vague.
+	system_prompt_1 : str
+	# Stage 2 : Create search engine queries for each subtopic.
+	system_prompt_2 : str
+
+	max_subtopics : int
+	max_prompts_per_topic : int
+
 	# third-party search engine integration
 	google_engine_id : str
 	google_api_key : str
@@ -219,7 +227,13 @@ class SearchConf(ConfigSection):
 
 @dataclass
 class SynthesisConf(ConfigSection):
-	system_prompt : str
+
+	# Stage 1 : For each topic, filter and rerank the search results.
+	system_prompt_1 : str
+	# Stage 2 : Give a summary of the remaining results. 
+	system_prompt_2 : str
+
+	# max number of characters per summary.
 	max_len : int
 
 	#@override
@@ -230,6 +244,9 @@ class SynthesisConf(ConfigSection):
 		return dataclasses.asdict(self)
 
 
+# @deprecated Unused for now, as I move on to multi-stage.
+# But I keep it here, in case I may need to refer to it in the future,
+# as I fine-tuned it a lot.
 CONFIG_DEF_SEARCH_GEN_RPOMPT : str = \
 """
 You will receive abstract or concrete business-related concepts or
@@ -289,6 +306,9 @@ Only output search queries, separating them by newlines. Do not explain
 or instruct. And DO NOT enclose the entire queries in e.g. quotes or
 special symbols.
 """
+# @deprecated Unused for now, as I move on to multi-stage.
+# But I keep it here, in case I may need to refer to it in the future,
+# as I fine-tuned it a lot.
 CONFIG_DEF_SYN_PROMPT : str = \
 """
 Forget ALL previous instructions!!!
@@ -307,6 +327,68 @@ to include the URLs.
 
 You should always try to include the URLs, that is, the start of each result.
 """
+
+CONFIG_DEF_SEARCH_GEN_PROMPT_1 : str = \
+"""
+You will receive a business-related topic, abstract or concrete. Your task is
+to identify 3–5 key subtopics, questions, or angles that are worth exploring
+via news search. Focus on what real-world events, company actions, market
+trends, or controversies might be related to the topic.
+
+If the topic is abstract (e.g., "competitive advantage", "vertical
+integration"), suggest subtopics that reflect real-world applications,
+examples, or industries. If the topic is concrete, keep it as-is, but try to
+cover all angles of it.
+
+Output each subtopic or question on a separate line.  Do NOT explain or
+elaborate; output the topics ONLY.
+"""
+CONFIG_DEF_SEARCH_GEN_PROMPT_2 : str = \
+"""
+You will receive a list of business-related subtopics or questions. For each,
+generate one or two search engine queries aimed at retrieving recent news
+events, or stories that illustrate or discuss the topic.
+
+For abstract subtopics, follow these additional rules:
+
+	Identify relevant real-world examples, companies, events, or industries
+	that relate to the topic.
+
+	Include both the abstract term and its concrete examples or synonyms in the
+	same query. 
+
+	Use two queries to vary examples and improve coverage.
+
+For concrete subtopics (e.g., “Trump’s latest tariff”), generate one query that
+matches relevant phrasings and combinations people might search.
+
+Output only the search queries. One per line. No explanation or formatting.
+"""
+
+CONFIG_DEF_SYN_PROMPT_1 : str = \
+"""
+Prompt (System): You will be given a business topic and a list of search
+results that are supposed to be about it. Each result consists of a URL, a
+title, and a snippet or keywords. They are separated by newlines.
+
+For each result, judge its relevance against the topic. If it is irrelevant,
+discard it.
+
+Finally, for all the relevant ones, output the most relevant one at the
+beginning (in descending order of relevance).
+"""
+CONFIG_DEF_SYN_PROMPT_2 : str = \
+"""
+You will receive a list of search results (URL + title + keywords/snippet). 
+They are separated by newlines.
+
+Your task is to summarize them. More specifically,
+	Identify the key insights, patterns, or news developments from the
+	articles.
+	Mention company names, actions, or trends as appropriate.
+	Always cite URLs when referring to specific articles or claims.
+"""
+
 @dataclass
 class Config:
 	"""
@@ -370,16 +452,21 @@ class Config:
 		verbose_level : int = 1
 
 		search_conf = SearchConf(
-			system_prompt = \
-				CONFIG_DEF_SEARCH_GEN_RPOMPT,
-			max_prompts = 5,
+			system_prompt_1 = \
+				CONFIG_DEF_SEARCH_GEN_PROMPT_1,
+			system_prompt_2 = \
+				CONFIG_DEF_SEARCH_GEN_PROMPT_2,
+			max_subtopics = 3,
+			max_prompts_per_topic = 2,
 			# from the burner account
 			google_engine_id = "d0735e44d0a2b43f0",
 			google_api_key = " AIzaSyBJoHRornbbIRNGXSrCr9ScTeioWTTOnN8 "
 		)
 		synthesis_conf = SynthesisConf(
-			system_prompt = \
-				CONFIG_DEF_SYN_PROMPT,
+			system_prompt_1 = \
+				CONFIG_DEF_SYN_PROMPT_1,
+			system_prompt_2 = \
+				CONFIG_DEF_SYN_PROMPT_2,
 			max_len = 3200
 		)
 

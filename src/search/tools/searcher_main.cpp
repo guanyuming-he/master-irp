@@ -53,8 +53,8 @@ int main(int argc, char* argv[])
 
 	try 
 	{
-		// Return at most 24 results.
-		xp::MSet result = s.query(query_str, {24});
+		// Return at most 16 results.
+		xp::MSet result = s.query(query_str, {16});
 
 		std::cout << "Found " << result.size() << " results\n";
 		for (auto i = result.begin(); i != result.end(); ++i)

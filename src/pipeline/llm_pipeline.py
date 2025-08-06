@@ -109,7 +109,7 @@ class LLMPipeline:
 		
 		self.logger = logging.getLogger(__name__)
 		
-	def generate_search_prompts(self, business_topic: str) -> List[str]:
+	def generate_search_prompts(self, business_topic: str) -> list[str]:
 		"""
 		Generate search prompts for a business topic using Ollama.
 		"""
@@ -119,24 +119,39 @@ class LLMPipeline:
 				f"{business_topic}"
 			)
 		
-		response = send_to_ollama(
+		response_1 = send_to_ollama(
 			self.config.text_model,
-			self.config.search_conf.system_prompt,
-			business_topic + "\n relatd search engine prompts"
+			self.config.search_conf.system_prompt_1,
+			"Give subtopics for:\n" + business_topic
 		)
 		
-		# Parse the response to extract individual prompts
-		# line.strip() returns True only if the lines is not empty after
+		# Subtopics are put on individual lines.
+		# line.strip() gives True only if the line is not empty after
 		# stripping.
-		prompts = [line.strip() for line in response.split('\n') 
-				if line.strip()]
-		
-		# Limit the number of prompts if specified
-		max_prompts = min(
-			self.config.search_conf.max_prompts,
-			len(prompts)
+		subtopics = [
+			line.strip() for line in response_1.split('\n') 
+			if line.strip()
+		]
+		self.logger.info(
+			f"Generated subtopics:\n {subtopics}"
 		)
-		prompts = prompts[:max_prompts]
+
+		prompts : list[str] = []
+		n_st : int = 0
+		for st in subtopics:
+			response_2 = send_to_ollama(
+				self.config.text_model,
+				self.config.search_conf.system_prompt_2,
+				"Give search query(ies) for:\n" + st
+			)
+			prompts += [
+				line.strip() for line in response_2.split('\n')
+				if line.strip()
+			][:self.config.search_conf.max_prompts_per_topic]
+			
+			n_st += 1
+			if n_st >= self.config.search_conf.max_subtopics:
+				break
 		
 		if hasattr(self, 'logger'):
 			self.logger.info(f"Generated {len(prompts)} search prompts for "
@@ -219,13 +234,24 @@ class LLMPipeline:
 		combined_results = ""
 		for prompt, result in self.results[topic].items():
 			combined_results += f"\n--- Search: {prompt} ---\n{result}\n"
+
+		topic_line : str = \
+			f"*Business topic: {topic}*\n\n\n"
 		
-		# Get synthesis from Ollama
-		system_prompt = self.config.synthesis_conf.system_prompt
+		# Stage 1: filter and rerank.
+		filtered = send_to_ollama(
+			self.config.text_model, 
+			self.config.synthesis_conf.system_prompt_1,
+			topic_line +
+			"search results:\n" + combined_results
+		)
+
+		# Stage 2: summarize
 		synthesis = send_to_ollama(
 			self.config.text_model, 
-			system_prompt,
-			"summarize these search results:\n\n" + combined_results
+			self.config.synthesis_conf.system_prompt_2,
+			topic_line +
+			"search results:\n" + filtered
 		)
 		max_len = min(
 			self.config.synthesis_conf.max_len,
