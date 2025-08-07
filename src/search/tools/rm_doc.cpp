@@ -8,7 +8,6 @@
  * @author Guanyuming He
  */
 
-#include <boost/url/url.hpp>
 #include <iostream>
 #include <random>
 #include <unordered_map>
@@ -30,13 +29,7 @@ bool rm_func(xp::Document& doc)
 {
 	static unsigned num_rmed = 0;
 
-	std::string date = doc.get_data();
-	// date is url \t title.
-	std::string_view u_str(
-		date.c_str(), 
-		date.find_first_of('\t')
-	);
-	urls::url u(u_str);
+	urls::url u(index::url_from_doc(doc));
 
 	std::string key{u.encoded_host()};
 	if (!domain_rm_prob.contains(key))

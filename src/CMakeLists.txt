@@ -52,6 +52,11 @@ add_executable(upd_doc
 	search/tools/upd_doc.cpp
 )
 target_link_libraries(upd_doc PRIVATE search_eng)
+
+add_executable(doc_dist
+	search/tools/doc_dist.cpp
+)
+target_link_libraries(doc_dist PRIVATE search_eng)
 ############## External libs ###############
 
 # Python 3 C API

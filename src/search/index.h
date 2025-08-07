@@ -83,6 +83,13 @@ public:
 	inline auto num_documents() const
 	{ return db.get_doccount(); }
 
+	/**
+	 * Because how the data is stored in the document is decided by the class,
+	 * the class should thus provide means to recover them.
+	 */
+	static std::string url_from_doc(const xp::Document& doc);
+	static std::string title_from_doc(const xp::Document& doc);
+
 public:
 	/**
 	 * Adds document to the index.

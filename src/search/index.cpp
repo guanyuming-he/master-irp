@@ -97,6 +97,24 @@ std::optional<xp::Document> index::get_document(const xp::docid id) const
 	return ret;
 }
 
+std::string index::url_from_doc(const xp::Document& doc)
+{
+	std::string data = doc.get_data();
+	// data is url \t title.
+	return data.substr(
+		0, data.find('\t')
+	);
+}
+
+std::string index::title_from_doc(const xp::Document& doc)
+{
+	std::string data = doc.get_data();
+	// data is url \t title.
+	return data.substr(
+		data.find('\t')+1
+	);
+}
+
 void index::add_document(const webpage& w)
 { 
 	// do not index an empty document.

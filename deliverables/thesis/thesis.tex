@@ -19,6 +19,8 @@
 \repository{https://github.com/ese-ada-lovelace-2024/irp-gh124}
 
 \newcommand\casemethod{case method}
+% allow breaking in long texttt words.
+\newcommand\ttb{\discretionary{}{}{}}
 
 \begin{document}
 
@@ -268,7 +270,7 @@ On the other hand, these are beyond the scope of my project:
 
 
 \section{Methods} 
-\subsection{Design philosophy}
+\subsection{Design philosophy} \label{sec.design.philo}
 The core of this project is a big software system designed to achieve the
 goals. Considering the scale and complexity of the software system, its
 development will greatly benefit from a clear design philosophy.
@@ -467,7 +469,7 @@ HTTP POST to \texttt{/api/generate} and \texttt{chat} via HTTP POST to
 method is used.
 
 Both the search prompt generation and the results sythesis are invoked this
-way. For each, a different system prompt will be used, carefully
+way. For each, different system prompts will be used, carefully
 crafted by my own interaction with Ollama. They are included in the default
 configuration (see \texttt{config.py}).
 
@@ -478,6 +480,11 @@ given, but also probably are not deterministic, given that probalisitic
 processes are widely used in deep neural networks and complex machine learning
 models. Thus, the only way to obtain desirable prompts is to manually craft the
 prompts and test them.
+
+Initially, each stage invoking LLMs was one-shot (using only one invocation of
+the LLM). Later tests revealed that this approach was extremely hard to tune
+for all situations. Therefore, I turned to have a series of LLM invocations for
+each stage, enabling the LLM to focus on one specific task at one time.
 
 The manual tests are done in two ways. The straight-forward way is to directly
 change the prompts in my system, which is easy, thanks to the fact that I
@@ -534,10 +541,47 @@ The protocol is SMTP + TLS to ensure that the email content is confidential.
 
 
 \section{Results}
-This section demonstrates what a user can achieve using my tool. Next, using
-the same inputs, information retrieved by my tool and other mainstream LLMs \&
-search engines are compared.
+This section demonstrates the completed system.  Next, using the same inputs,
+information retrieved by my tool and other mainstream LLMs \& search engines
+are compared.
 
+\subsection{Completed system}
+\subsubsection{Configuration GUI}
+The GUI used for end-users to configure the pipeline is implemented in Tkinter
+\cite{tkinter}, a Python GUI interface. 
+
+The source is in \verb!config_gui.py!. By the principles in section
+\ref{sec.design.philo}, the configuration is divided into different separate
+sections, each of which is managed by a GUI class inheriting from base lass
+\texttt{Config\ttb Section\ttb Frame}.
+
+Figure~\ref{fig.config.gui} shows a screenshot of the GUI.
+\begin{figure}[hbtp!]
+	\centering
+	\includegraphics[height=.25\textheight]{res/gui.png}
+	\caption{Configuration GUI}
+	\label{fig.config.gui}
+\end{figure}
+
+\subsubsection{Custom search engine}
+Recall that the main goal of developing this custom search engine is to 
+filter out non-concrete information sources, which mainstream search engines
+all include, as they index the whole Internet.
+
+Figure~\ref{fig.index.host.dist} displays the host distribution of all the
+indexed data on my personal computer, as of 7 August. This figure is produced
+by \texttt{doc\_\ttb dist.cpp} and \texttt{doc\_\ttb dist\_\ttb pie.py}.
+Unfortunately, because of the volatility of the Internet content, the exact
+data is probably not reproducible.
+\begin{figure}[hbtp!]
+	\centering
+	\includegraphics[height=.3\textheight]{res/doc_host_dist.png}
+	\caption{Indexed document host distribution}
+	\label{fig.index.host.dist}
+\end{figure}
+
+
+\subsection{Comparsion with mainstream tools}
 As a Business School teacher, my supervisor provides me with a list of topics
 from his modules:
 \begin{enumerate}

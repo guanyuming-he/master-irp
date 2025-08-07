@@ -58,20 +58,29 @@ class SearchConfFrame(ConfigSectionFrame):
 	def create_widgets(self) -> None:
 		# System prompt
 		ttk.Label(self.frame, text="System Prompt:").pack(anchor='w')
-		self.widgets['system_prompt'] = scrolledtext.ScrolledText(
+		self.widgets['system_prompt_1'] = scrolledtext.ScrolledText(
 			self.frame, height=10, width=80, wrap=tk.WORD,
 			font=DEFAULT_FONT
 		)
-		self.widgets['system_prompt'].pack(fill='both', expand=True, pady=5)
+		self.widgets['system_prompt_1'].pack(fill='both', expand=True, pady=5)
+		self.widgets['system_prompt_2'] = scrolledtext.ScrolledText(
+			self.frame, height=10, width=80, wrap=tk.WORD,
+			font=DEFAULT_FONT
+		)
+		self.widgets['system_prompt_2'].pack(fill='both', expand=True, pady=5)
 		
 		# Max prompts
 		prompt_frame = ttk.Frame(self.frame)
 		prompt_frame.pack(fill='x', pady=5)
 		ttk.Label(prompt_frame, text="Max Prompts:").pack(side='left')
-		self.widgets['max_prompts'] = ttk.Spinbox(
-			prompt_frame, from_=1, to=50, width=10
+		self.widgets['max_subtopics'] = ttk.Spinbox(
+			prompt_frame, from_=1, to=10, width=10
 		)
-		self.widgets['max_prompts'].pack(side='left', padx=(10, 0))
+		self.widgets['max_subtopics'].pack(side='left', padx=(10, 0))
+		self.widgets['max_prompts_per_topic'] = ttk.Spinbox(
+			prompt_frame, from_=1, to=10, width=10
+		)
+		self.widgets['max_prompts_per_topic'].pack(side='left', padx=(10, 0))
 
 		# Google Search engine ID
 		src_frame = ttk.Frame(self.frame)
@@ -93,9 +102,12 @@ class SearchConfFrame(ConfigSectionFrame):
 
 		
 	def load_data(self, data: SearchConf) -> None:
-		self.widgets['system_prompt'].delete('1.0', tk.END)
-		self.widgets['system_prompt'].insert('1.0', data.system_prompt)
-		self.widgets['max_prompts'].set(str(data.max_prompts))
+		self.widgets['system_prompt_1'].delete('1.0', tk.END)
+		self.widgets['system_prompt_1'].insert('1.0', data.system_prompt_1)
+		self.widgets['system_prompt_2'].delete('1.0', tk.END)
+		self.widgets['system_prompt_2'].insert('1.0', data.system_prompt_2)
+		self.widgets['max_subtopics'].set(str(data.max_subtopics))
+		self.widgets['max_prompts_per_topic'].set(str(data.max_prompts_per_topic))
 		self.widgets['google_id'].delete(0, tk.END)
 		self.widgets['google_id'].insert(0, data.google_engine_id)
 		self.widgets['google_api'].delete(0, tk.END)
@@ -103,8 +115,10 @@ class SearchConfFrame(ConfigSectionFrame):
 		
 	def get_data(self) -> SearchConf:
 		return SearchConf(
-			system_prompt=self.widgets['system_prompt'].get('1.0', tk.END).strip(),
-			max_prompts=int(self.widgets['max_prompts'].get()),
+			system_prompt_1=self.widgets['system_prompt_1'].get('1.0', tk.END).strip(),
+			system_prompt_2=self.widgets['system_prompt_2'].get('1.0', tk.END).strip(),
+			max_subtopics=int(self.widgets['max_subtopics'].get()),
+			max_prompts_per_topic=int(self.widgets['max_prompts_per_topic'].get()),
 			google_engine_id=self.widgets['google_id'].get(0, tk.END),
 			google_api_key=self.widgets['google_api'].get(0, tk.END),
 		)
@@ -120,11 +134,16 @@ class SynthesisConfFrame(ConfigSectionFrame):
 	def create_widgets(self) -> None:
 		# System prompt
 		ttk.Label(self.frame, text="System Prompt:").pack(anchor='w')
-		self.widgets['system_prompt'] = scrolledtext.ScrolledText(
+		self.widgets['system_prompt_1'] = scrolledtext.ScrolledText(
 			self.frame, height=10, width=80, wrap=tk.WORD,
 			font=DEFAULT_FONT
 		)
-		self.widgets['system_prompt'].pack(fill='both', expand=True, pady=5)
+		self.widgets['system_prompt_1'].pack(fill='both', expand=True, pady=5)
+		self.widgets['system_prompt_2'] = scrolledtext.ScrolledText(
+			self.frame, height=10, width=80, wrap=tk.WORD,
+			font=DEFAULT_FONT
+		)
+		self.widgets['system_prompt_2'].pack(fill='both', expand=True, pady=5)
 		
 		# Max length
 		len_frame = ttk.Frame(self.frame)
@@ -136,13 +155,16 @@ class SynthesisConfFrame(ConfigSectionFrame):
 		self.widgets['max_len'].pack(side='left', padx=(10, 0))
 		
 	def load_data(self, data: SynthesisConf) -> None:
-		self.widgets['system_prompt'].delete('1.0', tk.END)
-		self.widgets['system_prompt'].insert('1.0', data.system_prompt)
+		self.widgets['system_prompt_1'].delete('1.0', tk.END)
+		self.widgets['system_prompt_1'].insert('1.0', data.system_prompt_1)
+		self.widgets['system_prompt_2'].delete('1.0', tk.END)
+		self.widgets['system_prompt_2'].insert('1.0', data.system_prompt_2)
 		self.widgets['max_len'].set(str(data.max_len))
 		
 	def get_data(self) -> SynthesisConf:
 		return SynthesisConf(
-			system_prompt=self.widgets['system_prompt'].get('1.0', tk.END).strip(),
+			system_prompt_1=self.widgets['system_prompt_1'].get('1.0', tk.END).strip(),
+			system_prompt_2=self.widgets['system_prompt_2'].get('1.0', tk.END).strip(),
 			max_len=int(self.widgets['max_len'].get())
 		)
 
