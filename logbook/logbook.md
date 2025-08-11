@@ -187,4 +187,15 @@ work greatly. He suggested me to make it multi-stage instead of one-shot.
 ### Work plan before next meeting:
 I will apply Rhodri's suggestion to my system.
 
+## Meeting (8 August 2025)
+*Present: Guanyuming He (GH, student), Sean O'Grady (SO, main supervisor),
+
+### Key points discusses
+Sean asked me what I have been doing the last two days, and I said I
+changed to LLM invocation to multistage, as Rhodri suggested.
+
+### Work plan before next meeting:
+My thesis, and tuning prompts for the system.
+
+
 

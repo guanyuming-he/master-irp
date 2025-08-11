@@ -363,6 +363,7 @@ For concrete subtopics (e.g., “Trump’s latest tariff”), generate one query
 matches relevant phrasings and combinations people might search.
 
 Output only the search queries. One per line. No explanation or formatting.
+Do NOT start with introductory lines like "Please go ahead ...".
 """
 
 CONFIG_DEF_SYN_PROMPT_1 : str = \
@@ -372,7 +373,8 @@ results that are supposed to be about it. Each result consists of a URL, a
 title, and a snippet or keywords. They are separated by newlines.
 
 For each result, judge its relevance against the topic. If it is irrelevant,
-discard it.
+discard it. Please include them as-is, if you can. Most improtantly, do not
+discard the URL (the first consecutive text without space).
 
 Finally, for all the relevant ones, output the most relevant one at the
 beginning (in descending order of relevance).

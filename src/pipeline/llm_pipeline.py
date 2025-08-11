@@ -146,7 +146,10 @@ class LLMPipeline:
 			)
 			prompts += [
 				line.strip() for line in response_2.split('\n')
-				if line.strip()
+				# Ignore the introductory lines the LLM may put in.
+				# I also instruct it not to in the prompt,
+				# but that won't always work.
+				if (not "please go ahead" in line.lower()) and line.strip()
 			][:self.config.search_conf.max_prompts_per_topic]
 			
 			n_st += 1
