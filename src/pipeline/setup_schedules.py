@@ -23,7 +23,7 @@ import os
 import platform
 import subprocess
 import tempfile
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from enum import Enum
 
 from config import Config, Schedule, ScheduleType
@@ -335,7 +335,65 @@ class TaskScheduler:
 			return CronBackend()
 		else:
 			raise RuntimeError(f"Unsupported platform: {self.platform}")
-	
+
+	def _check_schedule_conflicts(self, schedules: List[Schedule]) -> \
+		Optional[Tuple[Schedule, Schedule]]:
+		"""
+		Check if any two schedules would run within 10 minutes of each other.
+		
+		@param schedules List of Schedule objects to check
+		@return Tuple of conflicting schedules if found, None otherwise
+		"""
+		# For simplicity, we'll check conflicts within a 24-hour period
+		# Convert each schedule to minutes from midnight for comparison
+		
+		def schedule_to_minutes_list(schedule: Schedule) -> List[int]:
+			"""Convert schedule to list of minutes from midnight when it runs."""
+			base_minutes = schedule.time.hour * 60 + schedule.time.minute
+			minutes_list = []
+			
+			if schedule.stype == ScheduleType.EVERY_X_DAYS:
+				# For every X days, it could run on any day, so check daily
+				minutes_list.append(base_minutes)
+			elif schedule.stype == ScheduleType.WEEKLY:
+				# Weekly schedules run once per week, convert to daily equivalent
+				# We'll check all 7 days to be safe
+				for day in range(7):
+					if day == (schedule.day % 7):  # The actual day it runs
+						minutes_list.append(base_minutes)
+			elif schedule.stype == ScheduleType.MONTHLY:
+				# Monthly schedules run once per month, treat as daily for
+				# conflict check
+				minutes_list.append(base_minutes)
+			
+			return minutes_list
+		
+		# Get all execution times for each schedule
+		schedule_times = []
+		for schedule in schedules:
+			times = schedule_to_minutes_list(schedule)
+			for time_minutes in times:
+				schedule_times.append((schedule, time_minutes))
+		
+		# Check for conflicts (within 10 minutes = 600 seconds)
+		CONFLICT_THRESHOLD = 10  # minutes
+		
+		for i, (schedule1, time1) in enumerate(schedule_times):
+			for j, (schedule2, time2) in enumerate(schedule_times[i+1:], 
+													i+1):
+				if schedule1.name == schedule2.name:
+					continue  # Skip same schedule
+				
+				# Check if times are within 10 minutes
+				time_diff = abs(time1 - time2)
+				# Also check wrap-around (e.g., 23:55 and 00:05)
+				time_diff_wrap = min(time_diff, 1440 - time_diff)  # 1440 = 24*60
+				
+				if time_diff_wrap <= CONFLICT_THRESHOLD:
+					return (schedule1, schedule2)
+		
+		return None
+
 	def install_config_schedules(self, config: Config) -> bool:
 		"""
 		Install all schedules from a Config object.
@@ -343,6 +401,20 @@ class TaskScheduler:
 		@param config The Config object containing schedules
 		@return True if all schedules installed successfully
 		"""
+		# Check for schedule conflicts before installing
+		conflict = self._check_schedule_conflicts(config.schedules)
+		if conflict:
+			schedule1, schedule2 = conflict
+			print(f"ERROR: Schedule conflict detected between " + \
+				  f"'{schedule1.name}' and '{schedule2.name}'")
+			print(f"  '{schedule1.name}' runs at " + \
+				  f"{schedule1.time.strftime('%H:%M')}")
+			print(f"  '{schedule2.name}' runs at " + \
+				  f"{schedule2.time.strftime('%H:%M')}")
+			print("  Schedules must be at least 10 minutes apart to " + \
+				  "prevent database race conditions.")
+			return False
+	
 		success = True
 		
 		for schedule in config.schedules:

@@ -477,7 +477,7 @@ class Config:
 				name = "updater",
 				stype = ScheduleType.EVERY_X_DAYS,
 				day = 3,
-				time = datetime.time(12,0),
+				time = datetime.time(10,0),
 				command = 
 					"/bin/bash " + 
 					Schedule.project_root_path() + 
@@ -491,7 +491,7 @@ class Config:
 				name = "llm_pipeline",
 				stype = ScheduleType.WEEKLY,
 				day = 1,
-				time = datetime.time(12,0),
+				time = datetime.time(14,0),
 				# May need to activate a few environments
 				# before running the Python pipeline. Thus, I put the work
 				# into one sh.
