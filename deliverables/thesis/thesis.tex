@@ -375,14 +375,14 @@ other supporting programs, and the red box with the dashed lines are optional.
 \node[module, below=of config] (scheduler) {Scheduled execution};
 \node[process, below=of scheduler] (promptgen) {LLM: Generate search prompts};
 \node[process, below=of promptgen] (search) {Search engines give results};
-\node[process, below=of search] (processresults) {Process \& Filter};
+\node[process, below=of search] (processresults) {LLM: Process \& Filter};
 \node[process, below=of processresults] (summarize) {LLM: Summarize};
 \node[process, below=of summarize] (deliver) {Deliver to user};
 \node[feedback, right=1.5cm of processresults] (feedback) {Feedback \& adaptation};
 
 \node[module, left=of config, align=left] (genconfig) {Generate config topics\\from
 	unstructured input};
-\node[module, left=of promptgen, align=left] (builtinsearch) {Built-in \\search
+\node[module, left=of promptgen, align=left] (builtinsearch) {Built-in custom\\search
 	engine};
 \node[module, below=of builtinsearch, align=left] (thirdsearch) {Third-party \\search
 	engines};
@@ -405,6 +405,10 @@ other supporting programs, and the red box with the dashed lines are optional.
 \draw[fb] (feedback.north) to (promptgen.east);
 \draw[fb] (feedback.north) to [bend right=50] (processresults.east);
 \draw[fb] (feedback.north) to [bend right=55] (config.east);
+
+% Legend
+\draw[fb] (current bounding box.south west) -- +(1,0)
+	node[right]{: Optional};
 \end{tikzpicture}
 \caption{Architecture and operational flow of the software system}
 \label{fig.arch.flow}
@@ -830,6 +834,13 @@ Compared with Google, my system retrieved more reputable and current
 information, but lacked in breadth. When Google's AI overview was triggered,
 its summary quality also appeared to be superior.
 
+Compared with the surveyed studies combining search engine of LLMs which have a
+focus (either LLM4Search or Search4LLM) \cite{llm.meet.search.1}, my system is
+a more neutral combination with a more general framework for information
+retrieval. Orthognoal to their work aiming to address specific weakness of one
+of the two, my work aims primarily to solve the specific information retrieval
+problem.
+
 \subsection{Challenges and future plans}
 The biggest engineering challenge overcome was implementing the custom search
 engine. The indexing algorithm is simple, but a search engine spans
@@ -864,7 +875,7 @@ Nevertheless, there are a few design limitations to improve next:
 \end{enumerate}
 
 \section{Conclusion}
-I successfully developed an integrated information retrieval system
+I successfully designed a pipeline and developed a corresponding system
 that combines LLMs with search engines to supply current content in business
 school teaching. The system complements each individual tool substantially with
 another, by limiting indexed websites, deterministic search result filters, and
@@ -878,7 +889,7 @@ purchasing a more powerful LLM, or devoting more time to make it
 cross-platform, the system's design choices exhibit some inflexibility, leaning
 towards Business topics.
 
-While my system contributes as an engineering solution and an innovative
+Although my system contributes as an engineering solution and an innovative
 framework to integrate search engine and LLMs, it is not a theoretical
 improvement of them; intrinsic problems like hallucination of LLMs and
 non-semantical understanding of queries of search engines are still present.
