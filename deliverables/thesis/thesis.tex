@@ -462,15 +462,9 @@ APIs \cite{openai.api.limit, anthropic.api.limit}, the project will use local
 LLMs powered by Ollama \cite{ollama}.
 
 Ollama provides two main modes to communicate with LLM, \texttt{generate} via
-HTTP POST to \texttt{/api/generate} and \texttt{chat} via HTTP POST to
-\texttt{/api/chat}; both access the Ollama local server at
-\url{localhost:11434}. Because the system is not interactive, only the generate
-method is used.
-
-Both the search prompt generation and the results sythesis are invoked this
-way. For each, different system prompts will be used, carefully
-crafted by my own interaction with Ollama. They are included in the default
-configuration (see \texttt{config.py}).
+and \texttt{chat}; both access the Ollama local server at
+\url{localhost:11434} via HTTP POST. Because the system is not interactive,
+only the generate method is used.
 
 Apparently, the system prompts are essential to our tasks. There is
 generally no fixed algorithm to arrive at the best prompts given to LLMs, as
@@ -482,8 +476,8 @@ prompts and test them.
 
 Initially, each stage invoking LLMs was one-shot (using only one invocation of
 the LLM). Later tests revealed that this approach was extremely hard to tune
-for all situations. Therefore, I turned to have a series of LLM invocations for
-each stage, enabling the LLM to focus on one specific task at one time.
+for all situations. Therefore, I turned to have a multi-stage invocation for
+each step, enabling the LLM to focus on one specific task at one time.
 
 The manual tests are done in two ways. The straight-forward way is to directly
 change the prompts in my system, which is easy, thanks to the fact that I
@@ -638,9 +632,12 @@ phrase or synonyms, or express the same meaning as the topic.
 
 The results of search summarization are even harder to qualify objectively. An
 objective merit is that the LLMs can sometimes uncover surprising angles, while
-an objective shortcoming is that the LLMs often fail to cite the URLs in the
-search results properly: sometimes they ignore URLs; sometimes they hallucinate
-URLs not given.
+an objective shortcoming is that the summarization quality sometimes cannot
+meet expectation. One novalty in the summarization, only discovered in late
+stage after several testing, is to make LLM output individually for each search
+result a relevance number, which is used for filtering and reranking, instead
+of giving all results to the LLM, where the LLM often distort the search
+results.
 
 \subsubsection{Walkthrough}
 The full system starts with the user's configuring the business topics, which
