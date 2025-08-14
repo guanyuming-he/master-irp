@@ -362,22 +362,28 @@ For abstract subtopics, follow these additional rules:
 For concrete subtopics (e.g., “Trump’s latest tariff”), generate one query that
 matches relevant phrasings and combinations people might search.
 
+You can use OR to connect the topic and the other phrases, to have a broader
+coverage.
+
 Output only the search queries. One per line. No explanation or formatting.
 Do NOT start with introductory lines like "Please go ahead ...".
 """
 
 CONFIG_DEF_SYN_PROMPT_1 : str = \
 """
-Prompt (System): You will be given a business topic and a list of search
-results that are supposed to be about it. Each result consists of a URL, a
-title, and a snippet or keywords. They are separated by newlines.
+You will be given a business topic and a single search result for it.
+Your task is to give a real number 0--10 to judge how relevant the result is to
+the topic. If the real number is < 4, then it means it's not so relevant.
+>= 8 is highly relevant. Output the number ONLY. Do NOT explain or instruct.
 
-For each result, judge its relevance against the topic. If it is irrelevant,
-discard it. Please include them as-is, if you can. Most improtantly, do not
-discard the URL (the first consecutive text without space).
+Input format for you:
+Topic:
+<topic>
 
-Finally, for all the relevant ones, output the most relevant one at the
-beginning (in descending order of relevance).
+
+Result:
+<url>	<title>
+<keywords or snippet>
 """
 CONFIG_DEF_SYN_PROMPT_2 : str = \
 """

@@ -32,6 +32,7 @@ import datetime
 # for securely sending emails
 import smtplib, ssl
 from email.message import EmailMessage
+import re
 
 # My local files
 from llm_interface import send_to_ollama
@@ -214,7 +215,6 @@ class LLMPipeline:
 	
 	def sanitize_filename(self, filename: str) -> str:
 		"""Sanitize a string to be used as a filename."""
-		import re
 		# Remove/replace invalid characters
 		filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
 		filename = re.sub(r'\s+', '_', filename)
@@ -223,6 +223,13 @@ class LLMPipeline:
 	def synthesize_results(self, topic: str) -> str:
 		"""
 		Synthesize and summarize results for a topic using Ollama.
+		Two stages:
+		1. LLM filter and rerank each individual search result. I do not decide
+		to output them all to LLM and let LLM output the filtered, which can be
+		distorted or lost. I will simply let LLM output a scale
+		0--10, < 4 = not relevant
+		and then use that to filter and rerank myself.
+		2. Put the filtered and reranked to LLM to summarize.
 		"""
 		if hasattr(self, 'logger'):
 			self.logger.info(f"Synthesizing results for topic: {topic}")
@@ -233,28 +240,76 @@ class LLMPipeline:
 				self.logger.warning(warning_msg)
 			return "No results available for synthesis"
 		
-		# Combine all search results for the topic
-		combined_results = ""
-		for prompt, result in self.results[topic].items():
-			combined_results += f"\n--- Search: {prompt} ---\n{result}\n"
-
 		topic_line : str = \
-			f"*Business topic: {topic}*\n\n\n"
-		
-		# Stage 1: filter and rerank.
-		filtered = send_to_ollama(
-			self.config.text_model, 
-			self.config.synthesis_conf.system_prompt_1,
-			topic_line +
-			"search results:\n" + combined_results
+			f"Topic: {topic}\n\n"
+
+		# Stage 1: filter and rerank
+		#
+		# Filtered res, mapping res to relevance number.
+		# Contains all filtered results for the whole topic.
+		dict_res = dict()
+		num_total_res = 0
+		for prompt, result in self.results[topic].items():
+			# which I need to separate manually.
+			# Each result is actually a collection of results for a prompt
+			# Each two are separated by an empty line, so split with \n\n.
+			list_res = result.split("\n\n")
+			num_total_res += len(list_res)
+
+			for r in list_res:
+				# The system prompt will ask the LLM to send out
+				# a 0--10 score based on the result
+				rel_score = send_to_ollama(
+					self.config.text_model,
+					self.config.synthesis_conf.system_prompt_1,
+					f"{topic_line}Result:\n{r}"
+				)
+				# Find the first real number or integer from rel_score,
+				# because the LLM might still output leading bullshit, even if
+				# I tell it not to from system prompt.
+				num : float = 0.0
+				num_str : str = ""
+				match = re.search(r'(?:\d+\.\d+|\.\d+|\d+)', rel_score)
+				# sometimes LLM will fuckup and output no number.
+				# check that out.
+				if match is not None: 
+					num_str = match.group()
+					num = float(num_str) if '.' in num_str else int(num_str)
+
+				# Filter out those < 2.
+				if num >= 2.0:
+					dict_res[r] = num
+
+		self.logger.info(
+			f"Filter: {len(dict_res)} remains out of {num_total_res}."
 		)
+
+		# Now, rerank based on the relevance score
+		sorted_res = sorted(dict_res, key=dict_res.get)
+		sorted_combined = ""
+		for r in sorted_res:
+			sorted_combined += r
+			sorted_combined += '\n'
+
+		# I could store them in another file to compare with the original all
+		# results.
+		topic_dir = self.output_dir / self.sanitize_filename(topic)
+		filtered_path = topic_dir / "filtered_results.txt"
+		with open(filtered_path, 'w', encoding="utf-8") as f:
+			f.write(f"Filtered results for {topic}\n")
+			f.write("="*50 + "\n")
+			for res in sorted_res:
+				f.write(f"Score: {dict_res.get(res)}\n")
+				f.write(res)
+				f.write('\n')
+
 
 		# Stage 2: summarize
 		synthesis = send_to_ollama(
 			self.config.text_model, 
 			self.config.synthesis_conf.system_prompt_2,
 			topic_line +
-			"search results:\n" + filtered
+			"search results:\n" + sorted_combined
 		)
 		max_len = min(
 			self.config.synthesis_conf.max_len,

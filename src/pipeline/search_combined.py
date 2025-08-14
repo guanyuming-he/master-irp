@@ -78,7 +78,12 @@ def google_search(
 	# Return the results in my custom search format:
 	# url \t title \n
 	# snippet
-	res = res["items"]
+	# Sometimes Google found none.
+	if "items" in res:
+		res = res["items"]
+	else:
+		res = []
+	# Past the prev point, res should be a list.
 
 	ret : str = ""
 	for item in res:
@@ -114,7 +119,7 @@ if __name__ == "__main__":
 	config = Config.load_default()
 	print(google_search(
 		config.search_conf,
-		"Trump tariff",
+		input(),
 		datetime.date(2025,1,1),
 		datetime.date(2025,7,10)
 	))
