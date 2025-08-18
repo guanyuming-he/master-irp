@@ -197,5 +197,8 @@ changed to LLM invocation to multistage, as Rhodri suggested.
 ### Work plan before next meeting:
 My thesis, and tuning prompts for the system.
 
+## Meeting (15 August 2025)
+Not held, as Sean was on vacation.
+
 
 
