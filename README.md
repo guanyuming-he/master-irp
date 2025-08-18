@@ -26,6 +26,10 @@ scripts work on one's computer.
 Note that I use Python version 3.11, not the latest, to be compatible with
 ollama and open-webui.
 
+Because Anaconda is used, one needs to modify the `run_pipeline.sh` and
+`run_updater.sh` to have the correct path to the Anaconda environment on one's
+computer.
+
 ## Setup the environment to compile C++ programs
 Setting up C++ programs is the hardest among all, because there's no concept as
 a package in C++, and libraries are managed and installed in different ways.
