@@ -74,63 +74,80 @@
 
 \subsection{Motivation}
 
-\begin{frame}{Business School Case Method}{Case Method}
-  % - A title should summarize the slide in an understandable fashion
-  %   for anyone how does not follow everything on the slide itself.
+\begin{frame}{Business School Case Method}
 
   \begin{itemize}
   \item
-    Use \texttt{itemize} a lot.
+    First institutionalized at Harvard Business School. One of the mainstream
+	teaching methods.
   \item
-    Use very short sentences or short phrases.
+	Christensen identifies that instructors have to conduct ``extensive
+	preparation'' for it.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Past advancements in information retrieval}{Information
-	Retrieval}
-
-  You can create overlays\dots
+\begin{frame}{Past advancements in information retrieval}
   \begin{itemize}
-  \item using the \texttt{pause} command:
-    \begin{itemize}
-    \item
-      First item.
-      \pause
-    \item    
-      Second item.
-    \end{itemize}
-  \item
-    using overlay specifications:
-    \begin{itemize}
-    \item<3->
-      First item.
-    \item<4->
-      Second item.
-    \end{itemize}
-  \item
-    using the general \texttt{uncover} command:
-    \begin{itemize}
-      \uncover<5->{\item
-        First item.}
-      \uncover<6->{\item
-        Second item.}
-    \end{itemize}
-  \end{itemize}
+	\item No significant improvement until the 19th century.
+	\item (Wired) Morse et al.'s telegraph (1840) and Bell's telephone (1876).
+	\item (Wireless) Marconi's experiments ($\sim 1900$), first radio voice
+		broadcast (1906) 
+	\item (Theory) Frequency modulation ($\sim 1930$).  Shannon's bits and
+		entropy (1948).   
+	\item (Modern) Digital computers, database systems, the Internet.
+	\item (Contemporary) Web search engines. Data Science. LLMs.
+\end{itemize}
 \end{frame}
-
 
 \subsection{Related Works}
 
 \begin{frame}{Improvements on LLMs}
+	\begin{itemize}
+		\item RAG: use pretrained retriever to address hallucination.
+		\item A lot others that use external knowledge to augment LLMs. Most
+			are to improve question answering.
+		\item Perhaps most similar to mine among them: WebGPT, whose retriever
+			is not a model, but a web browser that the LLM can use.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}{Improvements on Search engines}
+	\begin{itemize}
+		\item Some use LLMs to rewrite and improve search queries.
+		\item Some use LLMs to assist ranking of search results.
+		\item A few use LLMs in the indexing stage for NLP tasks (e.g.\ term
+			extraction, meaning filtering).
+	\end{itemize}
 \end{frame}
 
+\section{Methodology}
+\subsection{Design philosophy \& Architecture}
+\begin{frame}{Design philosophy \& Architecture}
+	\begin{itemize}
+		\item Three software engineering pinciples.
+		\item Modular design from the UNIX philosophy.
+		\item A main pipeline and surrounding support programs (scheduling,
+			search engine, GUI).
+	\end{itemize}
 
+	\begin{center}
+		\includegraphics[height=.5\textheight]{./architecture.png}
+	\end{center}
+
+\end{frame}
+
+\subsection{Technical plans}
+\begin{frame}{Technical plans}
+	\begin{itemize}
+		\item Use C++ and a number of libraries to implement the custom search
+			engine and supporting programs.
+		\item Use Python to implement the rest programs.
+		\item Use Ollama to invoke LLMs. 
+		\item Use Cron to schedule tasks. Use Email for results delivery.
+	\end{itemize}
+\end{frame}
 
 \section{Our Results/Contribution}
-
 \subsection{Main Results}
 
 \begin{frame}{Make Titles Informative.}
