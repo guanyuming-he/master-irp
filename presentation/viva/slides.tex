@@ -150,86 +150,117 @@
 \section{Our Results/Contribution}
 \subsection{Main Results}
 
-\begin{frame}{Make Titles Informative.}
+\begin{frame}{Search Engine}
+\begin{itemize}
+	\item Custom search engine
+	\begin{itemize}
+	\item Index only reputable Business sites (from online ranking and
+		supervisor recommendation)
+	\item Can be updated via \texttt{bin/updater} that reads from RSS feeds.
+	\end{itemize}
+	\item Commerical search engine: Google's programmable search engine.
+\end{itemize}
+	\vspace{-.6cm}
+	\begin{center}
+	\includegraphics[width=.5\textwidth]{../../deliverables/thesis/res/doc_host_dist.png}
+	\end{center}
 \end{frame}
 
-\begin{frame}{Make Titles Informative.}
+\begin{frame}{LLM invocation}
+	\begin{itemize}
+	\item Multi-stage invocation: 
+		\begin{enumerate}
+		\item For each business topic, generate subtopics.
+		\item For each subtopic, generate search prompts.
+		\item For each search result, judge its relevance (return a number)
+		\item For the filtered and reranked results, give a summary.
+		\end{enumerate}
+	\end{itemize}
+	\begin{center}
+	\includegraphics[height=.4\textheight]{../../deliverables/thesis/res/table_search_queries.png}
+	\end{center}
 \end{frame}
 
-\begin{frame}{Make Titles Informative.}
+\begin{frame}{Overall walkthrough}
+\begin{minipage}{.34\textwidth}
+	\includegraphics[height=.7\textheight]{../../deliverables/thesis/res/gui.png}
+\end{minipage}%
+\begin{minipage}{.65\textwidth}
+	\begin{itemize}
+	\item User configures the system via GUI.
+	\item User sets up the inital system (index database, scheduelling, etc.)
+	\item At configured times, the system is run.
+	\item The pipeline is invoked, which turns business topics into news summaries.
+	\item An updater is invoked, which constantly gives latest info to the database.
+	\item Final report is sent to the user.
+	\end{itemize}
+\end{minipage}
 \end{frame}
 
 
-\subsection{Comparsion with mainstream tools}
+\subsection{Comparsion with other works}
 
-\begin{frame}{Make Titles Informative.}
+\begin{frame}{Comparison with ChatGPT and Google}
+\begin{itemize}
+	\item Compared with ChatGPT, my system successfully eliminated search
+		results of non-reputable sites. However, my system produced a few
+		irrelavant search queries and could not compete with ChatGPT in summary
+		quality. 
+	\item Compared with Google, my system retrieved more reputable and current
+		information, but lacked in breadth. When Google's AI overview was
+		triggered, its summary quality also appeared to be superior.
+\end{itemize}
+\begin{center}
+	\includegraphics[height=.4\textheight]{../../deliverables/thesis/res/google_res1.png}
+	\includegraphics[height=.4\textheight]{../../deliverables/thesis/res/google_res2.png}
+\end{center}
 \end{frame}
 
-\begin{frame}{Make Titles Informative.}
+\begin{frame}{Overall contribution over similar academic works}
+	\begin{itemize}
+		\item Designed a novel pipeline that combined search engines and LLMs.
+		\item Aimed to address weaknesses of \emph{both} seach engines and
+			LLMs. (Similar works almost always aim to address one of them's.)
+		\item Developed an \emph{automatic} system that only requires
+			occasional user configuration.
+	\end{itemize}
 \end{frame}
 
-\begin{frame}{Make Titles Informative.}
-\end{frame}
+\section*{Challenges \& Future Plans}
+\begin{frame}{Challenges \& Future Plans}
 
-
-\section*{Summary}
-
-\begin{frame}{Summary}
-
-  % Keep the summary *very short*.
   \begin{itemize}
   \item
-    The \alert{first main message} of your talk in one or two lines.
+	  It fails to match the summarization power of commerical AI, probably
+	  because it uses local LLMs running on PC.
   \item
-    The \alert{second main message} of your talk in one or two lines.
-  \item
-    Perhaps a \alert{third message}, but not more than that.
-  \end{itemize}
-  
-  % The following outlook is optional.
-  \vskip0pt plus.5fill
-  \begin{itemize}
-  \item
-    Outlook
-    \begin{itemize}
-    \item
-      Something you haven't solved.
-    \item
-      Something else you haven't solved.
-    \end{itemize}
+	  It is specially tailored to help with business school case method, and a
+	  number of places are hard coded for that.
+  \item 
+	  The custom search engine requires a huge first time setup (indexing).
+	  Restrained by PC disk space, its database breadth is also limited.
+  \item 
+	  My project also does not improve search engines or LLMs theoretically on
+	  how they work.
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+	\begin{center}
+	{\large THANK YOU!}
+	\end{center}
 
-
-% All of the following is optional and typically not needed. 
-\appendix
-\section<presentation>*{\appendixname}
-\subsection<presentation>*{For Further Reading}
-
-\begin{frame}[allowframebreaks]
-  \frametitle<presentation>{For Further Reading}
-    
-  \begin{thebibliography}{10}
-    
-  \beamertemplatebookbibitems
-  % Start with overview books.
-
-  \bibitem{Author1990}
-    A.~Author.
-    \newblock {\em Handbook of Everything}.
-    \newblock Some Press, 1990.
- 
-    
-  \beamertemplatearticlebibitems
-  % Followed by interesting articles. Keep the list short. 
-
-  \bibitem{Someone2000}
-    S.~Someone.
-    \newblock On this and that.
-    \newblock {\em Journal of This and That}, 2(1):50--100,
-    2000.
-  \end{thebibliography}
+	Further reading:
+	\begin{itemize}
+		\item Hinrich Sch\"utze, Christopher D Manning, and Prabhakar Raghavan.
+			\emph{Introduction to information retrieval}, volume 39.
+			Cambridge University Press Cambridge, 2008.
+		\item Haoyi Xiong, Jiang Bian, Yuchen Li, Xuhong Li, Mengnan Du,
+			Shuaiqiang Wang, Dawei Yin, and Sumi Helal. When search engine
+			services meet large language models: Visions and challenges.
+			\emph{IEEE Transactions on Services Computing}, 17(6):4558--4577,
+			2024.
+	\end{itemize}
 \end{frame}
 
 \end{document}
