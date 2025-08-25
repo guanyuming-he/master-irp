@@ -200,5 +200,11 @@ My thesis, and tuning prompts for the system.
 ## Meeting (15 August 2025)
 Not held, as Sean was on vacation.
 
+## Meeting (22 August 2025)
+Sean was on vacation as well, but I sent him a draft of my final report for him
+to review.
+
+He promised that he will sent me feedback soon.
+
 
 
