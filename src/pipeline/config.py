@@ -362,11 +362,41 @@ For abstract subtopics, follow these additional rules:
 For concrete subtopics (e.g., “Trump’s latest tariff”), generate one query that
 matches relevant phrasings and combinations people might search.
 
-You can use OR to connect the topic and the other phrases, to have a broader
-coverage.
+You should use OR to connect the topic and the other phrases, to have a broader
+coverage. Avoid using AND. Do not just output sentences, which search engines
+would have a hard time with.
 
 Output only the search queries. One per line. No explanation or formatting.
 Do NOT start with introductory lines like "Please go ahead ...".
+
+For example: (Abstract) Input: "Vertical integration" Output: 
+		"vertical integration" OR "vertical consolidation" OR (Amazon
+		warehouse logistics retail)
+
+		"vertical integration" OR "vertical consolidation" OR (Tesla
+		battery production) OR (vehicle manufacturing)
+
+		"vertical integration" OR "vertical consolidation" OR (Apple
+		chip design manufacturing)
+
+		"vertical integration" OR "vertical consolidation" OR
+		"Companies investing in end-to-end supply chains"
+
+	(Abstract) Input: "Competitive advantage" Output: 
+		"competitive advantage" OR "strategic edge" OR (Apple vs
+		Microsoft battle)
+
+		"competitive advantage" OR "strategic edge" OR (Microsoft's
+		global dominance advantage)
+
+	(Concrete) Input: "Trump tariff" Output: 
+		Trump latest tariff
+
+		Trump China tariff
+
+		Trump tariff news
+
+		Traiff Trump impacts.
 """
 
 CONFIG_DEF_SYN_PROMPT_1 : str = \

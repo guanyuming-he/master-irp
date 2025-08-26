@@ -27,6 +27,7 @@ def custom_search(
 	# start_date..end_date queries
 	search_prompt += \
 		f" {start_date.isoformat()}..{end_date.isoformat()}";
+	print(search_prompt)
 
 	try:
 		cmd = ["./bin/searcher", "./db", search_prompt]
@@ -59,7 +60,7 @@ def google_search(
 	conf: SearchConf, 
 	search_prompt : str,
 	start_date : datetime.date, end_date : datetime.date
-):
+) -> str:
 	# The first string must be customsearch, representing Google's 
 	# custom search service.
 	service = build("customsearch", "v1", developerKey=conf.google_api_key)
@@ -104,14 +105,22 @@ def search_filter_combine(
 	filter by date,
 	and finally combine the results.
 	"""
-	ret1 = custom_search(
-		search_prompt, start_date, end_date
-	)
-	ret2 = google_search(
-		conf, search_prompt,
-		start_date, end_date
-	)
-	return ret1 + ret2
+	try:
+		ret1 = custom_search(
+			search_prompt, start_date, end_date
+		)
+	except RuntimeError as e:
+		ret1 = str(e)
+
+	try:
+		ret2 = google_search(
+			conf, search_prompt,
+			start_date, end_date
+		)
+	except Exception as e:
+		ret2 = str(e)
+		
+	return ret1 + '\n' + ret2
 
 # Main is for tests only. The file is used by directly calling the above
 # functions.

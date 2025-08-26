@@ -261,19 +261,18 @@ class LLMPipeline:
 			# returned.
 			# The values here are self tuned, because the LLM seems to output
 			# little when there is little, and many when there are many.
-			threshold : float = 2.0
-			if len(list_res) <= 10:
-				threshold = 1.0
-			elif len(list_res) <= 20:
-				threshold = 1.5
-			elif len(list_res) <= 30:
-				threshold = 2.0
+			threshold : float = 5.0
+			if len(list_res) <= 5:
+				# include all if less than 5 results
+				threshold = 0.0
+			elif len(list_res) <= 50:
+				threshold = float(len(list_res)) / 10.0
 			else:
-				threshold = 3.0
+				threshold = 5.0
 
 			for r in list_res:
 				# Probably Google's search engine out of quota.
-				# Just continue.
+				# Better ignore
 				if r.startswith("Search error"):
 					continue
 
