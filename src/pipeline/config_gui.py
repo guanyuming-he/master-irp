@@ -119,8 +119,8 @@ class SearchConfFrame(ConfigSectionFrame):
 			system_prompt_2=self.widgets['system_prompt_2'].get('1.0', tk.END).strip(),
 			max_subtopics=int(self.widgets['max_subtopics'].get()),
 			max_prompts_per_topic=int(self.widgets['max_prompts_per_topic'].get()),
-			google_engine_id=self.widgets['google_id'].get(0, tk.END),
-			google_api_key=self.widgets['google_api'].get(0, tk.END),
+			google_engine_id=self.widgets['google_id'].get(),
+			google_api_key=self.widgets['google_api'].get(),
 		)
 
 

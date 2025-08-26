@@ -67,7 +67,7 @@ def google_search(
 		q=search_prompt, cx=conf.google_engine_id, 
 		# let's not search too much at once so that
 		# my quota isn't reached.
-		num=10,
+		num=6,
 		# usage: https://developers.google.com/custom-search/docs/
 		# structured_search#restrict_to_range
 		sort= (

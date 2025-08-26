@@ -16,9 +16,9 @@ Also, schedule execution.
 3. Execute searches using my own search engine (and maybe also commercial ones)
 4. Store results in organized structure; syntehsize and summarize results using
 LLMs;
-5. Deliver results to user, based on the ways in the configuration file.
+5. Deliver results to user, based on the email addresses in the configuration
+file.
 
-inf. (to be implemented) implement feedback and self improvement.
 """
 
 import json
@@ -256,7 +256,27 @@ class LLMPipeline:
 			list_res = result.split("\n\n")
 			num_total_res += len(list_res)
 
+
+			# The filtering threshold depends on how many results are
+			# returned.
+			# The values here are self tuned, because the LLM seems to output
+			# little when there is little, and many when there are many.
+			threshold : float = 2.0
+			if len(list_res) <= 10:
+				threshold = 1.0
+			elif len(list_res) <= 20:
+				threshold = 1.5
+			elif len(list_res) <= 30:
+				threshold = 2.0
+			else:
+				threshold = 3.0
+
 			for r in list_res:
+				# Probably Google's search engine out of quota.
+				# Just continue.
+				if r.startswith("Search error"):
+					continue
+
 				# The system prompt will ask the LLM to send out
 				# a 0--10 score based on the result
 				rel_score = send_to_ollama(
@@ -276,8 +296,7 @@ class LLMPipeline:
 					num_str = match.group()
 					num = float(num_str) if '.' in num_str else int(num_str)
 
-				# Filter out those < 2.
-				if num >= 2.0:
+				if num >= threshold:
 					dict_res[r] = num
 
 		self.logger.info(
