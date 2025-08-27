@@ -127,7 +127,9 @@ execute
 ```
 make config-dbg
 ```
-Should succeed in finding all libraries.
+Should succeed in finding all libraries. If it fails in finding Python, make
+sure you have development files (on Debian based systems, run `apt-get install
+python3-dev`).
 Then, execute
 ```
 make build
@@ -165,9 +167,32 @@ Before the system can be used, it must be initialized.
 1. One must setup an initial database for the search engine.
 Run 
 ```
-
+./bin/indexer ./db ./que false <how_many>
+```
+It is recommended to have at least 10,000 as `<how_many>`.
+2.
+Activate Anaconda Python3. You must exit previous Python venv first
+```
+deactivate
+source ~/anaconda3/bin/activate irp
+```
+3. 
+Configure the system initially
+```
+python3 ./src/pipeline/config_gui.py
+```
+4. Setup task schedulling
+```
+python3 ./src/pipeline/setup_schedules.py
 ```
 
+It's done!
+
+After the setup, outside of scheduled times, you can also run the pipeline
+manually via
+```
+python3 ./src/pipeline/llm_pipeline.py
+```
 
 # IRP Repository
 
