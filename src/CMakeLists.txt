@@ -124,7 +124,6 @@ target_link_libraries(search_eng PRIVATE lexbor)
 
 # Boost
 find_package(Boost 
-	1.81 
 	REQUIRED
 	COMPONENTS unit_test_framework url
 )
