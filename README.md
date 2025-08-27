@@ -36,8 +36,18 @@ conda activate irp
 pip install -r requirements.txt
 ```
 
+3. Create a venv using system Python for C++ programs to link
+First, make sure your system Python can have `python3 -m venv`. 
+Then, execute
+```
+python3 -m venv ./venv
+source ./venv/bin/activate
+python3 -m pip install htmldate
+```
+
 Note that I use Python version 3.11, not the latest, to be compatible with
-ollama and open-webui.
+`ollama` and `open-webui`.
+
 
 ## Setup the environment to compile C++ programs
 Setting up C++ programs is the hardest among all, because there's no concept as
@@ -108,6 +118,10 @@ cp /usr/local/include/pugixml*.hpp -t /usr/local/include/pugixml
 
 ### Test installation and compile
 If everything goes well, then at the project root, 
+activate venv
+```
+source ./venv/bin/activate
+```
 
 execute
 ```

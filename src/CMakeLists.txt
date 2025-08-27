@@ -60,23 +60,16 @@ target_link_libraries(doc_dist PRIVATE search_eng)
 ############## External libs ###############
 
 # Python 3 C API
-# Use my anaconda's Python3.
-set(CONDA_PREFIX "/home/anony/anaconda3/envs/irp")
-set(Python3_ROOT_DIR ${CONDA_PREFIX})
-set(Python3_EXECUTABLE "${CONDA_PREFIX}/bin/python3")
-set(Python3_INCLUDE_DIRS "${CONDA_PREFIX}/include/python3.11")
-set(Python3_LIBRARY_DIRS "${CONDA_PREFIX}/lib")
-set(Python3_LIBRARIES 
-	"${CONDA_PREFIX}/lib/libpython3.so"
-	"${CONDA_PREFIX}/lib/libpython3.11.so.1.0"
-) 
-# Do not use this FindPython3, which isn't compatible with Anaconda
-#set(Python3_FIND_STRATEGY LOCATION)
-#set(Python3_FIND_VIRTUALENV ONLY)
-#find_package(
-#	Python3 3.13 REQUIRED
-#	COMPONENTS Development
-#)
+# Use venv's Python
+set(VENV_PREFIX "${CMAKE_SOURCE_DIR}/../venv")
+set(Python3_ROOT_DIR ${VENV_PREFIX})
+set(Python3_EXECUTABLE "${VENV_PREFIX}/bin/python3")
+set(Python3_FIND_STRATEGY LOCATION)
+set(Python3_FIND_VIRTUALENV ONLY)
+find_package(
+	Python3 3.11 REQUIRED
+	COMPONENTS Development
+)
 target_include_directories(
 	search_eng
 	PRIVATE ${Python3_INCLUDE_DIRS}
@@ -124,6 +117,7 @@ target_link_libraries(search_eng PRIVATE lexbor)
 
 # Boost
 find_package(Boost 
+	1.81 
 	REQUIRED
 	COMPONENTS unit_test_framework url
 )

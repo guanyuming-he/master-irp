@@ -33,6 +33,9 @@ papers/
 # binary files
 bin/
 
+# venv
+venv/
+
 # Search engine indexing database and queue.
 db/
 que
