@@ -189,7 +189,7 @@ python3 ./src/pipeline/setup_schedules.py
 It's done!
 
 After the setup, outside of scheduled times, you can also run the pipeline
-manually via
+manually via (be sure to run `ollama serve` first!)
 ```
 python3 ./src/pipeline/llm_pipeline.py
 ```

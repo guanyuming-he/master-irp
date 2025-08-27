@@ -27,17 +27,17 @@
 \maketitlepage  
 
 \section*{Abstract}
-Business school teaching using the famous \casemethod\ requires a large amount
-of information about latest business events to keep the course relevant.
-Digital technologies like web search engines and large languages models can
-offer substantial assistance to this process, yet a few challenges are still
-present: 1) search engines struggle to process unstructured search queries. 2)
+Business school teaching using the well-known \casemethod\ requires a
+substantial amount of information about latest business events to keep the
+course relevant.  Digital technologies like web search engines and LLMS can
+offer substantial assistance to this process. However, several challenges
+remain: 1) search engines struggle to process unstructured search queries. 2)
 while LLMs excel in understanding unstructured input, they often hallucinate
-and cannot ensure the retrieval of very recent information. 3) these tools
-still require manual invocation. In this project, I aim to address these
-challenges by developing a software system which combines search engines and
-LLMs in clever ways and also support automatic execution of the whole process
-and the delivery of the results to users, requiring minimal user configuration.
+and cannot reliably retrieve very recent information. 3) these tools still
+require manual invocation. In this project, I aim to address these challenges
+by developing a software system which combines search engines and LLMs in
+clever ways and also support automatic execution of the whole process and the
+delivery of the results to users, requiring minimal user configuration.
 
 \textbf{Keywords:} information retrieval, LLM, search
 engines, \casemethod, Business school
@@ -60,13 +60,13 @@ teaching, the case method faces a significant constraint: the availability and
 collection of timely and relevant case material \cite{case.method.limit.1,
 case.method.limit.3}. In particular, Christensen identifies in his classical
 article that instructors have to conduct ``extensive preparation''
-\cite{case.method.limit.2} for it. Another factor contributing to this
-constraint of case method is the ever-evolving business world and the necessity
-of the latest information: Clark argues that learned skill will lose
-value quickly in five years, and then it is critical for students to be up to
-date to remain relevant in the business world \cite{case.method.limit.4};
-McFarlane emphasises the importance of updated cases, as otherwise students
-could be disengaged or discouraged \cite{case.method.limit.5}.
+\cite{case.method.limit.2} for it. Another reason is the ever-evolving business
+world and the necessity of the latest information: Clark argues that learned
+skill will lose value quickly in five years, and then it is critical for
+students to be up to date to remain relevant in the business world
+\cite{case.method.limit.4}; McFarlane emphasises the importance of updated
+cases, as otherwise students could be disengaged or discouraged
+\cite{case.method.limit.5}.
 
 \subsection{Past advancements in information retrieval} 
 \label{sec.info.ret.history}
@@ -198,7 +198,7 @@ Beside RAG, numerous studies were conducted to augment pre-trained LLMs with
 external knowledge \cite{hybrid.method.1, hybrid.method.2, hybrid.method.3,
 hybrid.method.4, webgpt}.
 Some worked on the retriever, some on how information is integrated into the
-LLM, and some on both. Compared with my work, they focus on question-answering
+LLM, and some on both. Unlike my work, they focus on question-answering
 tasks, and none of them had getting the latest information as a requirement.
 
 Among them, Nakano et al.'s WebGPT is perhaps the closest to my work: their
@@ -779,11 +779,11 @@ search queries or summarizing them.
 The optional Goal~5 is not fulfilled.
 
 \subsection{Comparsion with mainstream tools}
-Compared with ChatGPT, my system successfully eliminated search results of
+Against ChatGPT, my system successfully eliminated search results of
 non-reputable sites. However, my system produced a few irrelavant search
 queries and could not compete with ChatGPT in summary quality.
 
-Compared with Google, my system retrieved more reputable and current
+Versus Google, my system retrieved more reputable and current
 information, but lacked in breadth. When Google's AI overview was triggered,
 its summary quality also appeared to be superior.
 
