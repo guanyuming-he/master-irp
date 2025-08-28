@@ -29,15 +29,15 @@
 \section*{Abstract}
 Business school teaching using the well-known \casemethod\ requires a
 substantial amount of information about latest business events to keep the
-course relevant.  Digital technologies like web search engines and LLMS can
+course relevant.  Digital technologies like web search engines and LLMs can
 offer substantial assistance to this process. However, several challenges
 remain: 1) search engines struggle to process unstructured search queries. 2)
 while LLMs excel in understanding unstructured input, they often hallucinate
 and cannot reliably retrieve very recent information. 3) these tools still
 require manual invocation. In this project, I aim to address these challenges
-by developing a software system which combines search engines and LLMs in
-clever ways and also support automatic execution of the whole process and the
-delivery of the results to users, requiring minimal user configuration.
+by a software system that compensates search engines and LLMs with each other,
+while also supporting automatic execution of the whole process and the delivery
+of the results to users, requiring minimal user configuration.
 
 \textbf{Keywords:} information retrieval, LLM, search
 engines, \casemethod, Business school
@@ -46,17 +46,17 @@ engines, \casemethod, Business school
 \subsection{Project background} \label{sec.proj.bg}
 Since the emergence of the first Business schools in the late 19th century
 \cite{first.bis.school.1, first.bis.school.2}, several distinct pedagogical
-teaching strategies have been applied.  First institutionalized at Harvard
+teaching strategies have been invented.  First institutionalized at Harvard
 Business School \cite{case.method.origin.1, case.method.origin.2} in the early
 20th century, a method about teaching students with real world business cases
 (will be called \emph{\casemethod} in the rest of the thesis) has been found
 more effective and engaging \cite{case.method.support.1, case.method.support.2,
 case.method.support.3} than many traditional, for example, big lecture based,
-teaching methods. Thus, it has found wide adoption across the world
+teaching methods. Thus, it obtained wide adoption across the world
 \cite{case.method.adoption.1, case.method.adoption.2}.
 
 Despite its aforementioned adoption and performance in business school
-teaching, the case method faces a significant constraint: the availability and
+teaching, the \casemethod\ faces a significant constraint: the availability and
 collection of timely and relevant case material \cite{case.method.limit.1,
 case.method.limit.3}. In particular, Christensen identifies in his classical
 article that instructors have to conduct ``extensive preparation''
@@ -75,30 +75,29 @@ problems: (1) collect/gather information (2) identify/select desired
 information from gathered sources.
 
 \subsubsection{Problem (1)}
-During the past two centuries, a number of key developments have profoundly
+During the past two centuries, several key developments have profoundly
 expanded one's capacity to gather information about the world. In
 the early 19th century, the transmission of information was still traditional
 --- carried by person on paper or simply remembered. The invention of
-telegraph in the 1840s by Morse, Cornell, and Henry \cite{history.telegraph.1,
+telegraph in the 1840s by Morse et al.\ \cite{history.telegraph.1,
 history.telegraph.2}, notably with Morse's first telegraph message,
 ``\emph{What hath God wrought?}'' in 1844 \cite{first.telegraph.msg}, marked a
 paradigm shift. This technological innovation was considerably improved by
 Bell's telephone in 1876 \cite{history.telephone.1, history.telephone.2},
 enabling communication directly by human voice, instead of encoded Morse code.
 
-Wired communication is critically constrained by geographical
-features on where the wires were laid. Around the late 19th century, 
-Marconi's experiments with wireless telegraphy \cite{history.wireless.1} and
-the first successful transatlantic signal in 1901
-\cite{history.first.atlantic.broadcast} introduced electromagnetic wave-based
+Wired communication is critically constrained by geographical features (where
+the wires were laid). Around the late 19th century, Marconi's experiments with
+wireless telegraphy \cite{history.wireless.1} and the first successful
+transatlantic signal in 1901 \cite{history.first.atlantic.broadcast} introduced
 wireless communication, eventually accumulating into the world's first voice
 broadcast by radio in 1906 \cite{first.voice.broadcast}. These milestones
 collectively redefined the temporal and spatial boundaries of information
 gathering.
 
-In parallel to improving the weaknesses of wireless communication
+Parallel to improving the weaknesses of wireless communication
 \cite{wireless.weakness.1, wireless.weakness.2, wireless.weakness.3},
-reseachers then worked on a theory of information.
+reseachers also worked on a theory of information.
 Hartley observed a logritham pattern of information capacity
 \cite{hartley.log.information} and then Shannon expanded on it to first define
 \emph{bits} and \emph{entropy}, giving a formal mathematical theory of
@@ -112,7 +111,7 @@ Although solutions to problem (1) had enormously improved during these times,
 substantial progress in problem (2) would have to wait until digital computers
 were invented in the 1940s \cite{eniac.story}, which were made to repeat
 tedious operations fast. Actually, the term \emph{information retrieval (IR)} was
-not invented until Mooers coined it in 1950 \cite{mooers.info.ret.term}.  The
+not there until Mooers coined it in 1950 \cite{mooers.info.ret.term}.  The
 nature of information reveals two subproblems of problem (2): (2.1) how to
 process (extract useful information from) potentially unstructured data. (2.2)
 how to related human queries to the content a user actually wants.
@@ -153,11 +152,11 @@ One major breakthrough in NLP is Vaswani et al.'s transformer \cite{transformer}
 Building upon it, OpenAI created generative pre-trained transformers (GPTs)
 trained on massive amount of data \cite{gpt1}, which, after a few iterations,
 evolved into a chatbot facing the general public, ChatGPT, and it was perhaps
-then when LLMs started to recieve massive amount of public attention, where LLM
-stands for large language model, language models that are \emph{large} in trained
-data and parameters.
+then when LLMs started to recieve massive amount of public attention. Here, LLM
+stands for large language model, language models that are \emph{large} in
+trained data and parameters.
 
-Although public attention is not the same as the importance of an idea, LLMs
+Although public attention is not the same as academic importance, LLMs
 have undoubtedly entered and transformed many areas, including daily life,
 business and the industry, and research \cite{llm.impact.1}. One strong appeal
 of LLMs is that they could process unstructured natural language input and generate
@@ -189,9 +188,9 @@ fine-tune a trained model with non-parametric memory \cite{rag}.
 RAG was designed to enrich a trained LLM with a pre-trained retriever.
 Addressing hallucination is its major concern. Because the retriever also
 needs to be pre-trained, it cannot inherently solve the outdated training data
-problem. In fact, their work used a retriever trained on a 2018 Wikipedia dump
-\cite[Section 3]{rag}. Additionally, the retriever is also a neural network.
-These are the major differences from my work.
+problem. In fact, their work's retriever, also a neural network, was trained on
+a 2018 Wikipedia dump \cite[Section 3]{rag}.  These are the major differences
+from my work.
 
 \subsubsection{Other hybrid methods}
 Beside RAG, numerous studies were conducted to augment pre-trained LLMs with
@@ -208,7 +207,7 @@ from a specific dataset. Moreover, it used human feedback to improve quality.
 These are the differences from my work.
 
 \subsubsection{Search engine centric}
-While the aforementioned studies work on improving LLMs, various works are also
+As the aforementioned studies work on improving LLMs, various works are also
 committed to improve search engines. 
 
 Some of them rewrite and improve search queries with LLMs
@@ -228,24 +227,22 @@ applications.
 	\item By combining LLMs and search engines, compensate each other's
 		weakeness in information retrieval.
 		\begin{enumerate}
-		\item The system shall improve search engines on prompt engineering to
-			the extent that a user would only need to give a rough and vague
-			natural language description of the target information to the
-			system.
+		\item The system shall improve search engines so that a user would only
+			need to give a rough and vague natural language description of the
+			target information to the system.
 		\item The system shall improve LLMs on result reliability and
 			accuracy. If pure LLMs lack the two properties, then combination
 			with deterministic search engines, using deterministic and accurate
-			algorithms, will compensate for that.
+			algorithms.
 		\end{enumerate}
 	\item Enhance the automation of the current general public information
-		retrieval tools, e.g., Google search, ChatGPT, to the extent that a
-		user would only need to occasionally configure the system, instead of
-		giving search prompts each time.
+		retrieval tools, e.g., Google search, ChatGPT, so that
+		user would only need to occasionally configure the system for it to
+		schedule running automatically.
 	\item Specially tailor the system to business teaching related information,
 		aiming to gather information from authentic and reliable sources.
-	\item The system shall support up-to-date information retrieval.
-		Particularly, it should prevent outdated LLM training data from polluting
-		the output.
+	\item The system shall support up-to-date information retrieval. It should
+		support restricting the date range of results.
 	\item (Optional) The system could support user feedback and learning from
 		it.
 \end{enumerate}
@@ -290,11 +287,10 @@ philosophy \cite{unix.philosophy}.
 \end{enumerate}
 
 \subsection{Architecture}
-As clarified in the previous section, the system is a collection of programs
-working together. What threads them together is a pipeline, which takes the
-user's configuration as input and produces the current information about the
-business topics mentioned in the config as output. The workflow of the pipeline
-is:
+As clarified previously, the system is a collection of programs working
+together. What threads them together is a pipeline, taking the user's
+configuration as input to produce current information about the business topics
+mentioned in the configuration as output. The workflow of the pipeline is:
 \begin{enumerate}
 	\item LLMs generate a list of search engine prompts based on the business topics
 		in the configuration.
@@ -311,15 +307,15 @@ another big module of the system is a minimal web search engine that can index
 business news websites for latest news. The purpose of this self-made search
 engine is to provide explicit control of the indexed contents and to avoid
 commerical limitations on the usage. See section \ref{sec.custom.search.engine}
-for the complete discussion. Still, third-party search engines are combined
-with the custom engine.
+for the complete discussion. Still, third-party search engines are also used to
+improve result coverage.
 
 Surrounding the pipeline and the search engine are the supporting programs
-which handle automation (schedulling), output delivery (by email),
-and user-friendly configuration management.
+which handle automation, output delivery, and user-friendly (GUI) configuration
+management.
 
 Table \ref{table.all.programs} lists all programs in the system and their
-functionality. The names are kept short to not overflow the table. The
+functionality. They are not full paths, to not overflow the table. The
 C++ programs can be found in \texttt{src/\ttb CMakeLists.\ttb txt}; the Python
 scripts can be found in \texttt{src/}.
 \begin{table}[hbtp!]
@@ -422,37 +418,36 @@ However, this suffer from a few serious problems.
 	\item 
 	The free-tier APIs often have various ungenerous limits, e.g., number of
 	queries, number of results returned, and filtering of search results.  For
-	example, see Google's \cite{search.api.limit.1} and 
+	instance, see Google's \cite{search.api.limit.1}.
 	\item
-	The algorithm of the search engines are proprietory; I cannot control what
+	The mechanism of the search engines is proprietory; I cannot control what
 	they give. This is a big problem, because my goal is not about retrieving
 	general information but specific information of business teaching value.
 \end{enumerate}
 
-Therefore, I plan to use commerical search APIs alongside my custom minimal
-search engine. The custom search engine will address the two problems with
+Therefore, I plan to use my custom minimal search engine alongside commerical
+search APIs. The custom search engine will address the two problems with
 unlimited usage and specific information retrieval. To achieve the latter, I
-configure the search engine to ONLY index business news websites. Clearly, I
-will not have the resource to index most of the Internet and store them, and
-this coverage weakness will be compensated by the use of commercial search
-APIs.
-
+configure the search engine to \emph{only} index business news websites.
+Clearly, I will not have the resource to index most of the Internet and store
+them, and this coverage weakness will be compensated by the use of commercial
+search APIs.
 
 \subsection{Implementation detail}
 Following the design philosophy and architecture, here are the details of the
 implementation.
 
 \subsubsection{Configuration format} 
-Most of the configuration is structured, e.g.,
+Most of the configuration have to be exact, e.g.,
 \begin{enumerate}
 	\item Scheduled time of the executions.
 	\item A list of email addresses to deliver the results to.
+	\item System prompts.
 \end{enumerate}
 
-The most important entry is the business topics used for information retrieval.
+The business topics in the configuration are used as input to the system.
 Here, LLMs will be used to extract them from unstructured data, including
-both user natural language input and file input (e.g.\ business school lecture
-notes).
+both user natural language input and images input.
 
 For all the configuration entries, see \texttt{config.py}.
 
@@ -461,14 +456,14 @@ Considering the heavy use of LLMs and the strict limitation of commercial LLM
 APIs \cite{openai.api.limit, anthropic.api.limit}, the project will use local
 LLMs powered by Ollama \cite{ollama}.
 
-Ollama provides two main modes to communicate with LLM, \texttt{generate} via
-and \texttt{chat}; both access the Ollama local server at
-\url{localhost:11434} via HTTP POST. Because the system is not interactive,
-only the generate method is used.
+Ollama provides two main modes to communicate with LLM, \texttt{generate} and
+\texttt{chat}; both access the Ollama local server at \url{localhost:11434} via
+HTTP POST. Because the system is not interactive, only the \texttt{generate}
+method is used.
 
 Apparently, the system prompts are essential to our tasks. There is
-generally no fixed algorithm to arrive at the best prompts given to LLMs, as
-the results not only depend on a lot of aspects including how the input is
+generally no fixed algorithm to derive the best prompts given to LLMs, as
+the results not only depend on many aspects including how the input is
 given, but also probably are not deterministic, given that probalisitic
 processes are widely used in deep neural networks and complex machine learning
 models. Thus, the only way to obtain desirable prompts is to manually craft the
@@ -484,19 +479,18 @@ change the prompts in my system, which is easy, thanks to the fact that I
 put them in configuration. Still, this requires running a large part of the
 system and is inefficient. Another approach involves OpenWebUI
 \cite{open.webui}, a GUI tool that allows me to interact directly with the LLM
-models via a web UI. Note that the models are in \texttt{chat} mode instead of
-\texttt{generate} mode. Nevertheless, practice proved that prompts good in chat
-mode is still relevant in the generate mode.
+models via a web UI. Note that the models  there are in \texttt{chat} mode
+instead of \texttt{generate} mode. Nevertheless, practice proved that prompts
+good in chat mode is still useful in the generate mode.
 
 The LLM models are selected prioritizing usability on personal computers. Thus,
-the maximum number of parameters should be about 10 billion. Among all the
-models Ollama offers \cite{ollama.models}, I chose \texttt{llama3.1:8b} for its
-competitive ability on text generation and summarization, proven by several
-academic studies and benchmarks
-\cite{llama3.1.bench.1, llama3.1.bench.2, llama3.1.bench.3}. Unfortunately,
-llama3.1:8b is text-only. When the user uses files to generate business topics,
-as mentioned earlier, another model fine-tuned with llama3 instructs,
-\texttt{llava-llama3}, is used.
+the maximum number of parameters is limited. Among all the models Ollama offers
+\cite{ollama.models}, I chose \texttt{llama3.1:8b} for its competitive ability
+on text generation and summarization, proven by several academic studies and
+benchmarks \cite{llama3.1.bench.1, llama3.1.bench.2, llama3.1.bench.3}.
+Unfortunately, llama3.1:8b is text-only. When the user uses images to generate
+business topics, as mentioned earlier, another model fine-tuned with llama3
+instructs, \texttt{llava-llama3}, is used.
 
 \subsubsection{Search engines}
 My custom search engine is implemented in C++ with
@@ -511,7 +505,7 @@ C++.
 
 The custom search engine's algorithm is similar to the mainstream ones:
 Starting from initial urls, scrap each. And for every url found in each, scrap
-them too.  More precisely, the indexing of a webpage and the expansion of its
+them too.  More precisely, the indexing of a webpage and the recursion into its
 urls included are controlled by four predicate filters. Two are on URLs and two
 are on the webpages. A webpage is indexed if both URL \& webpage index
 predicates return true; each of its url is considered further if both URL \&
@@ -545,7 +539,7 @@ The protocol is SMTP + TLS to ensure that the email content is confidential.
 \section{Results}
 This section demonstrates the completed system.  Next, using the same inputs,
 information retrieved by mainstream LLMs \& search engines are also displayed
-for comparsion in the discussion section.
+for comparsion.
 
 As a Business School teacher, my supervisor provides me with a list (LIST 1) of
 topics from his modules which will be used as inputs for demonstrating results.
@@ -566,10 +560,10 @@ The GUI used for end-users to configure the pipeline is implemented in Tkinter
 
 The source is in \verb!config_gui.py!. By the principles in section
 \ref{sec.design.philo}, the configuration is divided into different separate
-sections, each of which is managed by a GUI class inheriting from base lass
-\texttt{Config\ttb Section\ttb Frame}.
+\texttt{Config\ttb Section}s, each of which is managed by a GUI class
+inheriting from base class \texttt{Config\ttb Section\ttb Frame}.
 
-Figure~\ref{fig.config.gui} shows a screenshot of the GUI.
+Figure~\ref{fig.config.gui} is a screenshot of the GUI.
 \begin{figure}[hbtp!]
 	\centering
 	\includegraphics[height=.25\textheight]{res/gui.png}
@@ -579,14 +573,13 @@ Figure~\ref{fig.config.gui} shows a screenshot of the GUI.
 
 \subsubsection{Custom search engine}
 Recall that the main goal of developing this custom search engine is to 
-filter out non-concrete information sources, which mainstream search engines
-all include, as they index the whole Internet.
+restrict information sources by explicit control over it.
 
 Figure~\ref{fig.index.host.dist} displays the host distribution of all the
 indexed data on my personal computer, as of 7 August. This figure is produced
 by \texttt{doc\_\ttb dist.cpp} and \texttt{doc\_\ttb dist\_\ttb pie.py}.
 Unfortunately, because of the volatility of the Internet content, the exact
-data is probably not reproducible. Clearly, all domains from the database
+data is probably not reproducible. Arguably, all domains from the database
 are reputable Business news publishers.
 \begin{figure}[hbtp!]
 	\centering
@@ -615,7 +608,7 @@ except one of average response times are below $0.1$ second.
 
 \subsubsection{LLM invocation}
 LLMs are invoked with two main purposes in the project, search query generation
-from business topics, and summarization of search results.
+from business topics, and filtering + synthesis of search results.
 
 Table~\ref{tab.query.gen.result} lists the results of search query generation,
 using inputs from LIST 1. They are collected from the output of
@@ -636,14 +629,13 @@ an objective shortcoming is that the summarization quality sometimes cannot
 meet expectation. One novalty in the summarization, only discovered in late
 stage after several testing, is to make LLM output individually for each search
 result a relevance number, which is used for filtering and reranking, instead
-of giving all results to the LLM, where the LLM often distort the search
-results.
+of giving all results to the LLM, in which case the LLM often distort the
+search results.
 
 \subsubsection{Walkthrough}
-The full system starts with the user's configuring the business topics, which
-she can generate from unstructured text and images, the automatic scheduelling,
-and the accounts, like sender email address, destination email addresses, and
-Google search API key. All of them are configured on the GUI.
+The full system starts with the user's configuring the system: business topics,
+system prompts, automatic scheduelling, the accounts (sender email, destination
+email, and Google search API key). All of them are configured on the GUI.
 
 After the configuration, a setup script needs to be run to install the
 schedualling tasks on the operating system. The user should also run the
@@ -668,11 +660,11 @@ database, if the total number of documents exceeds a limit.
 The user is free to reconfigure the system, and the changes will be reflected
 the next time tasks are run.
 
-The lengthy result includes both a final report and a directory of intermediate
-results (e.g.\ search queries generated and raw search results), and thus
-cannot be included in this word-count-limited thesis. Moreover, the use of LLM
-makes them non-deterministic. The reader can instead run the pipeline herself
-to examine output.
+The result includes both a final report and a directory of intermediate results
+(e.g.\ search queries generated and raw search results), and thus cannot be
+included in this word-count-limited thesis. Moreover, the use of LLM makes them
+non-deterministic. The reader can instead run the pipeline herself to examine
+output.
 
 \subsection{Results from mainstream tools}
 I feed the same input to mainstream tools. Later in the Discussion section, I
@@ -707,7 +699,7 @@ itself or websites that act as a collection of articles on the topic, instead
 of Business news about it. 
 
 However, sometimes the AI Overview would trigger for the search results, but
-that shares the same problems ChatGPT has. Worse than ChatGPT, Google's version
+that shares the same problems of ChatGPT. Worse than ChatGPT, Google's version
 will also include webpages that are not news articles at all.
 Figure~\ref{fig.results.google} displays Google's top results with and without
 its AI Overview.
@@ -736,8 +728,8 @@ programs and Python scripts; interfaces of classes are chosen to make them
 highly cohesive and loosely coupled. In C++, \texttt{const} is widely applied
 to ensure immutability of data classes after construction. Comments cover all
 functions, except for trivial ones whose name gives its meaning. Unit testing
-were conducted for important features, althought time constraints prevented me
-to test all programs. These together adhere to design philosophies 1--3.
+were conducted for important features, because time constraints prevented me
+to test all features. These together adhere to design philosophies 1--3.
 
 Executables are separated to mostly doing one thing, often taking another's
 output as input. This adheres to design philosophy 4.
@@ -755,7 +747,7 @@ reputable Business news websites, and having both it and Google search only
 results in specific date ranges. Both of the measures are deterministic,
 providing reliability and accuracy to the system. Conversely, site-limiting
 indexing inherently is inflexible and lack coverage of good information from
-less reputable sources. A fixed range of date also excludes the possibility to
+less reputable sources. A fixed range of dates also excludes the possibility to
 include old discussions of concurrent events that spans a long time.
 
 Goal~2 is fulfilled by the pipeline, which can be schedulled for execution,
@@ -769,17 +761,17 @@ subtopics/search queries.
 Goal~3 is fulfilled by indexing only specific websites in the custom search
 engine, too. Beside the inflexibility and coverage problem mentioned earlier,
 the metric of reputability is inherently subjective. In this project, I took
-advice from my supervisor and consorted lists of ranking of Business news
+advice from my supervisor and consorted rankings of Business news
 websites \cite{business.news.ranking.1, business.news.ranking.2}.
 
-Goal~4 is partially fulfilled by using LLM only on real data from the search
-engines. However, this cannot stop LLMs from hallucinating when generating
-search queries or summarizing them.
+Goal~4 is fulfilled by using LLM only on real data from the search engines.
+However, this cannot stop LLMs from hallucinating when generating search
+queries or summarizing them.
 
 The optional Goal~5 is not fulfilled.
 
 \subsection{Comparsion with mainstream tools}
-Against ChatGPT, my system successfully eliminated search results of
+Against ChatGPT, my system successfully eliminated search results from
 non-reputable sites. However, my system produced a few irrelavant search
 queries and could not compete with ChatGPT in summary quality.
 
@@ -798,28 +790,28 @@ problem.
 The biggest engineering challenge overcome was implementing the custom search
 engine. The indexing algorithm is simple, but a search engine spans
 many different areas of computer science, networking, concurrency, program
-design, database, searching and indexing. Many third-party libraries had to be
-picked and used. Moreover, information retrieval on the current Internet is
-messy. One particular problem to address was to evade blocking to my search
-engine indexer.
+design, database, algorithms. Many third-party libraries had to be picked and
+used. Moreover, information retrieval on the current Internet is messy. One
+particular problem was to handle different URL formats used by different
+publishers.
 
 The most significant optimization challenge was to fine-tune my pipeline and
 LLMs. Tuning the prompts is complicated; changing a prompt to solve a current
 problem may trigger another problem. The multi-stage design was consequently
-implemented, to allow the LLM to at least work well for some substages.
+implemented to ensure the LLM focuses on one problem at a time.
 
 The system is significantly limited by the time-span of the project and my
 resources. Particularly, I had no fund to purchase commercial LLM APIs and
 could only rely on much less powerful local LLMs, constrained by local
 computing resources. Additionally, the indexing database of my custom search
 engine has to be built from scratch. Conversely, the minimal nature of my
-system enables it to become a free personal solution running on PCs.
+system enables it to become a free personal solution running locally on PCs.
 
 Most of the system's capabilities could be enhanced with more resources.
 Nevertheless, there are a few design limitations to improve next: 
 \begin{enumerate}
 	\item Currently, the LLMs and search engines are loosely coupled (design
-		philosophy 4). But in many cases integrating them more deeply (e.g.\ at
+		philosophy 4). But in some cases integrating them more deeply (e.g.\ at
 		the LLM model level) could be beneficial.
 	\item Some parts are hard-coded to work for Business topics, damaging its
 		potential to extend for general topics.
@@ -831,7 +823,7 @@ Nevertheless, there are a few design limitations to improve next:
 I successfully designed a pipeline and developed a corresponding system
 that combines LLMs with search engines to supply current content in business
 school teaching. The system complements each individual tool substantially with
-another, by limiting indexed websites, deterministic search result filters, and
+another, by limiting indexed websites, deterministic search results, and
 multi-stage LLM invocation. Moreover, the system achieves more automation than
 mainstream similar tools.
 
