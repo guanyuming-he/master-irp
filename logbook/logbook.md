@@ -206,5 +206,9 @@ to review.
 
 He promised that he will sent me feedback soon.
 
+## Meeting (29 August 2025)
+There's no meeting today, but Both Rhodri and Sean gave me feedback on my work
+yesterday and today, according to which I am polishing my project.
+
 
 
