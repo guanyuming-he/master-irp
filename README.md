@@ -67,20 +67,19 @@ correct Anaconda path.
    must support must C++20 features. (I use `g++` 12).
 1. Download and install CMake the way you like from https://cmake.org/download/
 You should also have `GNU Make` available.
-2. Change the `CONDA_PREFIX` variable in `src/CMakeLists.txt`.
-3. Install `libcurl`. On Debian or its derived GNU/Linux (e.g. Ubuntu, PureOS),
+2. Install `libcurl`. On Debian or its derived GNU/Linux (e.g. Ubuntu, PureOS),
 execute 
 ```
 apt-get install libcurl4-gnutls-dev
 ```
 or goto https://curl.se/download.html for other ways to install
-4. Install `xapian`. On Debian or its derived GNU/Linux (e.g. Ubuntu, PureOS),
+3. Install `xapian`. On Debian or its derived GNU/Linux (e.g. Ubuntu, PureOS),
 execute 
 ```
 apt-get install libxapian-dev
 ```
 or goto https://xapian.org/docs/install.html for other ways to install
-5. Install `lexbor`. Once you have cmake installed, download the source and
+4. Install `lexbor`. Once you have cmake installed, download the source and
    build `lexbor`. Finally install it. More specifically,
 ```
 git clone https://github.com/lexbor/lexbor.git
@@ -92,7 +91,7 @@ After the tests have passed, then, as `root`, execute
 ```
 cmake --install .
 ```
-6. Install `Boost.unit_test_framework` and `Boost.url`.
+5. Install `Boost.unit_test_framework` and `Boost.url`.
 On Debian or its derived GNU/Linux (e.g. Ubuntu, PureOS),
 execute 
 ```
@@ -100,7 +99,7 @@ apt-get install libboost-test-dev libboost-url-dev
 ```
 or goto https://www.boost.org/library/latest/test/ and 
 https://www.boost.org/library/latest/url/ for other ways to install.
-7. Install `pugixml`.
+6. Install `pugixml`.
 ```
 curl -LO https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.tar.gz
 tar -xzf ./pugixml-1.15.tar.gz
