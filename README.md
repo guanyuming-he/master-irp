@@ -31,6 +31,7 @@ curl -LO https://repo.anaconda.com/archive/Anaconda3-2025.06-0-Linux-x86_64.sh |
 
 2. Create a conda environment and install packages.
 ```
+cd ./python-env
 conda env create -f environment.yml
 conda activate irp
 pip install -r requirements.txt

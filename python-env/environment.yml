@@ -1,0 +1,10 @@
+name: irp
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - mypy
+  - requests
+  - matplotlib
+  - numpy
+prefix: /home/anony/anaconda3/envs/irp
