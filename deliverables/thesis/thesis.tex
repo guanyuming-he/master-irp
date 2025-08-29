@@ -65,12 +65,12 @@ substantial amount of information about latest business events to keep the
 course relevant.  Digital technologies like web search engines and LLMs can
 offer substantial assistance to this process. However, several challenges
 remain: 1) search engines struggle to process unstructured search queries. 2)
-while LLMs excel in understanding unstructured input, they often hallucinate
-and cannot reliably retrieve very recent information. 3) these tools still
-require manual invocation. In this project, I aim to address these challenges
-by a software system that compensates search engines and LLMs with each other,
-while also supporting automatic execution of the whole process and the delivery
-of the results to users, requiring minimal user configuration.
+while LLMs excel in understanding unstructured input, they have problems in
+ensure the accuracy and timelyness of retrieved information. 3) these tools
+still require manual invocation. In this project, I aim to address these
+challenges by a software system that compensates search engines and LLMs with
+each other, while also supporting automatic execution of the whole process and
+the delivery of the results to users, requiring minimal user configuration.
 
 \textbf{Keywords:} information retrieval, LLM, search
 engines, \casemethod, Business school
@@ -104,10 +104,8 @@ cases, as otherwise students could be disengaged or discouraged
 \subsection{Past advancements in information retrieval} 
 \label{sec.info.ret.history}
 The thesis summarizes the challenges in information retrieval into two general
-problems: (1) collect/gather information (2) identify/select desired
-information from gathered sources.
-
-\subsubsection{Problem (1)}
+problems: 
+\subsubsection{Problem (1): collect/gather information}
 During the past two centuries, several key developments have profoundly
 expanded one's capacity to gather information about the world. In
 the early 19th century, the transmission of information was still traditional
@@ -139,7 +137,7 @@ engineers were experimenting with alternative modulation techniques, notably
 frequency modulation (FM), and the concepts were formalized in the 1930s
 \cite{history.modulation}. 
 
-\subsubsection{Problem (2)}
+\subsubsection{Problem (2): identify/find desired information from collection}
 Although solutions to problem (1) had enormously improved during these times,
 substantial progress in problem (2) would have to wait until digital computers
 were invented in the 1940s \cite{eniac.story}, which were made to repeat
@@ -195,8 +193,8 @@ business and the industry, and research \cite{llm.impact.1}. One strong appeal
 of LLMs is that they could process unstructured natural language input and generate
 natural language output in return with remarkable resemblence to what a human
 would say \cite{llm.power.1, llm.power.2}. However, because of the inherent
-limit of neural networks, some argue that they could not formally reason about
-what they output \cite{llm.limit.1, llm.limit.2, llm.limit.3}. Indeed,
+limit of neural networks, some raise concerns about their formal reasoning
+capabilities \cite{llm.limit.1, llm.limit.2, llm.limit.3}. Indeed,
 hallucination \cite{llm.hallucination.1, llm.hallucination.2} and other forms
 of distortion of facts, is a big problem of LLMs.
 
@@ -241,13 +239,11 @@ These are the differences from my work.
 
 \subsubsection{Search engine centric}
 As the aforementioned studies work on improving LLMs, various works are also
-committed to improve search engines. 
-
-Some of them rewrite and improve search queries with LLMs
-\cite{query.rewriting.1, query.rewriting.2}; some turn to assist ranking of
-search results \cite{search.result.rerank.1, search.result.rerank.1}. My work
-has both elements: in my project LLM will both be used on search queries and
-on search result synthesis.
+committed to improve search engines. Some of them rewrite and improve search
+queries with LLMs \cite{query.rewriting.1, query.rewriting.2}; some turn to
+assist ranking of search results \cite{search.result.rerank.1,
+search.result.rerank.1}. My work has both elements: in my project LLM will both
+be used on search queries and on search result synthesis.
 
 Furthermore, LLMs can potentially help document indexing with their excellent
 NLP abilities in term extraction \cite{llm.term.extraction.1,
@@ -345,10 +341,8 @@ improve result coverage.
 
 Surrounding the pipeline and the search engine are the supporting programs
 which handle automation, output delivery, and user-friendly (GUI) configuration
-management.
-
-Table \ref{tab.all.programs} lists all programs in the system and their
-functionality. They are not full paths, to not overflow the table. The
+management. Table \ref{table.all.programs} lists all programs in the system and
+their functionality. They are not full paths, to not overflow the table. The
 C++ programs can be found in \texttt{src/\ttb CMakeLists.\ttb txt}; the Python
 scripts can be found in \texttt{src/}.
 \begin{table}[hbtp!]
@@ -479,10 +473,9 @@ Most of the configuration have to be exact, e.g.,
 \end{enumerate}
 
 The business topics in the configuration are used as input to the system.
-Here, LLMs will be used to extract them from unstructured data, including
-both user natural language input and images input.
-
-For all the configuration entries, see \texttt{config.py}.
+Here, LLMs will be used to extract them from unstructured data, including both
+user natural language input and images input. For all the configuration
+entries, see \texttt{config.py}.
 
 \subsubsection{LLM invocation}
 Considering the heavy use of LLMs and the strict limitation of commercial LLM
@@ -565,7 +558,6 @@ via email. Because the code is visible in the repository along with the login
 credentials, I registered a burner Google account for email delivery. The
 configuration records a list of destination email addresses, to each of which
 the final results of running the pipeline will be sent from the burner account.
-
 The protocol is SMTP + TLS to ensure that the email content is confidential.
 
 
@@ -581,9 +573,6 @@ topics from his modules which will be used as inputs for demonstrating results.
 	\item Diversification 
 	\item Competitive advantage
 	\item Foreign direct investment
-	\item Mergers and acquisitions
-	\item Global supply network
-	\item Global value chain
 \end{enumerate}
 
 \subsection{Completed system}
@@ -686,18 +675,18 @@ The LLM pipeline starts by reading the business topics, then
 	\item Send the final report to the configured destination email addresses.
 \end{enumerate}
 
+The result includes both a final report and a directory of intermediate results
+(e.g.\ search queries generated and raw search results), and thus cannot be
+included in this word-count-limited thesis. Moreover, the use of LLM makes them
+non-deterministic. The reader can instead run the pipeline herself to examine
+output.
+
 The database updater pulls the latest business news from the RSS feeds of
 reputable Business sites, and then also removes the oldest documents from the
 database, if the total number of documents exceeds a limit.
 
 The user is free to reconfigure the system, and the changes will be reflected
 the next time tasks are run.
-
-The result includes both a final report and a directory of intermediate results
-(e.g.\ search queries generated and raw search results), and thus cannot be
-included in this word-count-limited thesis. Moreover, the use of LLM makes them
-non-deterministic. The reader can instead run the pipeline herself to examine
-output.
 
 \subsection{Results from mainstream tools}
 I feed the same input to mainstream tools. Later in the Discussion section, I
@@ -725,6 +714,9 @@ the phrase ``Current business news about [topic]''. Results:
 \href{https://www.google.com/search?q=Current+business+news+about+diversification+strategies}{2}, 
 \href{https://www.google.com/search?q=Current+business+news+about+competitive+advantage}{3}, 
 \href{https://www.google.com/search?q=Current+business+news+about+foreign+direct+investment}{4}.
+Note that the results are purely identified by the URIs with the search queries
+embedded in. As Google continues to update its service, there is no guarantee
+that the observed results will remain the same.
 
 Compared with ChatGPT, Google performed worse for all four topics. Each
 results page contains some websites that describes/elaborates on the topic
@@ -736,11 +728,6 @@ that shares the same problems of ChatGPT. Worse than ChatGPT, Google's version
 will also include webpages that are not news articles at all.
 Figure~\ref{fig.results.google} displays Google's top results with and without
 its AI Overview.
-
-Note that the results are purely identified by the URIs with the search queries
-embedded in. As Google continues to update its service, there is no guarantee
-that the observed results will remain the same.
-
 \begin{figure}[hbtp!]
 	\centering
 	\includegraphics[width=.3\textwidth]{res/google_res1.png}
