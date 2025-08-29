@@ -55,12 +55,8 @@ a package in C++, and libraries are managed and installed in different ways.
 
 However, there's a handy list of all the libraries that are needed, just inside
 my `CMakeLists.txt`. I believe it describes where I expect there libraries to
-be put in the system. In particular, because I only use Python from the
-Anaconda env, I link to the CPython library there from my C++ programs, not to
-the system's CPython Library. One must modify where one's Anaconda path is
-inside the `CMakeLists.txt` to ensure that it's the correct path. More
-specifically, one must modify the `CONDA_PREFIX` variable to point to the
-correct Anaconda path.
+be put in the system. To not mess things up, I link to the CPython libraries
+from a venv, the one you setup in the previous section.
 
 ### Detailed instructions
 0. Make sure you have a working C and a working C++ compiler. The C++ compiler
