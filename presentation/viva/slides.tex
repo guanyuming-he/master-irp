@@ -81,8 +81,15 @@
     First institutionalized at Harvard Business School. One of the mainstream
 	teaching methods.
   \item
-	Christensen identifies that instructors have to conduct ``extensive
-	preparation'' for it.
+	Engaging for students, but challenging for educators:
+	\begin{itemize}
+	\item
+		Christensen identifies that instructors have to conduct ``extensive
+		preparation'' for it.
+	\item
+		McFarlane emphasises the importance of updated cases, as otherwise
+		students could be disengaged or discouraged.
+	\end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -99,66 +106,62 @@
 \end{itemize}
 \end{frame}
 
-\subsection{Related Works}
-
-\begin{frame}{Improvements on LLMs}
+\subsection{Research aims}
+\begin{frame}{But today... So the aims...}
+\begin{itemize}
+	\item Each of the methods has unique major weaknesses. How well can an
+		integration framework be made to compensate each other?
 	\begin{itemize}
-		\item RAG: use pretrained retriever to address hallucination.
-		\item A lot others that use external knowledge to augment LLMs. Most
-			are to improve question answering.
-		\item Perhaps most similar to mine among them: WebGPT, whose retriever
-			is not a model, but a web browser that the LLM can use.
+		\item LLMs struggle at factual accuracy and logical correctness.
+		\item Search engines lack semantic or NLP capabilities.
 	\end{itemize}
-\end{frame}
-
-\begin{frame}{Improvements on Search engines}
-	\begin{itemize}
-		\item Some use LLMs to rewrite and improve search queries.
-		\item Some use LLMs to assist ranking of search results.
-		\item A few use LLMs in the indexing stage for NLP tasks (e.g.\ term
-			extraction, meaning filtering).
-	\end{itemize}
+	\item For a module, the main topic is stable. But tools are still manual.
+		Aim to improve automation so that only occasional configuration is
+		needed.
+\end{itemize}
 \end{frame}
 
 \section{Methodology}
 \subsection{Design philosophy \& Architecture}
 \begin{frame}{Design philosophy \& Architecture}
+	\begin{center}
+		\includegraphics[height=.6\textheight]{./architecture.png}
+	\end{center}
 	\begin{itemize}
 		\item Three software engineering pinciples.
-		\item Modular design from the UNIX philosophy.
-		\item A main pipeline and surrounding support programs (scheduling,
-			search engine, GUI).
+		\item Modular design from the UNIX philosophy; a main pipeline and
+			surrounding support programs (scheduling, search engine, GUI).
 	\end{itemize}
-
-	\begin{center}
-		\includegraphics[height=.5\textheight]{./architecture.png}
-	\end{center}
 
 \end{frame}
 
 \subsection{Technical plans}
 \begin{frame}{Technical plans}
 	\begin{itemize}
-		\item Use C++ and a number of libraries to implement the custom search
-			engine and supporting programs.
-		\item Use Python to implement the rest programs.
+		\item Use C++ (good statically typed) and a number of libraries to
+			implement the custom search engine and supporting programs.
+		\item Use Python (good scripting for invocation) to implement the rest
+			programs.
 		\item Use Ollama to invoke LLMs. 
-		\item Use Cron to schedule tasks. Use Email for results delivery.
 	\end{itemize}
 \end{frame}
 
-\section{Our Results/Contribution}
-\subsection{Main Results}
+\section{My results/contribution}
+\subsection{Main results}
+\begin{frame}{GUI Interface}
+	\centering
+	\includegraphics[height=.88\textheight]{../../deliverables/thesis/res/gui.png}
+\end{frame}
 
 \begin{frame}{Search Engine}
 \begin{itemize}
-	\item Custom search engine
+	\item Custom search engine for explicit and deterministic control.
 	\begin{itemize}
 	\item Index only reputable Business sites (from online ranking and
 		supervisor recommendation)
 	\item Can be updated via \texttt{bin/updater} that reads from RSS feeds.
 	\end{itemize}
-	\item Commerical search engine: Google's programmable search engine.
+	\item 3rd-party: Google's programmable search engine. Improves coverage.
 \end{itemize}
 	\vspace{-.6cm}
 	\begin{center}
@@ -181,25 +184,38 @@
 	\end{center}
 \end{frame}
 
-\begin{frame}{Overall walkthrough}
-\begin{minipage}{.34\textwidth}
-	\includegraphics[height=.7\textheight]{../../deliverables/thesis/res/gui.png}
-\end{minipage}%
-\begin{minipage}{.65\textwidth}
+\subsection{Contemporary related work}
+\begin{frame}{Works that improve LLMs/Search engines}
 	\begin{itemize}
-	\item User configures the system via GUI.
-	\item User sets up the inital system (index database, scheduelling, etc.)
-	\item At configured times, the system is run.
-	\item The pipeline is invoked, which turns business topics into news summaries.
-	\item An updater is invoked, which constantly gives latest info to the database.
-	\item Final report is sent to the user.
+	\item Improve LLMs
+	\begin{itemize}
+		\item RAG: use pretrained retriever to address hallucination.
+		\item Many others use external knowledge to augment LLMs as well. Most
+			are to improve question answering.
+		\item Perhaps most similar to mine among them: WebGPT, whose retriever
+			is not a model, but a web browser that the LLM can use.
 	\end{itemize}
-\end{minipage}
+	\item Improve search engines
+	\begin{itemize}
+		\item Some use LLMs to rewrite and improve search queries.
+		\item Some assist ranking of search results.
+		\item A few use LLMs in the indexing stage for NLP tasks (e.g.\ term
+			extraction, meaning filtering).
+	\end{itemize}
+	\end{itemize}
 \end{frame}
 
+\begin{frame}{Overall contribution over similar academic works}
+	\begin{itemize}
+		\item Designed a novel pipeline that combined search engines and LLMs.
+		\item Aimed to address weaknesses of \emph{both} seach engines and
+			LLMs. (Similar works almost always aim to address one of them's.)
+		\item Developed an \emph{automatic} system that only requires
+			occasional user configuration.
+	\end{itemize}
+\end{frame}
 
-\subsection{Comparsion with other works}
-
+\subsection{Comparsion with mainstream commercial tools}
 \begin{frame}{Comparison with ChatGPT and Google}
 \begin{itemize}
 	\item Compared with ChatGPT, my system successfully eliminated search
@@ -216,19 +232,8 @@
 \end{center}
 \end{frame}
 
-\begin{frame}{Overall contribution over similar academic works}
-	\begin{itemize}
-		\item Designed a novel pipeline that combined search engines and LLMs.
-		\item Aimed to address weaknesses of \emph{both} seach engines and
-			LLMs. (Similar works almost always aim to address one of them's.)
-		\item Developed an \emph{automatic} system that only requires
-			occasional user configuration.
-	\end{itemize}
-\end{frame}
-
 \section*{Challenges \& Future Plans}
 \begin{frame}{Challenges \& Future Plans}
-
   \begin{itemize}
   \item
 	  It fails to match the summarization power of commerical AI, probably
@@ -242,6 +247,9 @@
   \item 
 	  My project also does not improve search engines or LLMs theoretically on
 	  how they work.
+  \item
+	  Although judging the summary of business topics is subjective, a dataset
+	  and benchmark framework could have been used, but invocation is limited.
   \end{itemize}
 \end{frame}
 
