@@ -1,3 +1,17 @@
+# What is this project
+This project contains my 3 month Independent Research Project related files for
+my Master's at Imperial College London in 2024--25.
+
+The project was originally private and under the authorship of my Imperial
+GitHub account (see the commit history). Agreed by my supervisors, I could
+publish this repository. 
+
+For publish's sake, I made a few modifications to this repo:
+- The final updated slides for my thesis is here, not in that private repo.
+- Only the public readme has this section.
+- I removed all the GitHub actions from the private repo.
+
+
 # What is this README About
 Since all important background, methodology, results, and discussion can be
 found in the main thesis (gh124-final-report.pdf), the README is ONLY concerned
